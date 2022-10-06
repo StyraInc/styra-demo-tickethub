@@ -1,0 +1,161 @@
+h1, h2, h3 {
+  white-space: nowrap;
+}
+
+th {
+  text-align: left;
+  vertical-align: top;
+  background: #c9daf8;
+}
+
+td {
+  text-align: left;
+  vertical-align: top;
+}
+
+button {
+  background: none;
+  padding: 10px;
+  cursor: pointer;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #c9daf8;
+  border-radius: 10px;
+}
+
+button:hover:enabled {
+  background: #c9daf8;
+}
+
+button:disabled {
+  background: lightgray;
+  cursor: not-allowed;
+}
+
+.hidden {
+  display: none;
+}
+
+.content {
+  padding: 20px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+.menu {
+  display: flex;
+}
+
+.nav-menu {
+  flex: 1;
+  display: flex;
+  margin: 2px;
+}
+
+.nav-menu .option {
+  margin-right: 10px;
+}
+
+.nav-menu .option-selected {
+  font-weight: bold;
+}
+
+.nav-menu .divider {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.nav-menu a:link {
+  color: inherit;
+}
+
+.nav-menu a:visited {
+  color: inherit;
+}
+
+.nav-menu a:hover {
+  color: blue;
+}
+
+.login-menu {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  margin: 2px;
+}
+
+.login-menu button {
+  margin-left: 10px;
+}
+
+.login-form {
+  display: flex;
+  flex: 1;
+}
+
+.login-menu label {
+  margin-right: 10px;
+}
+
+.logout-form {
+  display: flex;
+  flex: 1;
+}
+
+.ticket-list table {
+  width: 100%;
+}
+
+.ticket-list tr {
+  border-bottom: 1px solid black;
+}
+.ticket-list tr:hover {
+  background: #c9daf8;
+  cursor: pointer;
+}
+
+#ticket-info {
+  width: 100%
+}
+
+#ticket-info th {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.ticket-info td {
+  padding-left: 10px;
+}
+
+#new-ticket-button {
+  margin-top: 20px;
+}
+
+#ticket-create-button {
+  margin-top: 20px;
+}
+
+#ticket-resolve-button {
+  margin-top: 20px;
+}
+
+.delegate-list th {
+  text-align: left;
+  background: #c9daf8;
+}
+
+.assignees-list  {
+  width: fit-content;
+}
+
+.add-comment-text {
+  width: 100%;
+}
+
+.comment-text {
+  width: 100%;
+  resize: none;
+}
+
+.lane {
+  margin-right: 20px;
+}

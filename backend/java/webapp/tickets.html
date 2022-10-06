@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Tickets</title>
+  <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" />
+</head>
+
+<body>
+
+  <div class="menu">
+    <div class="nav-menu">
+      <div class="option option-selected">Tickets</div>
+      <div class="divider">|</div>
+      <div class="option"><a href="/admin">Admin</a></div>
+    </div>
+    <div id="login-menu" class="login-menu"></div>
+  </div>
+
+  <div class="content">
+    <div id="ticket-list" class="ticket-list"></div>
+    <button id="new-ticket-button" onclick="displayNewTicket()">New Ticket</button>
+  </div>
+
+  <script src="/scripts/login.js"></script>
+
+  <script>
+    function displayNewTicket() {
+      window.location.href = 'ticket/new'
+    }
+
+    async function displayTickets() {
+      const table = document.createElement('table')
+      table.innerHTML = `<tr>
+              <th>Id</th>
+              <th>Last Updated</th>
+              <th>Customer</th>
+              <th>Description</th>
+              <th>Resolved</th>
+          </tr>
+          `
+      const body = await fetch('/api/tickets').then(x => x.json())
+      body.tickets.forEach((ticket) => {
+        const row = document.createElement('tr')
+        row.innerHTML = `<td>${ticket.id}</td>
+                  <td>${ticket.last_updated}</td>
+                  <td>${ticket.customer}</td>
+                  <td>${ticket.description}</td>
+                  <td>${ticket.resolved ? "yes" : "no"}</td>
+              `
+        row.onclick = () => { window.location.href = `/ticket/${ticket.id}` }
+        table.appendChild(row)
+      })
+      document.getElementById('ticket-list').appendChild(table)
+    }
+    displayTickets()
+  </script>
+</body>
+
+</html>
