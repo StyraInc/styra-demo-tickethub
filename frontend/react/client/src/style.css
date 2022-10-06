@@ -1,0 +1,110 @@
+:root {
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px;
+  margin: 30px;
+  color: dimgray;
+}
+
+select {
+  height: 30px;
+  font-size: 16px;
+  border: none;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(17, 20, 24, 0.2), 0 1px 2px rgba(17, 20, 24, 0.1);
+  padding: 5px 0 5px 7px;
+  cursor: pointer;
+}
+
+button, .button-large {
+  cursor: pointer;
+  height: 30px;
+  border: none;
+  background: whitesmoke;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(17, 20, 24, 0.2), 0 1px 2px rgba(17, 20, 24, 0.1);
+  padding: 5px 10px;
+  text-decoration: none;
+  color: initial;
+  font-size: 16px;
+}
+
+button[disabled] {
+  color: gray;
+  cursor: not-allowed;
+  box-shadow: none;
+  background-color: gainsboro;
+}
+
+label {
+  color: black;
+}
+
+/* nav */
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 10px;
+}
+
+.login-menu {
+  display: flex;
+  gap: 10px;
+}
+
+.login-select {
+  min-width: 120px;
+}
+
+/* main */
+
+main {
+  margin-top: 30px;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+thead > tr {
+  border-bottom: solid 1px lightgray;
+  color: black;
+}
+
+tr {
+  vertical-align: baseline;
+  text-align: left;
+}
+
+th, td {
+  text-align: left;
+  font-weight: normal;
+  padding: 16px 24px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 150px auto;
+  row-gap: 30px;
+  max-width: 500px;
+}
+
+.update-status {
+  color: black;
+  font-weight: 600;
+}
+
+#ticket-list {
+  margin-bottom: 30px;
+}
+
+#ticket-list tbody > tr:hover {
+  background: gainsboro;
+  cursor: pointer;
+}
