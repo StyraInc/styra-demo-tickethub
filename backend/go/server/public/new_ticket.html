@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>New Ticket</title>
+  <link rel="stylesheet" type="text/css" href="/stylesheets/style.css"/>
+
+  <script type="module" src="/scripts/login.js"></script>  
+  <script>
+    async function createTicket (event) {
+      event.preventDefault();
+
+      const customer = document.getElementById('customer').value;
+      const description = document.getElementById('description').value;
+      const ticket = {customer, description};
+
+      const body = await fetch('/api/tickets', {
+        method: 'POST',
+        headers: {'content-type': 'application/json'},
+        body: JSON.stringify(ticket)
+      }).then(x => x.json());
+
+      window.location.href = `/ticket/${body.id}`;
+    };
+  </script>
+</head>
+
+<body>
+  <nav>
+    <div class="nav-menu">
+      <div class="option"><a href="/tickets">Tickets</a></div>
+      <div class="divider option-selected">/</div>
+      <div class="option option-selected">New</div>
+      <div class="divider">|</div><div class="option"><a href="/admin">Admin</a></div>
+    </div>
+    <div id="login-menu" class="login-menu"></div>
+  </nav>
+
+  <main>
+    <form class="form-grid" onsubmit="createTicket(event)">
+      <label for="customer">Customer</label>
+      <input type="text" id="customer"></input>
+
+      <label for="description">Description</label>
+      <textarea id="description" rows="3"></textarea>
+
+      <div>
+        <button type="submit">Create ticket</button>
+      </div>
+    </form>
+  </main>
+</body>
+</html>
