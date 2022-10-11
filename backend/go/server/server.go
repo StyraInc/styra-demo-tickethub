@@ -2,13 +2,9 @@ package server
 
 import (
 	"context"
-	"embed"
 	"encoding/json"
 	"errors"
-	"io/fs"
-	"mime"
 	"net/http"
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -16,22 +12,6 @@ import (
 )
 
 var (
-	//go:embed public/*
-	files embed.FS
-
-	// Route mappings for static files.
-	mapping = map[string]string{
-		"/":                      "public/tickets.html",
-		"/tickets":               "public/tickets.html",
-		"/ticket/new":            "public/new_ticket.html",
-		"/ticket/{id}":           "public/ticket.html",
-		"/admin":                 "public/admin.html",
-		"/stylesheets/style.css": "public/stylesheets/style.css",
-		"/scripts/login.js":      "public/scripts/login.js",
-		"/scripts/users.js":      "public/scripts/users.js",
-		"/scripts/styra_run.js":  "public/scripts/styra_run.js",
-	}
-
 	credentialsError = errors.New("could not extract credentials")
 
 	getUrlVar = func(r *http.Request, key string) string {
@@ -66,24 +46,6 @@ func NewWebServer() WebServer {
 
 func (s *webServer) Listen() error {
 	router := mux.NewRouter()
-
-	// Setup route handlers for static files.
-	for k, v := range mapping {
-		k, v := k, v // ick
-
-		router.HandleFunc(k, func(w http.ResponseWriter, r *http.Request) {
-			if bytes, err := fs.ReadFile(files, v); err == nil {
-				contentType := mime.TypeByExtension(
-					filepath.Ext(v),
-				)
-
-				w.Header().Set("Content-Type", contentType)
-				w.Write(bytes)
-			} else {
-				http.Error(w, "file not found", http.StatusNotFound)
-			}
-		}).Methods("GET")
-	}
 
 	// Setup api routes.
 	router.HandleFunc("/api/tickets", s.list).Methods("GET")
