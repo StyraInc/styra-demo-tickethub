@@ -70,7 +70,7 @@ func (s *webServer) Listen() error {
 
 	router.Use(addUser)
 
-	return http.ListenAndServe(":3000", router)
+	return http.ListenAndServe(":4000", router)
 }
 
 func (s *webServer) user(r *http.Request) *User {
