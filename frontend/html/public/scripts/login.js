@@ -13,7 +13,10 @@ function displayUsers() {
   let [currentUser] = userList;
 
   document.cookie.split(';').forEach((c) => {
-    [, currentUser] = c.split('=');
+    const [cookieName, cookieValue] = c.split('=');
+    if (cookieName === 'user') {
+      currentUser = cookieValue
+    }
   })
 
   const menu = document.getElementById('login-menu');

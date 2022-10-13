@@ -27,5 +27,3 @@ run-node-react:
 	(trap 'kill 0' SIGINT; \
 		$(MAKE) -C ./backend/node run & \
 		$(MAKE) -C ./frontend/react run)
-
-
