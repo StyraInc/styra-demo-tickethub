@@ -2,4 +2,4 @@ compile:
 	npm install
 
 run: compile
-	npm run start:client
+	npm run start
