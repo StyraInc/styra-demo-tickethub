@@ -33,7 +33,7 @@ export default function useAccounts() {
 }
 
 function getAccountFromCookie() {
-  var account
+  let account
   document.cookie.split(';').forEach((c) => {
     const [cookieName, user] = c.split('=')
     if (cookieName === 'user') {
