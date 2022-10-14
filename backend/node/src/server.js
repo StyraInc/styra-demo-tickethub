@@ -4,11 +4,10 @@ import express from "express";
 import 'express-async-errors'; // makes sure uncaught errors in async handlers doesn't cause crash
 import StatusCodes from "http-status-codes";
 
-import {router as htmlRouter} from "./html.js";
 import {router as apiRouter} from "./api.js";
 
-const port = process.env.PORT || 3000
-const host = process.env.HOST || 'localhost'
+const port = process.env.BACKEND_PORT || 4000
+const host = process.env.BACKEND_HOST || 'localhost'
 const app = express()
 
 /**
@@ -32,9 +31,6 @@ app.use((err, req, res, _) => {
     error: err && err.message,
   })
 })
-
-// HTML
-app.use(htmlRouter)
 
 // Authentication.
 app.use((req, res, next) => {

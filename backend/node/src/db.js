@@ -1,14 +1,15 @@
-import userList from './public/scripts/users.js'
-
-export const users = userList.reduce((users, x) => {
-  const [tenant, user] = x.split(' / ')
-  if (tenant in users) {
-    users[tenant].push(user)
-  } else {
-    users[tenant] = [user]
-  }
-  return users
-}, {})
+export const users = {
+  'acmecorp': [
+    'alice',
+    'bob',
+    'cesar'
+  ],
+  'hooli': [
+    'dylan',
+    'eva',
+    'frank'
+  ]
+}
 
 export const tickets = {
   "acmecorp": [

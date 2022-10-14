@@ -33,13 +33,7 @@ Nav.propTypes = {
 }
 
 function Menu() {
-  const {current, tenants, users, handleSetTenant, handleSetUser} = useAccounts()
-
-  const handleChangeTenant = React.useCallback((event) => {
-    const tenant = event.target.value
-    handleSetTenant(tenant)
-    window.location = '/'
-  }, [handleSetTenant])
+  const {current, users, handleSetUser} = useAccounts()
 
   const handleChangeUser = React.useCallback((event) => {
     const user = event.target.value
@@ -47,19 +41,12 @@ function Menu() {
     window.location.reload()
   }, [handleSetUser])
 
-  if (!current || !tenants || !users) {
+  if (!current || !users) {
     return null
   }
 
   return (
     <div className="login-menu">
-      <span>
-        Tenant
-        {' '} 
-        <select className="login-select" value={current.tenant} onChange={handleChangeTenant}>
-          {tenants.map((tenant) => <option key={tenant}>{tenant}</option>)}
-        </select>
-      </span>
       <span>
         User
         {' '}

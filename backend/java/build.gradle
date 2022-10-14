@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 group 'com.styra.tickethub'
@@ -29,3 +30,8 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+application {
+    mainClass = 'com.styra.tickethub.Tickethub'
+}
+

@@ -83,20 +83,12 @@ public class Tickethub {
     }
 
     public static void main(String... args) throws Exception {
-        var server = new Server(3000);
+        var port = Integer.parseInt(System.getProperty("BACKEND_PORT", "4000"));
+        var server = new Server(port);
         var root = new ServletContextHandler();
         server.setHandler(root);
 
         root.addFilter(SessionFilter.class, "/*", EnumSet.of(REQUEST));
-        root.setBaseResource(new PathResource(new File("./webapp")));
-        root.setWelcomeFiles(new String[]{"tickets.html"});
-        var resourceHolder = new ServletHolder();
-        resourceHolder.setServlet(new ResourceServlet(List.of(
-                new Alias("/tickets", "/tickets.html"),
-                new Alias("/ticket/new", "/new_ticket.html"),
-                new Alias("/ticket/*", "/ticket.html"),
-                new Alias("/admin", "/admin.html"))));
-        root.addServlet(resourceHolder, "/");
 
         var apiHolder = root.addServlet(ServletContainer.class, "/api/*");
         apiHolder.setInitOrder(0);
@@ -111,14 +103,17 @@ public class Tickethub {
         public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
                 throws IOException, ServletException {
             var httpReq = (HttpServletRequest) req;
-            Arrays.stream(httpReq.getCookies())
-                    .filter(cookie -> "user".equals(cookie.getName()))
-                    .findAny()
-                    .ifPresent(cookie -> {
-                        var components = cookie.getValue().split("@");
-                        req.setAttribute("user", components[0]);
-                        req.setAttribute("tenant", components[1]);
-                    });
+            var cookies = httpReq.getCookies();
+            if (cookies != null) {
+                Arrays.stream(cookies)
+                        .filter(cookie -> "user".equals(cookie.getName()))
+                        .findAny()
+                        .ifPresent(cookie -> {
+                            var components = cookie.getValue().split("/");
+                            req.setAttribute("tenant", components[0].trim());
+                            req.setAttribute("user", components[1].trim());
+                        });
+            }
 
             chain.doFilter(req, resp);
         }
