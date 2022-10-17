@@ -3,3 +3,6 @@ compile:
 
 run: compile
 	./gradlew run
+
+clean:
+	./gradlew clean

@@ -1,0 +1,4 @@
+run:
+	(trap 'kill 0' SIGINT; \
+		$(MAKE) -C ./backend run & \
+		$(MAKE) -C ./frontend run)

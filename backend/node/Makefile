@@ -3,3 +3,6 @@ compile:
 
 run: compile
 	npm run start:dev
+
+clean:
+	rm -rf node_modules
