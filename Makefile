@@ -47,7 +47,7 @@ tar-%: TARGET = tickethub-$(BACKEND)-$(FRONTEND)
 tar-%:
 	echo "Copying $(TARGET)"
 	mkdir -p build/$(TARGET)
-	cp Makefile.template build/$(TARGET)/Makefile
+	cp templates/* build/$(TARGET)/
 	mkdir -p build/$(TARGET)/frontend
 	cp -r frontend/$(FRONTEND)/. build/$(TARGET)/frontend/
 	mkdir -p build/$(TARGET)/backend

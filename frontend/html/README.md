@@ -1,4 +1,4 @@
-# TicketHub React Front-end
+# TicketHub Plain HTML/JavaScript Front-end
 
 The TicketHub sample app front-end component.
 
@@ -9,4 +9,4 @@ The TicketHub sample app front-end component.
 
 ## SDKs
 
-* [Styra Run React SDK](https://github.com/StyraInc/styra-run-sdk-react)
+* [Styra Run js SDK](https://github.com/StyraInc/styra-run-sdk-js)

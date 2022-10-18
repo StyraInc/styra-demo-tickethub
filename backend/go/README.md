@@ -1,8 +1,12 @@
-# styra-tickethub-go
+# TicketHub Go Back-end
 
-This repository contains an implementation of `TicketHub`, an example multi-tenant SaaS application.
+The TicketHub sample app back-end component.
 
 ## How to run
 
-1. `make run`
-2. Interact with the app by visiting `http://localhost:3000` in your browser.
+1. `make run`.
+2. The server opens a listener on `0.0.0.0:4000`.
+
+## SDKs
+
+* [Styra Run Go SDK](https://github.com/StyraInc/styra-run-sdk-go)
