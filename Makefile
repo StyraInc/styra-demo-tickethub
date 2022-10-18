@@ -33,6 +33,7 @@ run-node-react: run
 
 .PHONY: clean
 clean:
+	rm -rf dist
 	rm -rf build
 	rm -rf target
 	for proj in $(PROJECTS); do \
@@ -51,7 +52,8 @@ tar-%:
 	cp -r frontend/$(FRONTEND)/. build/$(TARGET)/frontend/
 	mkdir -p build/$(TARGET)/backend
 	cp -r backend/$(BACKEND)/. build/$(TARGET)/backend/
-	tar -czvf build/$(TARGET).tar.gz -C build/$(TARGET) .
+	mkdir -p dist
+	tar -czvf dist/$(TARGET).tar.gz -C build/$(TARGET) .
 
 package-go-html: BACKEND = go
 package-go-html: FRONTEND = html
