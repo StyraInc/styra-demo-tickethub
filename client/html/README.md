@@ -1,6 +1,6 @@
-# TicketHub Plain HTML/JavaScript Front-end
+# TicketHub Plain HTML/JavaScript Client
 
-The TicketHub sample app front-end component.
+The TicketHub sample app client component.
 
 ## How to run
 

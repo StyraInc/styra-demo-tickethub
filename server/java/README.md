@@ -1,6 +1,6 @@
-# TicketHub Java Back-end
+# TicketHub Java Server
 
-The TicketHub sample app back-end component.
+The TicketHub sample app server component.
 
 ## How to run
 

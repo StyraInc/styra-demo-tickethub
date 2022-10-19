@@ -1,10 +1,10 @@
-run-backend:
-	$(MAKE) -C ./backend run
+run-server:
+	$(MAKE) -C ./server run
 
-run-frontend:
-	$(MAKE) -C ./frontend run
+run-client:
+	$(MAKE) -C ./client run
 
 run:
 	(trap 'kill 0' SIGINT; \
-		$(MAKE) -C ./backend run & \
-		$(MAKE) -C ./frontend run)
+		$(MAKE) -C ./server run & \
+		$(MAKE) -C ./client run)

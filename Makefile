@@ -1,34 +1,32 @@
-PROJECTS = $(wildcard ./frontend/* ./backend/*)
-BACKENDS = $(shell cd backend; ls -d *)
-FRONTENDS = $(shell cd frontend; ls -d *)
+PROJECTS = $(wildcard ./client/* ./server/*)
 
 run:
 	(trap 'kill 0' SIGINT; \
-		$(MAKE) -C ./backend/$(BACKEND) run & \
-		$(MAKE) -C ./frontend/$(FRONTEND) run)
+		$(MAKE) -C ./server/$(SERVER) run & \
+		$(MAKE) -C ./client/$(CLIENT) run)
 
-run-go-html: BACKEND = go
-run-go-html: FRONTEND = html
+run-go-html: SERVER = go
+run-go-html: CLIENT = html
 run-go-html: run
 
-run-go-react: BACKEND = go
-run-go-react: FRONTEND = react
+run-go-react: SERVER = go
+run-go-react: CLIENT = react
 run-go-react: run
 
-run-java-html: BACKEND = java
-run-java-html: FRONTEND = html
+run-java-html: SERVER = java
+run-java-html: CLIENT = html
 run-java-html: run
 
-run-java-react: BACKEND = java
-run-java-react: FRONTEND = react
+run-java-react: SERVER = java
+run-java-react: CLIENT = react
 run-java-react: run
 
-run-node-html: BACKEND = node
-run-node-html: FRONTEND = html
+run-node-html: SERVER = node
+run-node-html: CLIENT = html
 run-node-html: run
 
-run-node-react: BACKEND = node
-run-node-react: FRONTEND = react
+run-node-react: SERVER = node
+run-node-react: CLIENT = react
 run-node-react: run
 
 .PHONY: clean
@@ -43,40 +41,40 @@ clean:
 		fi; \
     done
 
-tar-%: TARGET = tickethub-$(BACKEND)-$(FRONTEND)
+tar-%: TARGET = tickethub-$(SERVER)-$(CLIENT)
 tar-%:
 	echo "Copying $(TARGET)"
 	mkdir -p build/$(TARGET)
 	cp templates/* build/$(TARGET)/
-	mkdir -p build/$(TARGET)/frontend
-	cp -r frontend/$(FRONTEND)/. build/$(TARGET)/frontend/
-	mkdir -p build/$(TARGET)/backend
-	cp -r backend/$(BACKEND)/. build/$(TARGET)/backend/
+	mkdir -p build/$(TARGET)/client
+	cp -r client/$(CLIENT)/. build/$(TARGET)/client/
+	mkdir -p build/$(TARGET)/server
+	cp -r server/$(SERVER)/. build/$(TARGET)/server/
 	mkdir -p dist
 	tar -czvf dist/$(TARGET).tar.gz -C build/$(TARGET) .
 
-package-go-html: BACKEND = go
-package-go-html: FRONTEND = html
+package-go-html: SERVER = go
+package-go-html: CLIENT = html
 package-go-html: tar-go-html
 
-package-go-react: BACKEND = go
-package-go-react: FRONTEND = react
+package-go-react: SERVER = go
+package-go-react: CLIENT = react
 package-go-react: tar-go-react
 
-package-java-html: BACKEND = java
-package-java-html: FRONTEND = html
+package-java-html: SERVER = java
+package-java-html: CLIENT = html
 package-java-html: tar-java-html
 
-package-java-react: BACKEND = java
-package-java-react: FRONTEND = react
+package-java-react: SERVER = java
+package-java-react: CLIENT = react
 package-java-react: tar-java-react
 
-package-node-html: BACKEND = node
-package-node-html: FRONTEND = html
+package-node-html: SERVER = node
+package-node-html: CLIENT = html
 package-node-html: tar-node-html
 
-package-node-react: BACKEND = node
-package-node-react: FRONTEND = react
+package-node-react: SERVER = node
+package-node-react: CLIENT = react
 package-node-react: tar-node-react
 
 package-all: package-node-html package-node-react package-java-html package-java-react package-go-html package-go-react

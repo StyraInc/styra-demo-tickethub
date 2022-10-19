@@ -6,8 +6,8 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
-- Go backend
-- Java backend
-- Node backend
-- Plain HTML/javascript frontend
-- React frontend
+- Go server
+- Java server
+- Node server
+- Plain HTML/javascript client
+- React client

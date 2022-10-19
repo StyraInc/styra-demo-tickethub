@@ -1,6 +1,6 @@
-# TicketHub Node Back-end
+# TicketHub Node Server
 
-The TicketHub sample app back-end component.
+The TicketHub sample app server component.
 
 ## How to run
 

@@ -6,8 +6,8 @@ import StatusCodes from "http-status-codes";
 
 import {router as apiRouter} from "./api.js";
 
-const port = process.env.BACKEND_PORT || 4000
-const host = process.env.BACKEND_HOST || 'localhost'
+const port = process.env.SERVER_PORT || 4000
+const host = process.env.SERVER_HOST || 'localhost'
 const app = express()
 
 /**
