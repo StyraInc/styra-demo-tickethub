@@ -6,10 +6,10 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const port = process.env.FRONTEND_PORT || 3000
-const host = process.env.FRONTEND_HOST || 'localhost'
-const backendPort = process.env.BACKEND_PORT || 4000
-const backendHost = process.env.BACKEND_HOST || 'localhost'
+const port = process.env.CLIENT_PORT || 3000
+const host = process.env.CLIENT_HOST || 'localhost'
+const serverPort = process.env.SERVER_PORT || 4000
+const serverHost = process.env.SERVER_HOST || 'localhost'
 const server = express()
 
 const staticDir = path.join(__dirname, '../public')
@@ -39,8 +39,8 @@ server.get('/admin', (_, res) => {
 // Proxy
 server.use('/', (req, resp) => {
   const options = {
-    hostname: backendHost,
-    port: backendPort,
+    hostname: serverHost,
+    port: serverPort,
     path: req.url,
     method: req.method,
     headers: req.headers

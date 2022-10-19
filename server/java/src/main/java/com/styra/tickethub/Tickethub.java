@@ -83,7 +83,7 @@ public class Tickethub {
     }
 
     public static void main(String... args) throws Exception {
-        var port = Integer.parseInt(System.getProperty("BACKEND_PORT", "4000"));
+        var port = Integer.parseInt(System.getProperty("SERVER_PORT", "4000"));
         var server = new Server(port);
         var root = new ServletContextHandler();
         server.setHandler(root);
