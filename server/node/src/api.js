@@ -23,7 +23,7 @@ router.post('/tickets', async (req, res) => {
   return res.status(OK).json(asTicket(id, ticket))
 })
 
-// list all tickets
+// list tickets
 router.get('/tickets', async (req, res) => {
   const tickets = ticketsDb[req.auth.tenant]
     .map((t, index) => asTicket(index, t))
