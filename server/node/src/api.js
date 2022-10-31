@@ -3,12 +3,13 @@ import StatusCodes from 'http-status-codes'
 import {Router} from 'express'
 import {tickets as ticketsDb, users as usersDb} from './db.js'
 
+// all routes in this router is prefixed with /api, see ./server.js:42
 export const router = Router()
 const {OK, FORBIDDEN} = StatusCodes
 
 // resolve ticket
 router.post('/tickets/:id/resolve', async (req, res) => {
-  const ticket = ticketsDb[req.auth.tenant][req.params.id]
+  const ticket = new Map(Object.entries(ticketsDb[req.auth.tenant])).get(req.params.id)
   ticket.resolved = req.body.resolved ? true : false
   ticket.last_updated = now()
   return res.status(OK).json(asTicket(req.params.id, ticket))

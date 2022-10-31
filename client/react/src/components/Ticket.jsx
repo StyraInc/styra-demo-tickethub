@@ -28,7 +28,8 @@ export default function Ticket({ticketId}) {
     })
 
     if (response.status === 200) {
-      setMessage(!ticket.resolved ? 'unresolved → resolved' : 'resolved → unresolved')
+      const resolved = !ticket.resolved ? 'unresolved → resolved' : 'resolved → unresolved'
+      setMessage(`Ticket updated: ${resolved}`)
     } else {
       setMessage('Error: user unauthorized to perform operation')
     }
@@ -60,7 +61,7 @@ export default function Ticket({ticketId}) {
         </div>
         <div>
           { message && 
-            <>Ticket updated: <span className="update-status">{message}</span></>
+            <span className="update-status">{message}</span>
           }
         </div>
       </form>
