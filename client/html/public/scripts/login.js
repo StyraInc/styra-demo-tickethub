@@ -1,4 +1,4 @@
-import userList from './users.js'
+import accounts from './users.js'
 
 initialize();
 
@@ -10,31 +10,49 @@ function initialize() {
 
 // Renders the user dropdown menu
 function displayUsers() {
-  let [currentUser] = userList;
+  let [currentAccount] = accounts;
 
-  document.cookie.split(';').forEach((c) => {
-    const [cookieName, cookieValue] = c.split('=');
+  document.cookie.split('; ').forEach((cookie) => {
+    const [cookieName, cookieValue] = cookie.split('=');
     if (cookieName === 'user') {
-      currentUser = cookieValue
+      currentAccount = cookieValue;
     }
   })
 
   const menu = document.getElementById('login-menu');
+  const tenantUsers = accounts.reduce((tenantUsers, account) => {
+    const [tenant, user] = account.split('/').map((account) => account.trim());
+    tenantUsers[tenant] ??= [];
+    tenantUsers[tenant].push({account, name: user});
+    return tenantUsers;
+  }, {});
+
+  const [currentTenant, currentUser] = currentAccount.split('/').map((account) => account.trim());
+
   menu.innerHTML = `\
   <form id="login">
-    <label for="user-picker">Current tenant / user</label>
-    <select id="user-picker" name="user" class="user" onchange="login(true)">
-      ${userList.map((user) => 
-        `<option ${user == currentUser ? "selected" : ""}>${user}</option>`
+    <label for="account-select">User</label>
+    <select id="account-select" name="account" class="account" onchange="login(true)">
+      ${Object.entries(tenantUsers).map(([tenant, users]) => 
+        `<optgroup label="${tenant}">
+          ${users.map(({name, account}) => {
+            const selected = currentTenant === tenant && currentUser === name;
+            return `<option ${selected ? 'selected' : ''} value="${account}">${name}</option>`;
+          })}
+        </optgroup>`
       )}
     </select>
   </form>`;
+
+  // Update tenant
+  document.title = `${document.title} - ${currentTenant}`;
+  document.getElementById('tenant').textContent = currentTenant;
 }
 
 function login(reload) {
-  const [user] = document.getElementsByName('user');
+  const [user] = document.getElementsByName('account');
   document.cookie = `user=${user.value}; Path=/; SameSite=Lax`;
   if (reload) {
-    location.reload();
+   location.reload();
   }
 }

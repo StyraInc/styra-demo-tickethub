@@ -48,6 +48,11 @@ nav {
   align-items: baseline;
 }
 
+nav h1 {
+  margin: 0;
+  margin-bottom: 5px;
+}
+
 .nav-menu {
   display: flex;
   gap: 10px;
