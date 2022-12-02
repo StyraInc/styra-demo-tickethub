@@ -40,7 +40,7 @@ function displayUsers() {
             return `<option ${selected ? 'selected' : ''} value="${account}">${name}</option>`;
           })}
         </optgroup>`
-      )}
+      ).join('')}
     </select>
   </form>`;
 
@@ -53,6 +53,6 @@ function login(reload) {
   const [user] = document.getElementsByName('account');
   document.cookie = `user=${user.value}; Path=/; SameSite=Lax`;
   if (reload) {
-   location.reload();
+    location.reload();
   }
 }
