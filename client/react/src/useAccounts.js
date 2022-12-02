@@ -7,7 +7,14 @@ export default function useAccounts() {
   React.useEffect(() => {
     fetch('/accounts.json')
       .then((res) => res.json())
-      .then(({accounts}) => setAccounts(accounts))
+      .then((data) => {
+        setAccounts(data.accounts.reduce((accounts, account) => {
+          const {tenant, user} = getTenantUser(account);
+          accounts[tenant] ??= [];
+          accounts[tenant].push({account, name: user});
+          return accounts;
+        }, {}))
+      })
   }, [])
 
   React.useEffect(() => {
@@ -15,35 +22,40 @@ export default function useAccounts() {
       return
     }
 
-    const [user] = accounts
-    setAccountCookie(user)
-    setCurrent({user})
+    const [tenant] = Object.values(accounts)
+    const [user] = tenant
+    setAccountCookie(user.account)
+    setCurrent(getTenantUser(user.account))
   }, [accounts, current])
 
   return useMemo(() => {
     return {
       current,
-      users: accounts,
-      handleSetUser: (user) => {
-        setAccountCookie(user)
-        setCurrent({user})
+      accounts,
+      handleSetAccount: (account) => {
+        setAccountCookie(account)
+        setCurrent({account})
       }
     }
   }, [current, accounts])
 }
 
 function getAccountFromCookie() {
-  let account
-  document.cookie.split(';').forEach((c) => {
-    const [cookieName, user] = c.split('=')
+  let current
+  document.cookie.split('; ').forEach((cookie) => {
+    const [cookieName, cookieAccount] = cookie.split('=')
     if (cookieName === 'user') {
-      account = {user}
+      current = getTenantUser(cookieAccount)
     }
   })
-
-  return account
+  return current
 }
 
-function setAccountCookie(user) {
-  document.cookie = `user=${user}; Path=/; SameSite=Lax`
+function setAccountCookie(account) {
+  document.cookie = `user=${account}; Path=/; SameSite=Lax`
+}
+
+function getTenantUser(account) {
+  const [tenant, user] = account.split('/').map((account) => account.trim());
+  return {tenant, user, account} 
 }
