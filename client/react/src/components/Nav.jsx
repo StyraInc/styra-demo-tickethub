@@ -13,7 +13,7 @@ export default function Nav({type, ticketId}) {
   return (
     <nav>
       <div>
-        <h1>{current.tenant}</h1>
+        <h1>{current?.tenant}</h1>
         <div className="nav-menu">
           <span>{tickets}</span>
           { (ticketId || newTicket) &&

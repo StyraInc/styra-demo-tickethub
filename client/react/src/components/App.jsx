@@ -41,7 +41,7 @@ export default function App() {
   const Component = components[type]
 
   React.useEffect(() => {
-    document.title = `${titles[type]} - ${current.tenant}`
+    document.title = `${titles[type]} - ${current?.tenant}`
   }, [type, current])
   
   return (

@@ -22,10 +22,10 @@ export default function useAccounts() {
       return
     }
 
-    const [users] = Object.values(accounts)
-    const [user] = users
-    setAccountCookie(user)
-    setCurrent({user})
+    const [tenant] = Object.values(accounts)
+    const [user] = tenant
+    setAccountCookie(user.account)
+    setCurrent(getTenantUser(user.account))
   }, [accounts, current])
 
   return useMemo(() => {
@@ -46,7 +46,6 @@ function getAccountFromCookie() {
     const [cookieName, cookieAccount] = cookie.split('=')
     if (cookieName === 'user') {
       current = getTenantUser(cookieAccount)
-      current.account = cookieAccount
     }
   })
   return current
@@ -58,5 +57,5 @@ function setAccountCookie(account) {
 
 function getTenantUser(account) {
   const [tenant, user] = account.split('/').map((account) => account.trim());
-  return {tenant, user} 
+  return {tenant, user, account} 
 }
