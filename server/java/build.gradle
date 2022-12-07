@@ -11,6 +11,10 @@ repositories {
 }
 
 dependencies {
+    implementation 'com.styra.run:styra-run-sdk'
+    implementation 'com.styra.run:styra-run-sdk-core'
+    implementation 'com.styra.run:styra-run-sdk-servlet'
+
     implementation 'org.slf4j:slf4j-api:2.0.0'
     runtimeClasspath 'org.slf4j:slf4j-simple:2.0.0'
     implementation 'org.eclipse.jetty:jetty-server:11.0.11'
