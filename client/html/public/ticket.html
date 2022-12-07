@@ -53,6 +53,10 @@
     document.getElementById('ticket-id').textContent = id;
     displayTicket(id);
   </script>
+  <script src="/scripts/styra_run.js"></script>
+  <script type="module">
+    StyraRun.New('/api/authz').render()
+  </script>
 </head>
 
 <body>
@@ -85,7 +89,7 @@
       <div id="resolved"></div>
 
       <div>
-        <button id="ticket-resolve-button" type="submit"></button>
+        <button id="ticket-resolve-button" type="submit" authz="tickets/resolve/allow" disabled></button>
       </div>
       <div id="message"></div>
     </form>

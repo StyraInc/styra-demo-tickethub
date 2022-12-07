@@ -4,6 +4,10 @@
     <title>Admin</title>
     <link rel="stylesheet" type="text/css" href="/stylesheets/style.css"/>
     <script type="module" src="/scripts/login.js"></script>  
+    <script src="/scripts/styra_run.js"></script>
+    <script type="module">
+      StyraRun.renderRbacManagement('/api/rbac', '#manage-rbac')
+    </script>
   </head>
 
   <body>
@@ -20,7 +24,7 @@
     </nav>
     
     <main>
-      <p>This page has not been implemented yet. Go to the Build Permission Management step to learn how.</p>
+      <div id="manage-rbac"></div>
     </main>
   </body>
 </html>
