@@ -33,7 +33,7 @@
 
       const messageContainer = document.getElementById('message');
       
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 204) {
         const ticket = await displayTicket(id);
         messageContainer.innerHTML = `\
         Ticket updated: 
