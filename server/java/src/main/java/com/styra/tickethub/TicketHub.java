@@ -5,7 +5,6 @@ import com.styra.run.StyraRun;
 import com.styra.run.servlet.ProxyServlet;
 import com.styra.run.servlet.rbac.RbacServletHelper;
 import com.styra.run.servlet.session.TenantSessionManager;
-import com.styra.run.session.TenantInputTransformer;
 import com.styra.tickethub.Storage.Ticket;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -142,8 +141,7 @@ public class TicketHub {
         apiHolder.setInitOrder(0);
         apiHolder.setInitParameter("jersey.config.server.provider.packages", TicketHub.class.getPackageName());
 
-        var inputTransformer = new TenantInputTransformer();
-        root.addServlet(new ServletHolder(new ProxyServlet<>(styraRun, sessionManager, inputTransformer)), "/api/authz");
+        root.addServlet(new ServletHolder(new ProxyServlet<>(styraRun, sessionManager)), "/api/authz");
 
         RbacServletHelper.addRbacServlets(root, "/api/rbac", styraRun, sessionManager, null);
 
