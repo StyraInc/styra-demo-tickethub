@@ -23,12 +23,6 @@ import java.util.Map;
 
 @Path("/")
 public class TicketHub {
-    private record TicketStatus(boolean resolved) {
-    }
-
-    private record Tickets(List<Ticket> tickets) {
-    }
-
     private static final Storage storage = Storage.create();
 
     private @Context
@@ -111,5 +105,11 @@ public class TicketHub {
 
         server.start();
         server.join();
+    }
+
+    private record TicketStatus(boolean resolved) {
+    }
+
+    private record Tickets(List<Ticket> tickets) {
     }
 }
