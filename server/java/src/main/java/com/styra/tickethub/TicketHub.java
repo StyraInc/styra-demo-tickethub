@@ -58,13 +58,14 @@ public class TicketHub {
     @POST
     @Path("/tickets/{id}/resolve")
     @Produces(MediaType.APPLICATION_JSON)
-    public void resolveTicket(@PathParam("id") int id, TicketStatus status) {
+    public Ticket resolveTicket(@PathParam("id") int id, TicketStatus status) {
         var tickets = storage.getTickets(getTenant());
         var ticket = tickets.get(id);
         if (ticket == null) {
             throw new NotFoundException();
         }
         ticket.setResolved(status.resolved);
+        return ticket;
     }
 
     private String getTenant() {
