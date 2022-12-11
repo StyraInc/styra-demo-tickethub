@@ -69,21 +69,25 @@ public class TicketHub {
     }
 
     private String getTenant() {
-        return getSessionAttributes().get("tenant");
+        return (String) getSessionAttributes().get("tenant");
     }
 
     private String getSubject() {
-        return getSessionAttributes().get("subject");
+        return (String) getSessionAttributes().get("subject");
     }
 
-    Map<String, String> getSessionAttributes() {
+    private Map<String, Object> getSessionAttributes() {
+        return getSessionAttributes(request);
+    }
+
+    static Map<String, Object> getSessionAttributes(HttpServletRequest request) {
         var cookies = request.getCookies();
         return Arrays.stream(cookies != null ? cookies : new Cookie[]{})
                 .filter(cookie -> "user".equals(cookie.getName()))
                 .findAny()
                 .map(cookie -> {
                     var components = cookie.getValue().split("\\s*/\\s*", 2);
-                    Map<String, String> map = new HashMap<>();
+                    Map<String, Object> map = new HashMap<>();
                     if (components.length > 0) {
                         map.put("tenant", components[0].trim());
                     }
