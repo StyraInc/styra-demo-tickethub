@@ -137,7 +137,7 @@ public class TicketHub {
 
         root.addServlet(new ServletHolder(new ProxyServlet<>(styraRun, sessionManager)), "/api/authz");
 
-        RbacServletHelper.addRbacServlets(root, "/api/rbac", styraRun, sessionManager, null);
+        RbacServletHelper.addRbacServlets(root, "/api/rbac", styraRun, sessionManager);
 
         server.start();
         server.join();
