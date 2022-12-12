@@ -25,6 +25,5 @@ dependencies {
 }
 
 application {
-    mainClass = 'com.styra.tickethub.Tickethub'
+    mainClass = 'com.styra.tickethub.TicketHub'
 }
-
