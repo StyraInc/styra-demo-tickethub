@@ -16,6 +16,27 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.glassfish.jersey.servlet.ServletContainer;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.styra.opa.models.operations.*;
+import com.styra.opa.models.operations.ExecutePolicyWithInputRequest;
+import com.styra.opa.models.operations.ExecutePolicyWithInputRequestBody;
+import com.styra.opa.models.operations.ExecutePolicyWithInputResponse;
+import com.styra.opa.models.shared.*;
+import com.styra.opa.models.shared.Explain;
+import com.styra.opa.models.shared.GzipAcceptEncoding;
+import com.styra.opa.models.shared.GzipContentEncoding;
+import com.styra.opa.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.Map;
+import static java.util.Map.entry;
+import jakarta.ws.rs.NotAllowedException;
+
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +53,9 @@ public class TicketHub {
     @Path("/tickets")
     @Produces({MediaType.APPLICATION_JSON})
     public Tickets getTickets() {
+        if (!authz()) {
+            throw new NotAllowedException("Not authorized");
+        }
         return new Tickets(storage.getTickets(getTenant()));
     }
 
@@ -39,6 +63,9 @@ public class TicketHub {
     @Path("/tickets/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Ticket getTicket(@PathParam("id") int id) {
+        if (!authz()) {
+            throw new NotAllowedException("Not authorized");
+        }
         var tickets = storage.getTickets(getTenant());
         var ticket = tickets.get(id);
         if (ticket == null) {
@@ -52,6 +79,9 @@ public class TicketHub {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Ticket addTicket(Ticket ticket) {
+        if (!authz()) {
+            throw new NotAllowedException("Not authorized");
+        }
         return storage.addTicket(getTenant(), ticket);
     }
 
@@ -59,6 +89,9 @@ public class TicketHub {
     @Path("/tickets/{id}/resolve")
     @Produces(MediaType.APPLICATION_JSON)
     public Ticket resolveTicket(@PathParam("id") int id, TicketStatus status) {
+        if (!authz()) {
+            throw new NotAllowedException("Not authorized");
+        }
         var tickets = storage.getTickets(getTenant());
         var ticket = tickets.get(id);
         if (ticket == null) {
@@ -96,6 +129,71 @@ public class TicketHub {
                     }
                     return map;
                 }).orElse(Map.of());
+    }
+
+    private String getSessionPath() {
+        return getSessionPath(request);
+    }
+
+    static String getSessionPath(HttpServletRequest request) {
+        return request.getPathInfo();
+    }
+
+    private String getSessionMethod() {
+        return getSessionMethod(request);
+    }
+
+    static String getSessionMethod(HttpServletRequest request) {
+        return request.getMethod();
+    }
+
+    private boolean authz() {
+        System.out.printf("DEBUG: %s %s %s\n", getSessionPath(), getSessionMethod(), getSessionAttributes());
+
+        java.util.Map iMap = java.util.Map.ofEntries(
+            entry("path", getSessionPath()),
+            entry("method", getSessionMethod()),
+            entry("cookie", getSessionAttributes())
+        );
+
+        // TODO: this can probably be done once and re-used?
+        Opa sdk = Opa.builder().build();
+
+        ExecutePolicyWithInputRequest req = ExecutePolicyWithInputRequest.builder()
+            .path("main")
+            .requestBody(ExecutePolicyWithInputRequestBody.builder()
+                    .input(Input.of(iMap)).build())
+            .pretty(false)
+            .provenance(false)
+            .explain(Explain.NOTES)
+            .metrics(false)
+            .instrument(false)
+            .strictBuiltinErrors(false)
+            .build();
+
+        try {
+
+            ExecutePolicyWithInputResponse res = sdk.executePolicyWithInput()
+                .request(req)
+                .call();
+
+            boolean allow = false;
+
+            if (res.successfulPolicyEvaluation().isPresent()) {
+                Object out = res.successfulPolicyEvaluation().get().result().get().value();
+                System.out.printf("DEBUG: policy evaluation result: %s (%s)\n", out, out.getClass());
+                allow = (boolean) ((java.util.LinkedHashMap) out).get("allow");
+                System.out.printf("DEBUG: allow is: %b\n", allow);
+            } else {
+                System.out.printf("DEBUG: policy evaluation failed: %s\n", res);
+            }
+
+            return allow;
+
+        } catch (Exception e) {
+            System.out.printf("ERROR: request threw exception: %s\n", e);
+            return false;
+        }
     }
 
     public static void main(String... args) throws Exception {

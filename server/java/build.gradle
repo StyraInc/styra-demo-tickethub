@@ -4,15 +4,22 @@ plugins {
 }
 
 group 'com.styra.tickethub'
-version '0.3.0'
+version '0.5.0'
 
 repositories {
     mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(19)
+    }
+}
+
 dependencies {
     implementation 'org.slf4j:slf4j-api:2.0.0'
-    runtimeClasspath 'org.slf4j:slf4j-simple:2.0.0'
+    implementation 'org.slf4j:slf4j-simple:2.0.0'
+    //runtimeClasspath 'org.slf4j:slf4j-simple:2.0.0'
     implementation 'org.eclipse.jetty:jetty-server:11.0.11'
     implementation 'org.eclipse.jetty:jetty-servlet:11.0.11'
     implementation 'org.eclipse.jetty:jetty-util:11.0.11'
@@ -22,8 +29,24 @@ dependencies {
     implementation 'org.glassfish.jersey.containers:jersey-container-servlet-core:3.0.6'
     implementation 'org.glassfish.jersey.containers:jersey-container-jetty-http:3.0.6'
     implementation 'org.glassfish.jersey.media:jersey-media-json-jackson:3.0.6'
+
+    implementation files('/home/cad-styra/f/src/opa-java/build/libs/api.jar')
+
+    // for run_in_docker.sh
+    implementation files('/mnt/libs/api.jar')
+
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.16.1'
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.14'
+    implementation 'org.apache.httpcomponents:httpmime:4.5.14'
+    implementation 'com.jayway.jsonpath:json-path:2.9.0'
+    implementation 'commons-io:commons-io:2.15.1'
+
 }
 
 application {
     mainClass = 'com.styra.tickethub.TicketHub'
 }
+
