@@ -1,6 +1,8 @@
 package com.styra.tickethub;
 
 import com.styra.tickethub.Storage.Ticket;
+import com.styra.tickethub.Porcelain;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Consumes;
@@ -45,6 +47,12 @@ import java.util.Map;
 @Path("/")
 public class TicketHub {
     private static final Storage storage = Storage.create();
+
+    private Porcelain porc;
+
+    public TicketHub() {
+        porc = new Porcelain();
+    }
 
     private @Context
     HttpServletRequest request;
@@ -156,6 +164,23 @@ public class TicketHub {
             entry("cookie", getSessionAttributes())
         );
 
+        Object out;
+        boolean allow;
+
+        try {
+            out = porc.ExecutePolicy(iMap, "main");
+        } catch (Exception e) {
+            System.out.printf("ERROR: request threw exception: %s\n", e);
+            return false;
+        }
+
+        System.out.printf("DEBUG: policy evaluation result: %s (%s)\n", out, out.getClass());
+        allow = (boolean) ((java.util.LinkedHashMap) out).get("allow");
+        System.out.printf("DEBUG: allow is: %b\n", allow);
+
+        return allow;
+
+        /*
         // TODO: this can probably be done once and re-used?
         Opa sdk = Opa.builder().build();
 
@@ -193,7 +218,7 @@ public class TicketHub {
         } catch (Exception e) {
             System.out.printf("ERROR: request threw exception: %s\n", e);
             return false;
-        }
+        }*/
     }
 
     public static void main(String... args) throws Exception {
