@@ -8,34 +8,27 @@
     "lint": "npx eslint ."
   },
   "nodemonConfig": {
-    "watch": [
-      "src"
-    ],
+    "watch": ["src"],
     "ext": "js, html",
-    "ignore": [
-      "src/public"
-    ],
+    "ignore": ["src/public"],
     "exec": "node ./src/server"
   },
   "eslintConfig": {
     "parserOptions": {
-      "ecmaVersion": 6,
+      "ecmaVersion": "latest",
       "sourceType": "module"
     },
     "rules": {
       "max-len": [
         "error",
         {
-          "code": 100
+          "code": 105
         }
       ],
       "no-console": 1,
       "no-extra-boolean-cast": 0
     }
   },
-  "eslintIgnore": [
-    "src/public/"
-  ],
   "dependencies": {
     "command-line-args": "^5.2.1",
     "cookie-parser": "^1.4.6",
@@ -49,8 +42,8 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
-    "eslint": "^8.14.0",
-    "eslint-plugin-import": "^2.25.4",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-sort-imports-es6-autofix": "^0.6.0",
     "eslint-plugin-sort-requires": "^2.1.0",
