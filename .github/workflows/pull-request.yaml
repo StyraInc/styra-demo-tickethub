@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  workflow_dispatch: {}
+  pull_request: {}
+
+# When a new revision is pushed to a PR, cancel all in-progress CI runs for that
+# PR. See https://docs.github.com/en/actions/using-jobs/using-concurrency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-e2e:
+    name: Test E2E
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        server: [node] #TODO: java, csharp
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: setup
+        run: docker compose --profile ${{ matrix.server }} up --quiet-pull --wait --wait-timeout 300
+      - name: test
+        run: docker compose run --quiet-pull integration-tests
+        env:
+          VARIANT: ${{ matrix.server }}
+      - name: dump logs
+        run: docker compose --profile ${{ matrix.server }} logs
+        if: failure()
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: always()
+        with:
+          check_name: Results for server-${{ matrix.server }}
+          report_paths: tests/api/report.xml
