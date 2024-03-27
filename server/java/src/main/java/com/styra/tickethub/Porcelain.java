@@ -22,6 +22,11 @@ public class Porcelain {
         sdk = Opa.builder().build();
     }
 
+
+    public Porcelain(String opaURL) {
+        sdk = Opa.builder().serverURL(opaURL).build();
+    }
+
     // Use a custom instance of the Speakeasy generated SDK. This can allow for
     // modifying configuration options that are not otherwise exposed in the
     // porcelain API.
@@ -52,7 +57,9 @@ public class Porcelain {
         return executePolicyMachinery(Input.of(input), path);
     }
 
-    // TODO: array inputs
+    public java.lang.Object ExecutePolicy(java.util.List input, String path) throws Exception {
+        return executePolicyMachinery(Input.of(input), path);
+    }
 
     private java.lang.Object executePolicyMachinery(Input input, String path) throws Exception {
         ExecutePolicyWithInputRequest req = ExecutePolicyWithInputRequest.builder()

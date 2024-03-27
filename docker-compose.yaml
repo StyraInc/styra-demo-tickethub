@@ -50,6 +50,11 @@ services:
 
   server-java:
     build: server/java/
+    init: true
+    environment:
+      - OPA_URL=http://opa:8181
+    ports:
+      - "4000:4000"
     profiles:
       - java
     depends_on:

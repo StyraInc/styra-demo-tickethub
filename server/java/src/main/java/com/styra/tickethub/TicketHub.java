@@ -51,7 +51,14 @@ public class TicketHub {
     private Porcelain porc;
 
     public TicketHub() {
-        porc = new Porcelain();
+        String opaURL = "http://localhost:8181";
+        String opaURLEnv = System.getenv("OPA_URL");
+        if (opaURLEnv != null) {
+            opaURL = opaURLEnv;
+        }
+        System.out.printf("DEBUG: using OPA URL: %s\n", opaURL);
+
+        porc = new Porcelain(opaURL);
     }
 
     private @Context
@@ -161,14 +168,17 @@ public class TicketHub {
         java.util.Map iMap = java.util.Map.ofEntries(
             entry("path", getSessionPath()),
             entry("method", getSessionMethod()),
-            entry("cookie", getSessionAttributes())
+            entry("cookie", getSessionAttributes()),
+            entry("user", getSessionAttributes().get("subject")),
+            entry("tenant", getSessionAttributes().get("tenant")),
+            entry("action", getSessionMethod().toLowerCase())
         );
 
         Object out;
         boolean allow;
 
         try {
-            out = porc.ExecutePolicy(iMap, "main");
+            out = porc.ExecutePolicy(iMap, "tickets");
         } catch (Exception e) {
             System.out.printf("ERROR: request threw exception: %s\n", e);
             return false;

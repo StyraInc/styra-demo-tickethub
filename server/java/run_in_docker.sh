@@ -7,13 +7,17 @@ set -e
 set -u
 set -x
 
+if [ ! -f "./libs/api.jar" ] ; then
+	echo "no libs/api.jar, did you forgot to include the SDK JAR?" 1>&2
+	exit 1
+fi
+
 docker build . --file ./Dockerfile --tag tickethub-java:vlocal
 
 # TODO: make this not be dependant on Charls's laptop
 
 docker run \
 	--volume ./:/mnt/tickethub-java:ro \
-	--volume /home/cad-styra/f/src/opa-java/build/libs:/mnt/libs:ro \
 	--network=host \
 	--rm \
 	--tty \

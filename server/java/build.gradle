@@ -30,10 +30,7 @@ dependencies {
     implementation 'org.glassfish.jersey.containers:jersey-container-jetty-http:3.0.6'
     implementation 'org.glassfish.jersey.media:jersey-media-json-jackson:3.0.6'
 
-    implementation files('/home/cad-styra/f/src/opa-java/build/libs/api.jar')
-
-    // for run_in_docker.sh
-    implementation files('/mnt/libs/api.jar')
+    implementation files('libs/api.jar')
 
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.16.1'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1'
