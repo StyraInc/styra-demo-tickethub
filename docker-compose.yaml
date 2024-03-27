@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  server-node:
+    build: server/node/
+    environment:
+      - OPA_URL=http://opa:8181
+    ports:
+      - "4000:4000"
+    profiles:
+      - node
+
+  # TODO
+  server-java:
+    build: server/java/
+    profiles:
+      - java
+
+  # TODO
+  # server-csharp:
+
+  opa:
+    image: ${OPA_IMAGE:-docker.io/openpolicyagent/opa:latest}
+    ports:
+      - "8181:8181"
+    command:
+      - run
+      - --server
+      - --addr=:8181
+      - policies
+    working_dir: /work
+    volumes:
+      - ./policies:/work/policies
+
+  integration-tests:
+    image: ghcr.io/orange-opensource/hurl:latest
+    volumes:
+      - ./tests:/tests
+    command:
+      - --test
+      - --retry=10
+      - --verbose
+      - --report-junit=tests/api/report.xml
+      - tests/api/basic.hurl
+    environment:
+      - HURL_host=server-${VARIANT:-node}
+    profiles:
+      - tools
