@@ -165,7 +165,7 @@ public class TicketHub {
     private boolean authz() {
         System.out.printf("DEBUG: %s %s %s\n", getSessionPath(), getSessionMethod(), getSessionAttributes());
 
-        java.util.Map iMap = java.util.Map.ofEntries(
+        java.util.Map<String, Object> iMap = java.util.Map.ofEntries(
             entry("path", getSessionPath()),
             entry("method", getSessionMethod()),
             entry("cookie", getSessionAttributes()),
@@ -174,18 +174,20 @@ public class TicketHub {
             entry("action", getSessionMethod().toLowerCase())
         );
 
-        Object out;
+        //Object out;
         boolean allow;
 
         try {
-            out = porc.ExecutePolicy(iMap, "tickets");
+            //out = porc.ExecutePolicy(iMap, "tickets");
+            //allow = porc.query(iMap, "tickets/allow");
+            allow = porc.check(iMap, "tickets/allow");
         } catch (Exception e) {
             System.out.printf("ERROR: request threw exception: %s\n", e);
             return false;
         }
 
-        System.out.printf("DEBUG: policy evaluation result: %s (%s)\n", out, out.getClass());
-        allow = (boolean) ((java.util.LinkedHashMap) out).get("allow");
+        //System.out.printf("DEBUG: policy evaluation result: %s (%s)\n", out, out.getClass());
+        //allow = (boolean) ((java.util.LinkedHashMap) out).get("allow");
         System.out.printf("DEBUG: allow is: %b\n", allow);
 
         return allow;

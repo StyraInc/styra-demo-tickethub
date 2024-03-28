@@ -9,6 +9,9 @@ import com.styra.opa.models.operations.ExecutePolicyWithInputResponse;
 import com.styra.opa.models.shared.Explain;
 import com.styra.opa.models.shared.Input;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 // TODO: select an appropriate name and move this into the SDK
 public class Porcelain {
 
@@ -34,34 +37,48 @@ public class Porcelain {
         this.sdk = sdk;
     }
 
-    // TODO: support other types besides map.
-    //
-    // TODO: is java.lang.Object the simplest way to handle the different
-    // return types we might want? This will push type errors across the
-    // Java/Rego boundary into runtime.
-    //
+    public boolean check(java.util.Map<String, Object> input, String path) throws Exception {
+        return query(input, path);
+    }
+
+    public boolean check(String input, String path) throws Exception {
+        return query(input, path);
+    }
+
+    public boolean check(boolean input, String path) throws Exception {
+        return query(input, path);
+    }
+
+    public boolean check(double input, String path) throws Exception {
+        return query(input, path);
+    }
+
+    public boolean check(java.util.List<Object> input, String path) throws Exception {
+        return query(input, path);
+    }
+
+    public <T> T query(java.util.Map<String, Object> input, String path) throws Exception {
+        return queryMachinery(Input.of(input), path);
+    }
+
+    public <T> T query(String input, String path) throws Exception {
+        return queryMachinery(Input.of(input), path);
+    }
+
+    public <T> T query(boolean input, String path) throws Exception {
+        return queryMachinery(Input.of(input), path);
+    }
+
+    public <T> T query(double input, String path) throws Exception {
+        return queryMachinery(Input.of(input), path);
+    }
+
+    public <T> T query(java.util.List<Object> input, String path) throws Exception {
+        return queryMachinery(Input.of(input), path);
+    }
+
     // TODO: wrap exception types with something we control.
-    public java.lang.Object ExecutePolicy(java.util.Map input, String path) throws Exception {
-        return executePolicyMachinery(Input.of(input), path);
-    }
-
-    public java.lang.Object ExecutePolicy(String input, String path) throws Exception {
-        return executePolicyMachinery(Input.of(input), path);
-    }
-
-    public java.lang.Object ExecutePolicy(boolean input, String path) throws Exception {
-        return executePolicyMachinery(Input.of(input), path);
-    }
-
-    public java.lang.Object ExecutePolicy(double input, String path) throws Exception {
-        return executePolicyMachinery(Input.of(input), path);
-    }
-
-    public java.lang.Object ExecutePolicy(java.util.List input, String path) throws Exception {
-        return executePolicyMachinery(Input.of(input), path);
-    }
-
-    private java.lang.Object executePolicyMachinery(Input input, String path) throws Exception {
+    private <T> T queryMachinery(Input input, String path) throws Exception {
         ExecutePolicyWithInputRequest req = ExecutePolicyWithInputRequest.builder()
             .path(path)
             .requestBody(ExecutePolicyWithInputRequestBody.builder()
@@ -80,7 +97,9 @@ public class Porcelain {
 
         if (res.successfulPolicyEvaluation().isPresent()) {
             Object out = res.successfulPolicyEvaluation().get().result().get().value();
-            return out;
+            ObjectMapper mapper = new ObjectMapper();
+            T typedResult = mapper.convertValue(out, new TypeReference<T>() {});
+            return typedResult;
         } else {
             return null;
         }

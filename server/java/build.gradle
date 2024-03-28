@@ -47,3 +47,8 @@ application {
     mainClass = 'com.styra.tickethub.TicketHub'
 }
 
+gradle.projectsEvaluated {
+   tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+    }
+}
