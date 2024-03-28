@@ -36,7 +36,7 @@ jobs:
         make package-all
         
     - name: Upload Build Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: _release
         path: dist
