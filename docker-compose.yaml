@@ -5,8 +5,23 @@ services:
     build: server/node/
     environment:
       - OPA_URL=http://opa:8181
+      - DATABASE_URL=postgresql://postgres:schmickethub@database-node:5432/postgres?schema=public
     ports:
       - "4000:4000"
+    profiles:
+      - node
+
+  database-node:
+    image: postgres
+    restart: always
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    ports:
+      - "5432:5432"
+    volumes:
+      - "./server/node/database/init.sql:/docker-entrypoint-initdb.d/init.sql"
+    environment:
+      POSTGRES_PASSWORD: schmickethub
     profiles:
       - node
 
@@ -27,6 +42,7 @@ services:
       - run
       - --server
       - --addr=:8181
+      - --log-level=debug
       - policies
     working_dir: /work
     volumes:

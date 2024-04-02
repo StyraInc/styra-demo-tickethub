@@ -1,9 +1,13 @@
-GET http://{{host}}:4000/api/tickets/0
+GET http://{{host}}:4000/api/tickets/1
 Content-Type: application/json
 [Cookies]
 user: acmecorp / alice
 HTTP 200
-{"id":"0","customer":"Globex","last_updated":"2022-07-19T15:39:53Z","description":"Dooms day device needs to be refactored","resolved":false}
+[Asserts]
+jsonpath "$.id" == 1
+jsonpath "$.customer" == "Globex"
+jsonpath "$.description" == "Dooms day device needs to be refactored"
+jsonpath "$.resolved" == false
 
 GET http://{{host}}:4000/api/tickets
 Content-Type: application/json
@@ -62,5 +66,5 @@ user: acmecorp / ceasar
 { "resolved": true }
 HTTP 200
 [Asserts]
-jsonpath "$.id" == "{{ticket_id}}" # eek, it's a string now
+jsonpath "$.id" == {{ticket_id}}
 jsonpath "$.resolved" == true
