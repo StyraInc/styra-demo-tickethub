@@ -19,15 +19,27 @@ public class Porcelain {
     // and configuration information. This is re-used across requests.
     private Opa sdk;
 
+    // Values to use when generating requests.
+    private boolean policyRequestPretty = false;
+    private boolean policyRequestProvenance = false;
+    private Explain policyRequestExplain = Explain.NOTES;
+    private boolean policyRequestMetrics = false;
+    private boolean policyRequestInstrument = false;
+    private boolean policyRequestStrictBuiltinErrors = false;
+
+    // Default values to use when creating the SDK instance.
+    private String sdkServerURL = "http://localhost:8181";
+
     // Instantiates a new instance of the Speakeasy generated SDK internally
     // with default settings.
     public Porcelain() {
-        sdk = Opa.builder().build();
+        this.sdk = Opa.builder().serverURL(sdkServerURL).build();
     }
 
 
     public Porcelain(String opaURL) {
-        sdk = Opa.builder().serverURL(opaURL).build();
+        this.sdkServerURL = opaURL;
+        this.sdk = Opa.builder().serverURL(opaURL).build();
     }
 
     // Use a custom instance of the Speakeasy generated SDK. This can allow for
@@ -37,63 +49,69 @@ public class Porcelain {
         this.sdk = sdk;
     }
 
-    public boolean check(java.util.Map<String, Object> input, String path) throws Exception {
+    public boolean check(java.util.Map<String, Object> input, String path) throws PorcelainException {
         return query(input, path);
     }
 
-    public boolean check(String input, String path) throws Exception {
+    public boolean check(String input, String path) throws PorcelainException {
         return query(input, path);
     }
 
-    public boolean check(boolean input, String path) throws Exception {
+    public boolean check(boolean input, String path) throws PorcelainException {
         return query(input, path);
     }
 
-    public boolean check(double input, String path) throws Exception {
+    public boolean check(double input, String path) throws PorcelainException {
         return query(input, path);
     }
 
-    public boolean check(java.util.List<Object> input, String path) throws Exception {
+    public boolean check(java.util.List<Object> input, String path) throws PorcelainException {
         return query(input, path);
     }
 
-    public <T> T query(java.util.Map<String, Object> input, String path) throws Exception {
+    public <T> T query(java.util.Map<String, Object> input, String path) throws PorcelainException {
         return queryMachinery(Input.of(input), path);
     }
 
-    public <T> T query(String input, String path) throws Exception {
+    public <T> T query(String input, String path) throws PorcelainException {
         return queryMachinery(Input.of(input), path);
     }
 
-    public <T> T query(boolean input, String path) throws Exception {
+    public <T> T query(boolean input, String path) throws PorcelainException {
         return queryMachinery(Input.of(input), path);
     }
 
-    public <T> T query(double input, String path) throws Exception {
+    public <T> T query(double input, String path) throws PorcelainException {
         return queryMachinery(Input.of(input), path);
     }
 
-    public <T> T query(java.util.List<Object> input, String path) throws Exception {
+    public <T> T query(java.util.List<Object> input, String path) throws PorcelainException {
         return queryMachinery(Input.of(input), path);
     }
 
-    // TODO: wrap exception types with something we control.
-    private <T> T queryMachinery(Input input, String path) throws Exception {
+    private <T> T queryMachinery(Input input, String path) throws PorcelainException {
         ExecutePolicyWithInputRequest req = ExecutePolicyWithInputRequest.builder()
             .path(path)
             .requestBody(ExecutePolicyWithInputRequestBody.builder()
                     .input(input).build())
-            .pretty(false)
-            .provenance(false)
-            .explain(Explain.NOTES)
-            .metrics(false)
-            .instrument(false)
-            .strictBuiltinErrors(false)
+            .pretty(policyRequestPretty)
+            .provenance(policyRequestProvenance)
+            .explain(policyRequestExplain)
+            .metrics(policyRequestMetrics)
+            .instrument(policyRequestInstrument)
+            .strictBuiltinErrors(policyRequestStrictBuiltinErrors)
             .build();
 
-        ExecutePolicyWithInputResponse res = sdk.executePolicyWithInput()
-            .request(req)
-            .call();
+        ExecutePolicyWithInputResponse res;
+
+        try {
+            res = sdk.executePolicyWithInput()
+                .request(req)
+                .call();
+        } catch (Exception e) {
+            String msg = String.format("executing policy at '%s' with failed due to exception '%s'", path, e);
+            throw new PorcelainException(msg, e);
+        }
 
         if (res.successfulPolicyEvaluation().isPresent()) {
             Object out = res.successfulPolicyEvaluation().get().result().get().value();
