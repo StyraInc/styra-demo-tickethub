@@ -9,7 +9,7 @@ export const router = Router();
 const { OK } = StatusCodes;
 
 const prisma = new PrismaClient();
-const includeCustomers = { include: { customers: true } };
+const includeCustomers = { include: { customers: { select: { name: true } } } };
 
 // setup authz
 const authz = new Authorizer(process.env.OPA_URL || "http://127.0.0.1:8181/");
@@ -79,12 +79,16 @@ router.post("/tickets", async (req, res) => {
 
 // list all tickets
 router.get("/tickets", async (req, res) => {
-  await authz.authorized(path, { action: "list" }, req);
+  const conditions = await authz.authorizedFilter(
+    "tickets/conditions",
+    { action: "list" },
+    req,
+  );
 
   const tickets = (
     await prisma.tickets.findMany({
-      where: { tenant: req.auth.tenant.id },
-      include: { customers: true },
+      where: { tenant: req.auth.tenant.id, ...conditions },
+      ...includeCustomers,
     })
   ).map((ticket) => toTicket(ticket));
   return res.status(OK).json({ tickets });
