@@ -6,8 +6,9 @@ CREATE TABLE "public"."Tenants" (
 CREATE TABLE "public"."Customers" (
   id SERIAL PRIMARY KEY NOT NULL,
   tenant INTEGER NOT NULL,
-  name VARCHAR(255) UNIQUE,
-  FOREIGN KEY ("tenant") REFERENCES "public"."Tenants"(id)
+  name VARCHAR(255),
+  FOREIGN KEY ("tenant") REFERENCES "public"."Tenants"(id),
+  UNIQUE (tenant, name)
 );
 
 CREATE TABLE "public"."Tickets" (

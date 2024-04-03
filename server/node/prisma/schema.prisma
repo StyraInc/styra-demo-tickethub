@@ -10,9 +10,11 @@ datasource db {
 model Customers {
   id      Int       @id @default(autoincrement())
   tenant  Int
-  name    String?   @unique @db.VarChar(255)
+  name    String?   @db.VarChar(255)
   tenants Tenants   @relation(fields: [tenant], references: [id], onDelete: NoAction, onUpdate: NoAction)
   tickets Tickets[]
+
+  @@unique([tenant, name])
 }
 
 model Tickets {
