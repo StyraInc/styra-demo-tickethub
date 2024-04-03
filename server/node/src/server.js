@@ -7,11 +7,13 @@ import StatusCodes from "http-status-codes";
 
 import { router as apiRouter } from "./api.js";
 import { UnauthorizedError } from "./authz.js";
+import { PrismaClient } from "@prisma/client";
 
 const { INTERNAL_SERVER_ERROR, UNAUTHORIZED, FORBIDDEN } = StatusCodes;
 const port = process.env.SERVER_PORT || 4000;
 const host = process.env.SERVER_HOST || "localhost";
 const app = express();
+const prisma = new PrismaClient();
 
 // common middlewares
 app.use(express.json());
@@ -19,10 +21,16 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // authentication
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   if ("user" in req.cookies) {
-    const [tenant, subject] = req.cookies.user.split(" / ");
-    req.auth = { tenant, subject };
+    const [tenantName, subject] = req.cookies.user.split(" / ");
+    const tenantRecord = await prisma.tenants.findFirstOrThrow({
+      where: { name: tenantName },
+    });
+    req.auth = {
+      tenant: { name: tenantRecord.name, id: tenantRecord.id },
+      subject,
+    };
     next();
   } else {
     res.status(UNAUTHORIZED).json({

@@ -12,7 +12,16 @@ export class Authorizer {
     this.opa = new OPA(endpoint);
   }
 
-  async authorized(path, input, { auth: { tenant, subject: user } }) {
+  async authorized(
+    path,
+    input,
+    {
+      auth: {
+        tenant: { name: tenant }, // only feed tenant name to OPA
+        subject: user,
+      },
+    },
+  ) {
     if (!(await this.opa.authorize(path, { user, tenant, ...input })))
       throw new UnauthorizedError();
   }
