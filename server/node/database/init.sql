@@ -1,12 +1,12 @@
 CREATE TABLE "public"."Tenants" (
   id SERIAL PRIMARY KEY NOT NULL,
-  name VARCHAR(255)
+  name VARCHAR(255) UNIQUE
 );
 
 CREATE TABLE "public"."Customers" (
   id SERIAL PRIMARY KEY NOT NULL,
   tenant INTEGER NOT NULL,
-  name VARCHAR(255),
+  name VARCHAR(255) UNIQUE,
   FOREIGN KEY ("tenant") REFERENCES "public"."Tenants"(id)
 );
 
