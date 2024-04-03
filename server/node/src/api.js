@@ -43,7 +43,7 @@ router.post("/tickets", async (req, res) => {
 
   const {
     auth: {
-      tenant: { id: tenantId, name: tenantName },
+      tenant: { id: tenantId },
     },
     body: { customer, ...ticketData },
   } = req;
