@@ -55,6 +55,7 @@ router.post("/tickets", async (req, res) => {
         connectOrCreate: {
           where: {
             name: customer,
+            tenant: tenantId,
           },
           create: {
             name: customer,
@@ -80,6 +81,7 @@ router.get("/tickets", async (req, res) => {
 
   const tickets = (
     await prisma.tickets.findMany({
+      where: { tenant: req.auth.tenant.id },
       include: { customers: true },
     })
   ).map((ticket) => toTicket(ticket));
