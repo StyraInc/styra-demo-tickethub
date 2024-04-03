@@ -1,7 +1,7 @@
 package com.styra.tickethub;
 
 import com.styra.tickethub.Storage.Ticket;
-import com.styra.tickethub.Porcelain;
+import com.styra.opa.Porcelain;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,15 +20,15 @@ import org.glassfish.jersey.servlet.ServletContainer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.styra.opa.models.operations.*;
-import com.styra.opa.models.operations.ExecutePolicyWithInputRequest;
-import com.styra.opa.models.operations.ExecutePolicyWithInputRequestBody;
-import com.styra.opa.models.operations.ExecutePolicyWithInputResponse;
-import com.styra.opa.models.shared.*;
-import com.styra.opa.models.shared.Explain;
-import com.styra.opa.models.shared.GzipAcceptEncoding;
-import com.styra.opa.models.shared.GzipContentEncoding;
-import com.styra.opa.*;
+import com.styra.opa.sdk.models.operations.*;
+import com.styra.opa.sdk.models.operations.ExecutePolicyWithInputRequest;
+import com.styra.opa.sdk.models.operations.ExecutePolicyWithInputRequestBody;
+import com.styra.opa.sdk.models.operations.ExecutePolicyWithInputResponse;
+import com.styra.opa.sdk.models.shared.*;
+import com.styra.opa.sdk.models.shared.Explain;
+import com.styra.opa.sdk.models.shared.GzipAcceptEncoding;
+import com.styra.opa.sdk.models.shared.GzipContentEncoding;
+import com.styra.opa.sdk.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
