@@ -43,7 +43,7 @@ router.post("/tickets", async (req, res) => {
 
   const {
     auth: {
-      tenant: { id: tenantId },
+      tenant: { id: tenantId, name: tenantName },
     },
     body: { customer, ...ticketData },
   } = req;
@@ -54,8 +54,10 @@ router.post("/tickets", async (req, res) => {
       customers: {
         connectOrCreate: {
           where: {
-            name: customer,
-            tenant: tenantId,
+            tenant_name: {
+              tenant: tenantId,
+              name: customer,
+            },
           },
           create: {
             name: customer,
