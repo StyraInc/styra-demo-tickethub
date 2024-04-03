@@ -121,3 +121,18 @@ jsonpath "$.tickets[*].customer" not includes "Globex"
 jsonpath "$.tickets[*].customer" includes "Sirius Cybernetics Corp."
 jsonpath "$.tickets[*].customer" includes "Cyberdyne Systems Corp."
 jsonpath "$.tickets" count > 0
+
+# Amanda (by a special rule) can NOT see tickets of the Globex customer
+GET http://{{host}}:4000/api/tickets/2
+Content-Type: application/json
+[Cookies]
+user: acmecorp / amanda
+HTTP 404
+
+GET http://{{host}}:4000/api/tickets/2
+Content-Type: application/json
+[Cookies]
+user: acmecorp / alice
+HTTP 200
+[Asserts]
+jsonpath "$.customer" == "Globex"

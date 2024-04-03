@@ -6,7 +6,7 @@ import { PrismaClient } from "@prisma/client";
 
 // all routes in this router is prefixed with /api, see ./server.js:42
 export const router = Router();
-const { OK } = StatusCodes;
+const { OK, NOT_FOUND } = StatusCodes;
 
 const prisma = new PrismaClient();
 const includeCustomers = { include: { customers: { select: { name: true } } } };
@@ -99,10 +99,14 @@ router.get("/tickets/:id", [param("id").isInt().toInt()], async (req, res) => {
   const {
     params: { id },
   } = req;
-  await authz.authorized(path, { action: "get", id }, req);
+  const conditions = await authz.authorizedFilter(
+    "tickets/conditions",
+    { action: "get" },
+    req,
+  );
 
   const ticket = await prisma.tickets.findUniqueOrThrow({
-    where: { id },
+    where: { id, ...conditions },
     ...includeCustomers,
   });
   return res.status(OK).json(toTicket(ticket));

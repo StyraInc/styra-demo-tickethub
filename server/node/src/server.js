@@ -7,9 +7,10 @@ import StatusCodes from "http-status-codes";
 
 import { router as apiRouter } from "./api.js";
 import { UnauthorizedError } from "./authz.js";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 
-const { INTERNAL_SERVER_ERROR, UNAUTHORIZED, FORBIDDEN } = StatusCodes;
+const { INTERNAL_SERVER_ERROR, UNAUTHORIZED, FORBIDDEN, NOT_FOUND } =
+  StatusCodes;
 const port = process.env.SERVER_PORT || 4000;
 const host = process.env.SERVER_HOST || "localhost";
 const app = express();
@@ -49,6 +50,11 @@ app.use((err, _req, res, _next) => {
       status: "forbidden",
       message: err.message,
     }); // TODO(sr): do we actually get this response JSON back?
+  }
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    if ((err.code = "P2025")) {
+      return res.status(NOT_FOUND).json({ status: "not found" });
+    }
   }
   console.error(err);
   return res.status(INTERNAL_SERVER_ERROR).json({
