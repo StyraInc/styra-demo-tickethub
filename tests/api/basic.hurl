@@ -136,3 +136,17 @@ user: acmecorp / alice
 HTTP 200
 [Asserts]
 jsonpath "$.customer" == "Globex"
+
+# Dirk (by a special rule) can NOT see tickets of the Tyrell customer, hence not resolve them either
+POST http://{{host}}:4000/api/tickets/10/resolve
+Content-Type: application/json
+[Cookies]
+user: hooli / dirk
+HTTP 404
+
+# ...but Dylan can
+POST http://{{host}}:4000/api/tickets/10/resolve
+Content-Type: application/json
+[Cookies]
+user: hooli / dylan
+HTTP 200

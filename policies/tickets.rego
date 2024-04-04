@@ -11,6 +11,7 @@ roles_in_tenant := {
     },
     "hooli": {
       "dylan": ["admin"],
+      "dirk": ["resolver"],
     }
 }
 
@@ -45,3 +46,6 @@ conds.customers.is.name := "Globex" if input.user == "bob"
 
 # amanda cannot see Globex tickets
 conds.customers.isNot.name := "Globex" if input.user == "amanda"
+
+# dirk may not resolve "Tyrell Corp." tickets
+conds.customers.isNot.name := "Tyrell Corp." if input.user == "dirk"

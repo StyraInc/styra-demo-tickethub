@@ -6,7 +6,7 @@ import { PrismaClient } from "@prisma/client";
 
 // all routes in this router is prefixed with /api, see ./server.js:42
 export const router = Router();
-const { OK, NOT_FOUND } = StatusCodes;
+const { OK } = StatusCodes;
 
 const prisma = new PrismaClient();
 const includeCustomers = { include: { customers: { select: { name: true } } } };
@@ -23,10 +23,14 @@ router.post(
     const {
       params: { id },
     } = req;
-    await authz.authorized(path, { action: "resolve" }, req);
+    const conditions = await authz.authorizedFilter(
+      "tickets/conditions",
+      { action: "resolve" },
+      req,
+    );
 
     const ticket = await prisma.tickets.update({
-      where: { id },
+      where: { id, ...conditions },
       data: {
         resolved: req.body.resolved ? true : false,
         last_updated: now(),
