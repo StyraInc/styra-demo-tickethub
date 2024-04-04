@@ -9,4 +9,5 @@ The TicketHub sample app server component.
 
 ## SDKs
 
-* [Styra Run Node.js SDK](https://github.com/StyraInc/styra-run-sdk-node)
+* [SDK Documentation](https://docs.styra.com/sdk)
+* [OPA Typescript / Javascript SDK](https://github.com/StyraInc/opa-typescript)

@@ -9,4 +9,5 @@ The TicketHub sample app server component.
 
 ## SDKs
 
-* [Styra Run Java SDK](https://github.com/StyraInc/styra-run-sdk-Java)
+* [SDK Documentation](https://docs.styra.com/sdk)
+* [OPA Java SDK](https://github.com/StyraInc/opa-java)
