@@ -44,8 +44,11 @@ conds.resolved := false if {
 # bob can only see Globex tickets
 conds.customers.is.name := "Globex" if input.user == "bob"
 
-# amanda cannot see Globex tickets
-conds.customers.isNot.name := "Globex" if input.user == "amanda"
+# amanda cannot see resolved Globex tickets => she can only see tickets that are
+# NOT Globex OR NOT resolved
+# => NOT (Globex AND resolved)
+conds.NOT.customers.name := "Globex" if input.user == "amanda"
+conds.NOT.resolved := true if input.user == "amanda"
 
 # dirk may not resolve "Tyrell Corp." tickets
 conds.customers.isNot.name := "Tyrell Corp." if input.user == "dirk"

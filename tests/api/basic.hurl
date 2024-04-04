@@ -110,24 +110,36 @@ jsonpath "$.tickets[*].customer" not includes "Sirius Cybernetics Corp."
 jsonpath "$.tickets[*].customer" not includes "Cyberdyne Systems Corp."
 jsonpath "$.tickets" count > 0
 
-# Amanda (by a special rule) can NOT see tickets of the Globex customer
+# Amanda (by a special rule) can NOT see RESOLVED tickets of the Globex customer
 GET http://{{host}}:4000/api/tickets
 Content-Type: application/json
 [Cookies]
 user: acmecorp / amanda
 HTTP 200
 [Asserts]
-jsonpath "$.tickets[*].customer" not includes "Globex"
+jsonpath "$.tickets[*].customer" includes "Globex" # there's a unresolved ticket
 jsonpath "$.tickets[*].customer" includes "Sirius Cybernetics Corp."
 jsonpath "$.tickets[*].customer" includes "Cyberdyne Systems Corp."
+jsonpath "$.tickets[*].resolved" includes false
 jsonpath "$.tickets" count > 0
 
-# Amanda (by a special rule) can NOT see tickets of the Globex customer
+# Amanda (by a special rule) can NOT see RESOLVED tickets of the Globex customer
 GET http://{{host}}:4000/api/tickets/2
 Content-Type: application/json
 [Cookies]
 user: acmecorp / amanda
 HTTP 404
+
+GET http://{{host}}:4000/api/tickets/1
+Content-Type: application/json
+[Cookies]
+user: acmecorp / amanda
+HTTP 200
+[Asserts]
+jsonpath "$.id" == 1
+jsonpath "$.customer" == "Globex"
+jsonpath "$.description" == "Dooms day device needs to be refactored"
+jsonpath "$.resolved" == false
 
 GET http://{{host}}:4000/api/tickets/2
 Content-Type: application/json
