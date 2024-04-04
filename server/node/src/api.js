@@ -20,9 +20,6 @@ router.post(
   "/tickets/:id/resolve",
   [param("id").isInt().toInt()],
   async (req, res) => {
-    const {
-      params: { id },
-    } = req;
     const conditions = await authz.authorizedFilter(
       "tickets/conditions",
       { action: "resolve" },
@@ -30,7 +27,7 @@ router.post(
     );
 
     const ticket = await prisma.tickets.update({
-      where: { id, ...conditions },
+      where: { id: req.params.id, ...conditions },
       data: {
         resolved: req.body.resolved ? true : false,
         last_updated: now(),
@@ -100,9 +97,6 @@ router.get("/tickets", async (req, res) => {
 
 // get ticket
 router.get("/tickets/:id", [param("id").isInt().toInt()], async (req, res) => {
-  const {
-    params: { id },
-  } = req;
   const conditions = await authz.authorizedFilter(
     "tickets/conditions",
     { action: "get" },
@@ -110,7 +104,7 @@ router.get("/tickets/:id", [param("id").isInt().toInt()], async (req, res) => {
   );
 
   const ticket = await prisma.tickets.findUniqueOrThrow({
-    where: { id, ...conditions },
+    where: { id: req.params.id, ...conditions },
     ...includeCustomers,
   });
   return res.status(OK).json(toTicket(ticket));
