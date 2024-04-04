@@ -1,7 +1,7 @@
 package com.styra.tickethub;
 
 import com.styra.tickethub.Storage.Ticket;
-import com.styra.opa.Porcelain;
+import com.styra.opa.OPA;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,7 +48,7 @@ import java.util.Map;
 public class TicketHub {
     private static final Storage storage = Storage.create();
 
-    private Porcelain porc;
+    private OPA opa;
 
     public TicketHub() {
         String opaURL = "http://localhost:8181";
@@ -58,7 +58,7 @@ public class TicketHub {
         }
         System.out.printf("DEBUG: using OPA URL: %s\n", opaURL);
 
-        porc = new Porcelain(opaURL);
+        opa = new OPA(opaURL);
     }
 
     private @Context
@@ -178,9 +178,9 @@ public class TicketHub {
         boolean allow;
 
         try {
-            //out = porc.ExecutePolicy(iMap, "tickets");
-            //allow = porc.query(iMap, "tickets/allow");
-            allow = porc.check(iMap, "tickets/allow");
+            //out = opa.ExecutePolicy(iMap, "tickets");
+            //allow = opa.query(iMap, "tickets/allow");
+            allow = opa.check(iMap, "tickets/allow");
         } catch (Exception e) {
             System.out.printf("ERROR: request threw exception: %s\n", e);
             return false;
