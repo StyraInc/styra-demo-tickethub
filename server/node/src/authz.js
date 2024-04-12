@@ -1,4 +1,4 @@
-import { OPA } from "opa/highlevel/index.js";
+import { OPAClient } from "@styra/opa";
 
 export class UnauthorizedError extends Error {
   constructor(message) {
@@ -9,7 +9,7 @@ export class UnauthorizedError extends Error {
 
 export class Authorizer {
   constructor(endpoint) {
-    this.opa = new OPA(endpoint);
+    this.opa = new OPAClient(endpoint);
   }
 
   async authorized(
