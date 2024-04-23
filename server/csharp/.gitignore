@@ -1,0 +1,6 @@
+obj/
+bin/
+debug/
+_site/
+/.vscode/
+.DS_Store

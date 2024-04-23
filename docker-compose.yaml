@@ -13,6 +13,20 @@ services:
     expose:
       - 4000
 
+  server-csharp:
+    build: server/csharp/
+    profiles:
+      - csharp
+    environment:
+      OPA_URL: 'http://localhost:8181'
+      DATABASE_CONN_STR: 'Host=localhost;Database=postgres;Username=postgres;Password=schmickethub'
+    depends_on:
+      - database
+      - opa
+    network_mode: host
+    expose:
+      - 4000
+
   database:
     image: postgres
     restart: always
@@ -25,6 +39,14 @@ services:
     network_mode: host
     expose:
       - 5432
+
+  # For manual debugging of the Postgres DB.
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   network_mode: host
+  #   expose:
+  #     - 8080
 
   server-java:
     build: server/java/
@@ -55,9 +77,6 @@ services:
     network_mode: host
     expose:
       - 3000
-
-  # TODO
-  # server-csharp:
 
   opa:
     image: ${OPA_IMAGE:-docker.io/openpolicyagent/opa:latest}

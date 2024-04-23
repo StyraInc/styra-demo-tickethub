@@ -29,6 +29,14 @@ run-node-react: SERVER = node
 run-node-react: CLIENT = react
 run-node-react: run
 
+run-csharp-html: SERVER = csharp
+run-csharp-html: CLIENT = html
+run-csharp-html: run
+
+run-csharp-react: SERVER = csharp
+run-csharp-react: CLIENT = react
+run-csharp-react: run
+
 .PHONY: clean
 clean:
 	rm -rf dist
@@ -77,4 +85,12 @@ package-node-react: SERVER = node
 package-node-react: CLIENT = react
 package-node-react: tar-node-react
 
-package-all: package-node-html package-node-react package-java-html package-java-react package-go-html package-go-react
+package-csharp-html: SERVER = csharp
+package-csharp-html: CLIENT = html
+package-csharp-html: tar-csharp-html
+
+package-csharp-react: SERVER = csharp
+package-csharp-react: CLIENT = react
+package-csharp-react: tar-csharp-react
+
+package-all: package-node-html package-node-react package-java-html package-java-react package-csharp-html package-csharp-react package-go-html package-go-react
