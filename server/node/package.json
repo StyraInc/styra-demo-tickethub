@@ -58,6 +58,6 @@
     "fs-extra": "^11.2.0",
     "nodemon": "^3.1.0",
     "prisma": "^5.13.0",
-    "supertest": "^6.2.2"
+    "supertest": "^7.0.0"
   }
 }
