@@ -8,6 +8,9 @@ services:
       - DATABASE_URL=postgresql://postgres:schmickethub@database-node:5432/postgres?schema=public
     ports:
       - "4000:4000"
+    depends_on:
+      - database-node
+      - opa
     profiles:
       - node
 
@@ -30,6 +33,14 @@ services:
     build: server/java/
     profiles:
       - java
+    depends_on:
+      - opa
+
+  # TODO
+  # client-html:
+
+  # TODO
+  # client-react:
 
   # TODO
   # server-csharp:
