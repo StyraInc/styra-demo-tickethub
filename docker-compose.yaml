@@ -29,12 +29,12 @@ services:
       - node
 
   # TODO
-  server-java:
-    build: server/java/
-    profiles:
-      - java
-    depends_on:
-      - opa
+  # server-java:
+  #   build: server/java/
+  #   profiles:
+  #     - java
+  #   depends_on:
+  #     - opa
 
   # TODO
   # client-html:
