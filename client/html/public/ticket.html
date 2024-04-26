@@ -1,94 +1,100 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Ticket</title>
+        <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" />
 
-<head>
-  <meta charset="UTF-8">
-  <title>Ticket</title>
-  <link rel="stylesheet" type="text/css" href="/stylesheets/style.css"/>
+        <script>
+            async function displayTicket(id) {
+                const ticket = await fetch(`/api/tickets/${id}`).then((x) =>
+                    x.json(),
+                );
 
-  <script>
-     async function displayTicket(id) {
-      const ticket = await fetch(`/api/tickets/${id}`).then(x => x.json())
+                document.getElementById("customer").textContent =
+                    ticket.customer;
+                document.getElementById("last_updated").textContent =
+                    ticket.last_updated;
+                document.getElementById("description").textContent =
+                    ticket.description;
+                document.getElementById("resolved").textContent =
+                    ticket.resolved ? "yes" : "no";
+                document.getElementById("ticket-resolve-button").textContent =
+                    `${ticket.resolved ? "Unresolve" : "Resolve"} ticket`;
 
-      document.getElementById('customer').textContent = ticket.customer;
-      document.getElementById('last_updated').textContent = ticket.last_updated;
-      document.getElementById('description').textContent = ticket.description;
-      document.getElementById('resolved').textContent = ticket.resolved ? 'yes' : 'no';
-      document.getElementById('ticket-resolve-button').textContent = `${ticket.resolved ? 'Unresolve' : 'Resolve'} ticket`;
+                return ticket;
+            }
 
-      return ticket
-    }
+            async function toggleResolved(event) {
+                event.preventDefault();
 
-    async function toggleResolved(event) {
-      event.preventDefault();
+                const resolved =
+                    document.getElementById("ticket-resolve-button")
+                        .textContent === "Resolve ticket";
 
-      const resolved = document.getElementById('ticket-resolve-button').textContent === "Resolve ticket";
+                const id = location.pathname.split("/").at(-1);
+                const response = await fetch(`/api/tickets/${id}/resolve`, {
+                    method: "POST",
+                    headers: { "content-type": "application/json" },
+                    body: JSON.stringify({ resolved }),
+                });
 
-      const id = location.pathname.split('/').at(-1);
-      const response = await fetch(`/api/tickets/${id}/resolve`, {
-        method: 'POST',
-        headers: {'content-type': 'application/json'},
-        body: JSON.stringify({resolved})
-      });
+                const messageContainer = document.getElementById("message");
 
-      const messageContainer = document.getElementById('message');
-      
-      if (response.status === 200) {
-        const ticket = await displayTicket(id);
-        messageContainer.innerHTML = `\
-        Ticket updated: 
+                if (response.status === 200) {
+                    const ticket = await displayTicket(id);
+                    messageContainer.innerHTML = `\
+        Ticket updated:
         <span class="update-status">
-          ${state = ticket.resolved ? 'unresolved → resolved' : 'resolved → unresolved'}
+          ${(state = ticket.resolved ? "unresolved → resolved" : "resolved → unresolved")}
         </span>`;
-      } else {
-        messageContainer.innerHTML = `\
+                } else {
+                    messageContainer.innerHTML = `\
         <span class="update-status">Error: user unauthorized to perform operation</span>`;
-      }
-    };
-  </script>
+                }
+            }
+        </script>
 
-  <script type="module" src="/scripts/login.js"></script>
-  <script type="module">
-    const id = location.pathname.split('/').at(-1);
-    document.getElementById('ticket-id').textContent = id;
-    displayTicket(id);
-  </script>
-</head>
+        <script type="module" src="/scripts/login.js"></script>
+        <script type="module">
+            const id = location.pathname.split("/").at(-1);
+            document.getElementById("ticket-id").textContent = id;
+            displayTicket(id);
+        </script>
+    </head>
 
-<body>
-  <nav>
-    <div>
-      <h1 id="tenant"></h1>
-      <div class="nav-menu">
-        <div class="option"><a href="/tickets">Tickets</a></div>
-        <div class="divider option-selected">/</div>
-        <div class="option option-selected" id="ticket-id">N/A</div>
-        <div class="divider">|</div>
-        <div class="option"><a href="/admin">Admin</a></div>
-      </div>
-    </div>
-    <div id="login-menu"></div>
-  </nav>
+    <body>
+        <nav>
+            <div>
+                <h1 id="tenant"></h1>
+                <div class="nav-menu">
+                    <div class="option"><a href="/tickets">Tickets</a></div>
+                    <div class="divider option-selected">/</div>
+                    <div class="option option-selected" id="ticket-id">N/A</div>
+                </div>
+            </div>
+            <div id="login-menu"></div>
+        </nav>
 
-  <main>
-    <form class="form-grid" onsubmit="toggleResolved(event)">
-      <label for="customer">Customer</label>
-      <div id="customer"></div>
+        <main>
+            <form class="form-grid" onsubmit="toggleResolved(event)">
+                <label for="customer">Customer</label>
+                <div id="customer"></div>
 
-      <label for="last_updated">Last Updated</label>
-      <div id="last_updated"></div>
+                <label for="last_updated">Last Updated</label>
+                <div id="last_updated"></div>
 
-      <label for="description">Description</label>
-      <div id="description"></div>
+                <label for="description">Description</label>
+                <div id="description"></div>
 
-      <label for="resolved">Resolved</label>
-      <div id="resolved"></div>
+                <label for="resolved">Resolved</label>
+                <div id="resolved"></div>
 
-      <div>
-        <button id="ticket-resolve-button" type="submit"></button>
-      </div>
-      <div id="message"></div>
-    </form>
-  </main>
-</body>
+                <div>
+                    <button id="ticket-resolve-button" type="submit"></button>
+                </div>
+                <div id="message"></div>
+            </form>
+        </main>
+    </body>
 </html>
