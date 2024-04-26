@@ -39,8 +39,12 @@ services:
   # TODO
   # client-html:
 
-  # TODO
-  # client-react:
+  client-react:
+    build: client/react/
+    ports:
+      - "3000:3000"
+    profiles:
+      - react
 
   # TODO
   # server-csharp:
