@@ -1,44 +1,49 @@
-import PropTypes from 'prop-types'
-import React, {useCallback, useEffect, useState} from 'react'
+import PropTypes from "prop-types";
+import React, { useCallback, useEffect, useState } from "react";
 
-export default function Ticket({ticketId}) {
-  const [ticket, setTicket] = useState()
-  const [fetchTicket, setFetchTicket] = useState(true)
-  const [message, setMessage] = useState()
+export default function Ticket({ ticketId }) {
+  const [ticket, setTicket] = useState();
+  const [fetchTicket, setFetchTicket] = useState(true);
+  const [message, setMessage] = useState();
 
   useEffect(() => {
     if (!fetchTicket) {
-      return
+      return;
     }
 
     fetch(`/api/tickets/${ticketId}`)
       .then((res) => res.json())
-      .then((data) => setTicket(data))
+      .then((data) => setTicket(data));
 
-    setFetchTicket(false)
-  }, [ticketId, fetchTicket])
+    setFetchTicket(false);
+  }, [ticketId, fetchTicket]);
 
-  const handleSubmit = useCallback(async (event) => {
-    event.preventDefault()
+  const handleSubmit = useCallback(
+    async (event) => {
+      event.preventDefault();
 
-    const response = await fetch(`/api/tickets/${ticketId}/resolve`, {
-      method: 'POST',
-      headers: {'content-type': 'application/json'},
-      body: JSON.stringify({resolved: !ticket.resolved})
-    })
+      const response = await fetch(`/api/tickets/${ticketId}/resolve`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ resolved: !ticket.resolved }),
+      });
 
-    if (response.status === 200) {
-      const resolved = !ticket.resolved ? 'unresolved → resolved' : 'resolved → unresolved'
-      setMessage(`Ticket updated: ${resolved}`)
-    } else {
-      setMessage('Error: user unauthorized to perform operation')
-    }
+      if (response.status === 200) {
+        const resolved = !ticket.resolved
+          ? "unresolved → resolved"
+          : "resolved → unresolved";
+        setMessage(`Ticket updated: ${resolved}`);
+      } else {
+        setMessage("Error: user unauthorized to perform operation");
+      }
 
-    setFetchTicket(true)
-  }, [ticketId, ticket])
+      setFetchTicket(true);
+    },
+    [ticketId, ticket],
+  );
 
   if (!ticket) {
-    return null
+    return null;
   }
 
   return (
@@ -54,21 +59,19 @@ export default function Ticket({ticketId}) {
         <div id="description">{ticket.description}</div>
 
         <label htmlFor="resolved">Resolved</label>
-        <div id="resolved">{ticket.resolved ? 'yes' : 'no'}</div>
+        <div id="resolved">{ticket.resolved ? "yes" : "no"}</div>
 
         <div>
-          <button type="submit">{ticket.resolved ? 'Unresolve' : 'Resolve'}</button>
+          <button type="submit">
+            {ticket.resolved ? "Unresolve" : "Resolve"}
+          </button>
         </div>
-        <div>
-          { message && 
-            <span className="update-status">{message}</span>
-          }
-        </div>
+        <div>{message && <span className="update-status">{message}</span>}</div>
       </form>
     </main>
-  )
+  );
 }
 
 Ticket.propTypes = {
-  ticketId: PropTypes.string.isRequired
-}
+  ticketId: PropTypes.string.isRequired,
+};
