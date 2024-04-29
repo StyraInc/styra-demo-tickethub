@@ -1,0 +1,21 @@
+:{$CLIENT_PORT:3000} {
+    log {
+        format console
+    }
+
+    handle /api/* {
+        reverse_proxy {$SERVER_URL:"localhost:4000"}
+    }
+
+    handle { # catch-all
+        root * public/
+
+        rewrite /ticket/new /new_ticket.html
+        rewrite /ticket/* /ticket.html
+        rewrite /tickets /tickets.html
+
+        file_server {
+            index tickets.html 
+        }
+    }
+}
