@@ -39,11 +39,12 @@ server.use("/", (req, resp) => {
     port: serverPort,
     path: req.url,
     method: req.method,
-    headers: req.headers,
-  };
-
+    headers: req.headers
+  }
+  
   const proxy = request(options, (proxiedResp) => {
-    resp.writeHead(proxiedResp.statusCode, proxiedResp.headers);
+    console.log("RESPONSE: " + req.method + " " + req.url + ": " + proxiedResp.statusCode + " " + proxiedResp.headers);
+    resp.writeHead(proxiedResp.statusCode, proxiedResp.headers)
     proxiedResp.pipe(resp, {
       end: true,
     });

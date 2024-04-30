@@ -1,35 +1,60 @@
-version: "3"
-
 services:
   server-node:
     build: server/node/
-    environment:
-      - OPA_URL=http://opa:8181
-      - DATABASE_URL=postgresql://postgres:schmickethub@database-node:5432/postgres?schema=public
-    ports:
-      - "4000:4000"
     profiles:
       - node
+    environment:
+      - OPA_URL=http://localhost:8181
+      - DATABASE_URL=postgresql://postgres:schmickethub@localhost:5432/postgres?schema=public
+    depends_on:
+      - database
+      - opa
+    network_mode: host
+    expose:
+      - 4000
 
-  database-node:
+  database:
     image: postgres
     restart: always
     # set shared memory limit when using docker-compose
     shm_size: 128mb
-    ports:
-      - "5432:5432"
     volumes:
       - "./server/node/database/init.sql:/docker-entrypoint-initdb.d/init.sql"
     environment:
       POSTGRES_PASSWORD: schmickethub
-    profiles:
-      - node
+    network_mode: host
+    expose:
+      - 5432
 
-  # TODO
   server-java:
     build: server/java/
     profiles:
       - java
+    depends_on:
+      - opa
+    environment:
+      OPA_URL: http://localhost:8181
+
+  client-html:
+    build: client/html/
+    profiles:
+      - html
+    environment:
+      SERVER_HOST: localhost
+      SERVER_PORT: 4000
+      CLIENT_HOST: 127.0.0.1
+      CLIENT_SERVER: 3000
+    network_mode: host
+    expose:
+      - 3000
+
+  client-react:
+    build: client/react/
+    profiles:
+      - react
+    network_mode: host
+    expose:
+      - 3000
 
   # TODO
   # server-csharp:
@@ -59,6 +84,7 @@ services:
       - --report-junit=tests/api/report.xml
       - tests/api/basic.hurl
     environment:
-      - HURL_host=server-${VARIANT:-node}
+      - HURL_host=localhost
     profiles:
       - tools
+    network_mode: host
