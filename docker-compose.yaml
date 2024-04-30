@@ -4,10 +4,13 @@ services:
   server-node:
     build: server/node/
     environment:
-      - OPA_URL=http://opa:8181
-      - DATABASE_URL=postgresql://postgres:schmickethub@database-node:5432/postgres?schema=public
-    ports:
-      - "4000:4000"
+      #- OPA_URL=http://opa:8181
+      #- DATABASE_URL=postgresql://postgres:schmickethub@database-node:5432/postgres?schema=public
+      - OPA_URL=http://localhost:8181
+      - DATABASE_URL=postgresql://postgres:schmickethub@localhost:5432/postgres?schema=public
+    #ports:
+    #  - "4000:4000"
+    network_mode: host
     depends_on:
       - database-node
       - opa
@@ -19,6 +22,7 @@ services:
     restart: always
     # set shared memory limit when using docker-compose
     shm_size: 128mb
+    #network_mode: host
     ports:
       - "5432:5432"
     volumes:
@@ -41,16 +45,28 @@ services:
 
   client-react:
     build: client/react/
-    ports:
-      - "3000:3000"
+    network_mode: host
+    #ports:
+    #  - "3000:3000"
     profiles:
       - react
+
+  client-html:
+    build:
+      context: client/html/
+      dockerfile: Dockerfile.caddy
+    network_mode: host
+    #ports:
+    #  - "3000:3000"
+    profiles:
+      - html
 
   # TODO
   # server-csharp:
 
   opa:
     image: ${OPA_IMAGE:-docker.io/openpolicyagent/opa:latest}
+    #network_mode: host
     ports:
       - "8181:8181"
     command:
