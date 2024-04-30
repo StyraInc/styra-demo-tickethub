@@ -1,16 +1,14 @@
 services:
   server-node:
     build: server/node/
+    profiles:
+      - node
     environment:
       - OPA_URL=http://localhost:8181
       - DATABASE_URL=postgresql://postgres:schmickethub@localhost:5432/postgres?schema=public
-    # ports:
-    #   - "4000:4000"
     depends_on:
       - database
       - opa
-    profiles:
-      - node
     network_mode: host
     expose:
       - 4000
@@ -20,13 +18,13 @@ services:
     restart: always
     # set shared memory limit when using docker-compose
     shm_size: 128mb
-    expose:
-      - 5432
     volumes:
       - "./server/node/database/init.sql:/docker-entrypoint-initdb.d/init.sql"
     environment:
       POSTGRES_PASSWORD: schmickethub
     network_mode: host
+    expose:
+      - 5432
 
   server-java:
     build: server/java/
@@ -39,22 +37,22 @@ services:
 
   client-html:
     build: client/html/
+    profiles:
+      - html
     environment:
       SERVER_HOST: localhost
       SERVER_PORT: 4000
       CLIENT_HOST: 127.0.0.1
       CLIENT_SERVER: 3000
-    profiles:
-      - html
+    network_mode: host
     expose:
       - 3000
-    network_mode: host
 
   client-react:
     build: client/react/
-    network_mode: host
     profiles:
       - react
+    network_mode: host
     expose:
       - 3000
 
