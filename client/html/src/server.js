@@ -45,9 +45,7 @@ server.use('/', (req, resp) => {
     method: req.method,
     headers: req.headers
   }
-  console.log("PROXYING: " + req.method + " " + req.url);
-
-
+  
   const proxy = request(options, (proxiedResp) => {
     console.log("RESPONSE: " + req.method + " " + req.url + ": " + proxiedResp.statusCode + " " + proxiedResp.headers);
     resp.writeHead(proxiedResp.statusCode, proxiedResp.headers)
