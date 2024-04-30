@@ -84,6 +84,7 @@ services:
       - --report-junit=tests/api/report.xml
       - tests/api/basic.hurl
     environment:
-      - HURL_host=server-${VARIANT:-node}
+      - HURL_host=localhost
     profiles:
       - tools
+    network_mode: host
