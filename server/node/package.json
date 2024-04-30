@@ -34,7 +34,7 @@
     }
   },
   "dependencies": {
-    "@prisma/client": "^5.12.1",
+    "@prisma/client": "^5.13.0",
     "command-line-args": "^5.2.1",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.0",
@@ -46,7 +46,7 @@
     "jsonfile": "^6.1.0",
     "module-alias": "^2.2.2",
     "morgan": "^1.10.0",
-    "@styra/opa": "^0.4.0"
+    "@styra/opa": "^0.4.2"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
@@ -58,6 +58,6 @@
     "fs-extra": "^11.2.0",
     "nodemon": "^3.1.0",
     "prisma": "^5.13.0",
-    "supertest": "^6.2.2"
+    "supertest": "^7.0.0"
   }
 }

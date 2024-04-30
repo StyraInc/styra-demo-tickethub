@@ -1,18 +1,18 @@
-import React, {useCallback} from 'react'
+import React, { useCallback } from "react";
 
 export default function NewTicket() {
   const handleSubmit = useCallback(async (event) => {
-    event.preventDefault()
+    event.preventDefault();
 
     const data = new FormData(event.target);
-    const response = await fetch('/api/tickets', {
-      method: 'POST',
-      headers: {'content-type': 'application/json'},
-      body: JSON.stringify(Object.fromEntries(data.entries()))
-    }).then(res => res.json())
+    const response = await fetch("/api/tickets", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(Object.fromEntries(data.entries())),
+    }).then((res) => res.json());
 
-    window.location = `/tickets/${response.id}`
-  }, [])
+    window.location = `/tickets/${response.id}`;
+  }, []);
 
   return (
     <main>
@@ -27,6 +27,6 @@ export default function NewTicket() {
           <button type="submit">Create ticket</button>
         </div>
       </form>
-  </main>
-  )
+    </main>
+  );
 }

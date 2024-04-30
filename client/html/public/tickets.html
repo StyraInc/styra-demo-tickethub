@@ -1,16 +1,15 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Tickets</title>
+        <link rel="stylesheet" type="text/css" href="/stylesheets/style.css" />
 
-<head>
-  <meta charset="UTF-8">
-  <title>Tickets</title>
-  <link rel="stylesheet" type="text/css" href="/stylesheets/style.css"/>
-
-  <script type="module" src="/scripts/login.js"></script>  
-  <script type="module">
-    async function displayTickets() {
-      const table = document.getElementById('ticket-list');
-      table.innerHTML = `\
+        <script type="module" src="/scripts/login.js"></script>
+        <script type="module">
+            async function displayTickets() {
+                const table = document.getElementById("ticket-list");
+                table.innerHTML = `\
       <thead>
         <tr>
             <th>ID</th>
@@ -21,40 +20,44 @@
         </tr>
       </thead>`;
 
-      const {tickets} = await fetch('/api/tickets').then(res => res.json());
-      const tbody = document.createElement('tbody');
-      table.appendChild(tbody);
+                const { tickets } = await fetch("/api/tickets").then((res) =>
+                    res.json(),
+                );
+                const tbody = document.createElement("tbody");
+                table.appendChild(tbody);
 
-      tbody.innerHTML = tickets.map((ticket) => `\
+                tbody.innerHTML = tickets
+                    .map(
+                        (ticket) => `\
       <tr onclick="window.location.href = '/ticket/${ticket.id}'">
         <td>${ticket.id}</td>
         <td>${ticket.last_updated}</td>
         <td>${ticket.customer}</td>
         <td>${ticket.description}</td>
         <td>${ticket.resolved ? "yes" : "no"}</td>
-      </tr>`).join('');
-    }
+      </tr>`,
+                    )
+                    .join("");
+            }
 
-    displayTickets();
-  </script>
-</head>
+            displayTickets();
+        </script>
+    </head>
 
-<body>
-  <nav>
-    <div>
-      <h1 id="tenant"></h1>
-      <div class="nav-menu">
-        <div class="option option-selected">Tickets</div>
-        <div class="divider">|</div>
-        <div class="option"><a href="/admin">Admin</a></div>
-      </div>
-    </div>
-    <div id="login-menu"></div>
-  </nav>
+    <body>
+        <nav>
+            <div>
+                <h1 id="tenant"></h1>
+                <div class="nav-menu">
+                    <div class="option option-selected">Tickets</div>
+                </div>
+            </div>
+            <div id="login-menu"></div>
+        </nav>
 
-  <main>
-    <table id="ticket-list"></table>
-    <a class="button-large" href="/ticket/new">+ New ticket</a>
-  </main>
-</body>
+        <main>
+            <table id="ticket-list"></table>
+            <a class="button-large" href="/ticket/new">+ New ticket</a>
+        </main>
+    </body>
 </html>
