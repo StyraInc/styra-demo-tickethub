@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        server: [node] #TODO: java, csharp
+        server: [node, csharp] #TODO: java
     steps:
       - name: Check out code
         uses: actions/checkout@v4
