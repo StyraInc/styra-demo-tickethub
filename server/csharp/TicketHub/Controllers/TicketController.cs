@@ -89,7 +89,7 @@ public class TicketController : ControllerBase
 
         // Update ticket fields.
         ticket.Description = tf.description;
-        ticket.LastUpdated = DateTime.Now;
+        ticket.LastUpdated = DateTime.UtcNow.ToLocalTime();
         ticket.Tenant = foundTenant.Id;
         ticket.Customer = foundCustomer.Id;
 
@@ -111,7 +111,7 @@ public class TicketController : ControllerBase
             return NotFound();
         }
         ticket.Resolved = rf.resolved;
-        ticket.LastUpdated = DateTime.Now;
+        ticket.LastUpdated = DateTime.UtcNow.ToLocalTime();
         await _dbContext.SaveChangesAsync();
         return Ok(ticket);
     }
