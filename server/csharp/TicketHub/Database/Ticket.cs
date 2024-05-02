@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Authentication;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 
 namespace TicketHub.Database;
@@ -13,6 +14,8 @@ public partial class Ticket
 
     public string? Description { get; set; }
 
+    [JsonProperty("last_updated")]
+    [JsonConverter(typeof(UtcDateTimeConverter))]
     public DateTime LastUpdated { get; set; }
 
     public bool Resolved { get; set; }
@@ -68,5 +71,14 @@ public class TicketConverter : JsonConverter
     public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
     {
         throw new NotImplementedException();
+    }
+}
+
+public class UtcDateTimeConverter : IsoDateTimeConverter
+{
+    public UtcDateTimeConverter()
+    {
+        DateTimeFormat = "yyyy-MM-ddTHH:mm:ssZ";
+        DateTimeStyles = System.Globalization.DateTimeStyles.AssumeUniversal;
     }
 }
