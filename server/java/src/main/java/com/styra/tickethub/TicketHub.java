@@ -1,7 +1,7 @@
 package com.styra.tickethub;
 
 import com.styra.tickethub.Storage.Ticket;
-import com.styra.opa.OPA;
+import com.styra.opa.OPAClient;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,15 +20,6 @@ import org.glassfish.jersey.servlet.ServletContainer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.styra.opa.sdk.models.operations.*;
-import com.styra.opa.sdk.models.operations.ExecutePolicyWithInputRequest;
-import com.styra.opa.sdk.models.operations.ExecutePolicyWithInputRequestBody;
-import com.styra.opa.sdk.models.operations.ExecutePolicyWithInputResponse;
-import com.styra.opa.sdk.models.shared.*;
-import com.styra.opa.sdk.models.shared.Explain;
-import com.styra.opa.sdk.models.shared.GzipAcceptEncoding;
-import com.styra.opa.sdk.models.shared.GzipContentEncoding;
-import com.styra.opa.sdk.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -48,7 +39,7 @@ import java.util.Map;
 public class TicketHub {
     private static final Storage storage = Storage.create();
 
-    private OPA opa;
+    private OPAClient opa;
 
     public TicketHub() {
         String opaURL = "http://localhost:8181";
@@ -58,7 +49,7 @@ public class TicketHub {
         }
         System.out.printf("DEBUG: using OPA URL: %s\n", opaURL);
 
-        opa = new OPA(opaURL);
+        opa = new OPAClient(opaURL);
     }
 
     private @Context
@@ -174,63 +165,16 @@ public class TicketHub {
             entry("action", getSessionMethod().toLowerCase())
         );
 
-        //Object out;
         boolean allow;
 
         try {
-            //out = opa.ExecutePolicy(iMap, "tickets");
-            //allow = opa.query(iMap, "tickets/allow");
-            allow = opa.check(iMap, "tickets/allow");
+            allow = opa.check("tickets/allow", iMap);
         } catch (Exception e) {
             System.out.printf("ERROR: request threw exception: %s\n", e);
             return false;
         }
 
-        //System.out.printf("DEBUG: policy evaluation result: %s (%s)\n", out, out.getClass());
-        //allow = (boolean) ((java.util.LinkedHashMap) out).get("allow");
-        System.out.printf("DEBUG: allow is: %b\n", allow);
-
         return allow;
-
-        /*
-        // TODO: this can probably be done once and re-used?
-        Opa sdk = Opa.builder().build();
-
-        ExecutePolicyWithInputRequest req = ExecutePolicyWithInputRequest.builder()
-            .path("main")
-            .requestBody(ExecutePolicyWithInputRequestBody.builder()
-                    .input(Input.of(iMap)).build())
-            .pretty(false)
-            .provenance(false)
-            .explain(Explain.NOTES)
-            .metrics(false)
-            .instrument(false)
-            .strictBuiltinErrors(false)
-            .build();
-
-        try {
-
-            ExecutePolicyWithInputResponse res = sdk.executePolicyWithInput()
-                .request(req)
-                .call();
-
-            boolean allow = false;
-
-            if (res.successfulPolicyEvaluation().isPresent()) {
-                Object out = res.successfulPolicyEvaluation().get().result().get().value();
-                System.out.printf("DEBUG: policy evaluation result: %s (%s)\n", out, out.getClass());
-                allow = (boolean) ((java.util.LinkedHashMap) out).get("allow");
-                System.out.printf("DEBUG: allow is: %b\n", allow);
-            } else {
-                System.out.printf("DEBUG: policy evaluation failed: %s\n", res);
-            }
-
-            return allow;
-
-        } catch (Exception e) {
-            System.out.printf("ERROR: request threw exception: %s\n", e);
-            return false;
-        }*/
     }
 
     public static void main(String... args) throws Exception {

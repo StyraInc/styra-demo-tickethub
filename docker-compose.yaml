@@ -59,8 +59,6 @@ services:
       - java
     depends_on:
       - opa
-    environment:
-      OPA_URL: http://localhost:8181
 
   client-html:
     build: client/html/
