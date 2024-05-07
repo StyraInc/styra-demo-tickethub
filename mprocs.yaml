@@ -1,6 +1,0 @@
-procs:
-  server:
-    #shell: "cd ./server/java && make run"
-    shell: "cd ./server/java && ./run_in_docker.sh"
-  ui:
-    shell: "cd ./client/react && make run"
