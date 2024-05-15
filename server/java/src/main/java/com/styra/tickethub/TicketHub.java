@@ -1,6 +1,8 @@
 package com.styra.tickethub;
 
 import com.styra.tickethub.Storage.Ticket;
+import com.styra.opa.OPAClient;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Consumes;
@@ -16,6 +18,18 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.glassfish.jersey.servlet.ServletContainer;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.Map;
+import static java.util.Map.entry;
+import jakarta.ws.rs.NotAllowedException;
+
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +39,19 @@ import java.util.Map;
 public class TicketHub {
     private static final Storage storage = Storage.create();
 
+    private OPAClient opa;
+
+    public TicketHub() {
+        String opaURL = "http://localhost:8181";
+        String opaURLEnv = System.getenv("OPA_URL");
+        if (opaURLEnv != null) {
+            opaURL = opaURLEnv;
+        }
+        System.out.printf("DEBUG: using OPA URL: %s\n", opaURL);
+
+        opa = new OPAClient(opaURL);
+    }
+
     private @Context
     HttpServletRequest request;
 
@@ -32,6 +59,9 @@ public class TicketHub {
     @Path("/tickets")
     @Produces({MediaType.APPLICATION_JSON})
     public Tickets getTickets() {
+        if (!authz()) {
+            throw new NotAllowedException("Not authorized");
+        }
         return new Tickets(storage.getTickets(getTenant()));
     }
 
@@ -39,6 +69,9 @@ public class TicketHub {
     @Path("/tickets/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Ticket getTicket(@PathParam("id") int id) {
+        if (!authz()) {
+            throw new NotAllowedException("Not authorized");
+        }
         var tickets = storage.getTickets(getTenant());
         var ticket = tickets.get(id);
         if (ticket == null) {
@@ -52,6 +85,9 @@ public class TicketHub {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Ticket addTicket(Ticket ticket) {
+        if (!authz()) {
+            throw new NotAllowedException("Not authorized");
+        }
         return storage.addTicket(getTenant(), ticket);
     }
 
@@ -59,6 +95,9 @@ public class TicketHub {
     @Path("/tickets/{id}/resolve")
     @Produces(MediaType.APPLICATION_JSON)
     public Ticket resolveTicket(@PathParam("id") int id, TicketStatus status) {
+        if (!authz()) {
+            throw new NotAllowedException("Not authorized");
+        }
         var tickets = storage.getTickets(getTenant());
         var ticket = tickets.get(id);
         if (ticket == null) {
@@ -96,6 +135,46 @@ public class TicketHub {
                     }
                     return map;
                 }).orElse(Map.of());
+    }
+
+    private String getSessionPath() {
+        return getSessionPath(request);
+    }
+
+    static String getSessionPath(HttpServletRequest request) {
+        return request.getPathInfo();
+    }
+
+    private String getSessionMethod() {
+        return getSessionMethod(request);
+    }
+
+    static String getSessionMethod(HttpServletRequest request) {
+        return request.getMethod();
+    }
+
+    private boolean authz() {
+        System.out.printf("DEBUG: %s %s %s\n", getSessionPath(), getSessionMethod(), getSessionAttributes());
+
+        java.util.Map<String, Object> iMap = java.util.Map.ofEntries(
+            entry("path", getSessionPath()),
+            entry("method", getSessionMethod()),
+            entry("cookie", getSessionAttributes()),
+            entry("user", getSessionAttributes().get("subject")),
+            entry("tenant", getSessionAttributes().get("tenant")),
+            entry("action", getSessionMethod().toLowerCase())
+        );
+
+        boolean allow;
+
+        try {
+            allow = opa.check("tickets/allow", iMap);
+        } catch (Exception e) {
+            System.out.printf("ERROR: request threw exception: %s\n", e);
+            return false;
+        }
+
+        return allow;
     }
 
     public static void main(String... args) throws Exception {
