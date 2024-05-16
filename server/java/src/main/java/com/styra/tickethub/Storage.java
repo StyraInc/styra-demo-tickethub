@@ -71,7 +71,7 @@ public class Storage {
 
     public synchronized Ticket addTicket(String tenant, Ticket ticket) {
         var tickets = this.tenants.computeIfAbsent(tenant, (ignored) -> new Vector<>());
-        var newTicket = ticket.withId(tickets.size());
+        var newTicket = ticket.withId(tickets.size()+1);
         tickets.add(newTicket);
         return newTicket;
     }

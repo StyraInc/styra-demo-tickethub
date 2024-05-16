@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -27,13 +28,15 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.Map;
 import static java.util.Map.entry;
-import jakarta.ws.rs.NotAllowedException;
+import jakarta.ws.rs.ForbiddenException;
 
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Path("/")
 public class TicketHub {
@@ -60,7 +63,7 @@ public class TicketHub {
     @Produces({MediaType.APPLICATION_JSON})
     public Tickets getTickets() {
         if (!authz()) {
-            throw new NotAllowedException("Not authorized");
+            throw new ForbiddenException("Not authorized");
         }
         return new Tickets(storage.getTickets(getTenant()));
     }
@@ -70,13 +73,23 @@ public class TicketHub {
     @Produces(MediaType.APPLICATION_JSON)
     public Ticket getTicket(@PathParam("id") int id) {
         if (!authz()) {
-            throw new NotAllowedException("Not authorized");
+            throw new ForbiddenException("Not authorized");
         }
+
+        // This will perform poorly with a large number of tickets, but since
+        // this is just a demo it should never have more than a few dozen.
         var tickets = storage.getTickets(getTenant());
-        var ticket = tickets.get(id);
+        Ticket ticket = null;
+        for (Ticket t : tickets) {
+            if (t.getId() == id) {
+                ticket = t;
+                break;
+            }
+        }
         if (ticket == null) {
             throw new NotFoundException();
         }
+
         return ticket;
     }
 
@@ -86,7 +99,7 @@ public class TicketHub {
     @Produces(MediaType.APPLICATION_JSON)
     public Ticket addTicket(Ticket ticket) {
         if (!authz()) {
-            throw new NotAllowedException("Not authorized");
+            throw new ForbiddenException("Not authorized");
         }
         return storage.addTicket(getTenant(), ticket);
     }
@@ -96,10 +109,16 @@ public class TicketHub {
     @Produces(MediaType.APPLICATION_JSON)
     public Ticket resolveTicket(@PathParam("id") int id, TicketStatus status) {
         if (!authz()) {
-            throw new NotAllowedException("Not authorized");
+            throw new ForbiddenException("Not authorized");
         }
         var tickets = storage.getTickets(getTenant());
-        var ticket = tickets.get(id);
+        Ticket ticket = null;
+        for (Ticket t : tickets) {
+            if (t.getId() == id) {
+                ticket = t;
+                break;
+            }
+        }
         if (ticket == null) {
             throw new NotFoundException();
         }
@@ -154,16 +173,35 @@ public class TicketHub {
     }
 
     private boolean authz() {
-        System.out.printf("DEBUG: %s %s %s\n", getSessionPath(), getSessionMethod(), getSessionAttributes());
+        String path = getSessionPath();
+        String action = getSessionMethod().toLowerCase();
+
+        // An ugly kludge to decide what the action should be for the policy.
+        // At a minimum, we probably don't need to recompile the regexes for
+        // every single request. [0-9]+ also matches some invalid (non-int)
+        // IDs.
+        if (path == "/tickets") {
+            action = "list";
+        }
+
+        if (Pattern.compile("^/tickets/[0-9]+$").matcher(path).find()) {
+            action = "get";
+        }
+
+        if (Pattern.compile("^/tickets/[0-9]+/resolve$").matcher(path).find()) {
+            action = "resolve";
+        }
 
         java.util.Map<String, Object> iMap = java.util.Map.ofEntries(
-            entry("path", getSessionPath()),
+            entry("path", path),
             entry("method", getSessionMethod()),
             entry("cookie", getSessionAttributes()),
             entry("user", getSessionAttributes().get("subject")),
             entry("tenant", getSessionAttributes().get("tenant")),
-            entry("action", getSessionMethod().toLowerCase())
+            entry("action", action)
         );
+
+        System.out.printf("DEBUG: OPA input is: %s\n", iMap);
 
         boolean allow;
 
@@ -173,6 +211,8 @@ public class TicketHub {
             System.out.printf("ERROR: request threw exception: %s\n", e);
             return false;
         }
+
+        System.out.printf("DEBUG: %s %s %s %b\n", getSessionPath(), getSessionMethod(), getSessionAttributes(), allow);
 
         return allow;
     }
