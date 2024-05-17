@@ -61,6 +61,18 @@ services:
     depends_on:
       - opa
 
+  server-springboot:
+    build: server/springboot/
+    init: true
+    environment:
+      - OPA_URL=http://opa:8181
+    ports:
+      - "4000:8080"
+    profiles:
+      - springboot
+    depends_on:
+      - opa
+
   client-html:
     build: client/html/
     profiles:
