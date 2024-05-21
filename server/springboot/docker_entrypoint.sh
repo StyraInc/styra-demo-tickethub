@@ -7,4 +7,4 @@ set -u
 set -x
 
 cd /src/tickethub-springboot
-./gradlew run
+./gradlew run -x test -x testClasses
