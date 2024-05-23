@@ -1,7 +1,8 @@
-import PropTypes from "prop-types";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
-export default function Ticket({ ticketId }) {
+export default function Ticket() {
+  const { ticketId } = useParams();
   const [ticket, setTicket] = useState();
   const [fetchTicket, setFetchTicket] = useState(true);
   const [message, setMessage] = useState();
@@ -71,7 +72,3 @@ export default function Ticket({ ticketId }) {
     </main>
   );
 }
-
-Ticket.propTypes = {
-  ticketId: PropTypes.string.isRequired,
-};

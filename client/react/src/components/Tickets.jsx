@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Tickets() {
+  const navigate = useNavigate();
   const [tickets, setTickets] = useState();
 
   useEffect(() => {
@@ -25,7 +27,7 @@ export default function Tickets() {
           {tickets?.map((ticket) => (
             <tr
               key={ticket.id}
-              onClick={() => (window.location = `/tickets/${ticket.id}`)}
+              onClick={() => navigate(`/tickets/${ticket.id}`)}
             >
               <td>{ticket.id}</td>
               <td>{ticket.last_updated}</td>
@@ -36,9 +38,9 @@ export default function Tickets() {
           ))}
         </tbody>
       </table>
-      <a className="button-large" href="/tickets/new">
+      <Link className="button-large" to="/tickets/new">
         + New ticket
-      </a>
+      </Link>
     </main>
   );
 }

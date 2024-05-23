@@ -1,10 +1,10 @@
-import React, { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function useAccounts() {
   const [current, setCurrent] = useState(getAccountFromCookie());
   const [accounts, setAccounts] = useState();
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetch("/accounts.json")
       .then((res) => res.json())
       .then((data) => {
@@ -19,7 +19,7 @@ export default function useAccounts() {
       });
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!accounts || current) {
       return;
     }

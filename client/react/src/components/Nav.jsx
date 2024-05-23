@@ -1,12 +1,16 @@
 import PropTypes from "prop-types";
-import React from "react";
+import { useCallback } from "react";
 import { Types } from "../types";
+import { useParams, Link } from "react-router-dom";
+
 import useAccounts from "../useAccounts";
 
-export default function Nav({ type, ticketId }) {
+export default function Nav({ type }) {
   const { current } = useAccounts();
+  const { ticketId } = useParams();
 
-  const tickets = type === Types.TICKETS ? "Tickets" : <a href="/">Tickets</a>;
+  const tickets =
+    type === Types.TICKETS ? "Tickets" : <Link to="/">Tickets</Link>;
   const newTicket = type === Types.NEW_TICKET ? "New" : undefined;
 
   return (
@@ -37,7 +41,7 @@ Nav.propTypes = {
 function Menu() {
   const { current, accounts, handleSetAccount } = useAccounts();
 
-  const handleChangeAccount = React.useCallback(
+  const handleChangeAccount = useCallback(
     (event) => {
       handleSetAccount(event.target.value);
       window.location.reload();
