@@ -1,11 +1,10 @@
 import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
+import { useAuth } from "react-oidc-context";
 import Nav from "./Nav";
 
 import { Types } from "../types";
 import "../style.css";
-
-import useAccounts from "../useAccounts";
 
 const paths = {
   "/tickets/new": Types.NEW_TICKET,
@@ -20,22 +19,43 @@ const titles = {
 };
 
 export default function App() {
-  const { current } = useAccounts();
-  const location = useLocation();
+  const auth = useAuth();
 
-  const [, type] =
-    Object.entries(paths).find(([path]) =>
-      location.pathname.startsWith(path),
-    ) ?? [];
+  switch (auth.activeNavigator) {
+    case "signinSilent":
+      return <div>Signing you in...</div>;
+    case "signoutRedirect":
+      return <div>Signing you out...</div>;
+  }
 
-  useEffect(() => {
-    document.title = `${titles[type]} - ${current?.tenant}`;
-  }, [type, current]);
+  if (auth.isLoading) {
+    return <div>Loading...</div>;
+  }
 
-  return (
-    <div>
-      <Nav type={type} />
-      <Outlet />
-    </div>
-  );
+  if (auth.error) {
+    return <div>Oops... {auth.error.message}</div>;
+  }
+
+  if (auth.isAuthenticated) {
+    console.log(auth.user?.profile);
+
+    const location = useLocation();
+
+    const [, type] =
+      Object.entries(paths).find(([path]) =>
+        location.pathname.startsWith(path),
+      ) ?? [];
+
+    // useEffect(() => {
+    //   document.title = `${titles[type]} - ${current?.tenant}`;
+    // }, [type, current]);
+
+    return (
+      <div>
+        <Nav type={type} />
+        <Outlet />
+      </div>
+    );
+  }
+  return <button onClick={() => void auth.signinRedirect()}>Log in</button>;
 }

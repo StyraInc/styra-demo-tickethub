@@ -1,16 +1,27 @@
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { AuthProvider } from "react-oidc-context";
 
 import App from "./components/App";
 import NewTicket from "./components/NewTicket";
 import Tickets from "./components/Tickets";
 import Ticket from "./components/Ticket";
 
+const oidcConfig = {
+  authority: "http://localhost/dex",
+  client_id: "react",
+  redirect_uri: "http://localhost/",
+  // ...
+};
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: (
+      <AuthProvider {...oidcConfig}>
+        <App />
+      </AuthProvider>
+    ),
     children: [
       {
         path: "",

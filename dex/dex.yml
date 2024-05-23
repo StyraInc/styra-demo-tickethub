@@ -1,0 +1,33 @@
+issuer: http://localhost/dex
+storage:
+  type: sqlite3
+  config:
+    file: /var/dex/dex.db
+web:
+  http: 0.0.0.0:5556
+  # headers:
+  #   X-Frame-Options: "DENY"
+  #   X-Content-Type-Options: "nosniff"
+  #   X-XSS-Protection: "1; mode=block"
+  #   Content-Security-Policy: "default-src 'self'"
+  #   Access-Control-Allow-Origin: "localhost:3000"
+staticClients:
+  - id: react
+    public: true
+    name: "React"
+    redirectURIs:
+      - "http://localhost:3000/"
+      - "http://localhost/"
+staticPasswords:
+  - email: "admin@example.com"
+    # bcrypt hash of the string "password": $(echo password | htpasswd -BinC 10 admin | cut -d: -f2)
+    hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+    username: "admin"
+    userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"
+
+# Enable local users
+enablePasswordDB: true
+# Allow password grants with local users
+oauth2:
+  passwordConnector: local
+  skipApprovalScreen: true

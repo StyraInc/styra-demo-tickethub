@@ -1,0 +1,14 @@
+:80 {
+    handle_path /dex/* {
+        reverse_proxy http://dex:5556
+    }
+    handle_path /api/* {
+        reverse_proxy http://server-node:4000
+    }
+    handle_path /opa/* {
+        reverse_proxy http://opa:8181
+    }
+    handle {
+        reverse_proxy http://client-react:3000
+    }
+}
