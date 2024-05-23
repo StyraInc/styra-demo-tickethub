@@ -1,6 +1,8 @@
-import React, { useCallback } from "react";
+import { useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function NewTicket() {
+  const navigate = useNavigate();
   const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
 
@@ -11,7 +13,7 @@ export default function NewTicket() {
       body: JSON.stringify(Object.fromEntries(data.entries())),
     }).then((res) => res.json());
 
-    window.location = `/tickets/${response.id}`;
+    navigate(`/tickets/${response.id}`);
   }, []);
 
   return (
