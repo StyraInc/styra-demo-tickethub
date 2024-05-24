@@ -20,10 +20,18 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+function readToken(val) {
+  if (!val) return;
+  return val.slice(7).split(" / ");
+}
+
 // authentication
 app.use(async (req, res, next) => {
   if ("user" in req.cookies) {
-    const [tenantName, subject] = req.cookies.user.split(" / ");
+    let [tenantName, subject] = readToken(req.headers.authorization);
+    if (!tenantName || !subject) {
+      [tenantName, subject] = req.cookies.user.split(" / "); // fallback to cookie
+    }
     const tenantRecord = await prisma.tenants.findFirstOrThrow({
       where: { name: tenantName },
     });
