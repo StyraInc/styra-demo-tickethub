@@ -16,6 +16,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build-clients:
+    name: build clients
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        client: [html, react]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: setup
+        run: docker compose --profile ${{ matrix.client }} up --quiet-pull --wait --wait-timeout 300
+      - name: smoke test
+        run: curl http://127.0.0.1:3000
+
   test-e2e:
     name: Test E2E
     runs-on: ubuntu-22.04
