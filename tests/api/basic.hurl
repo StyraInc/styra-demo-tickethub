@@ -77,7 +77,7 @@ jsonpath "$.tickets[*].customer" includes "Tyrell Corp."
 # Bob (reader) cannot resolve a ticket
 POST http://{{host}}:4000/api/tickets/{{ticket_id}}/resolve
 Content-Type: application/json
-Authorization: Bearer acmecorp / alice
+Authorization: Bearer acmecorp / bob
 [Cookies]
 user: acmecorp / bob
 { "resolved": true }
