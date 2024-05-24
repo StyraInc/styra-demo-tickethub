@@ -1,7 +1,11 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuthn } from "../AuthnContext";
 
 export default function NewTicket() {
+  const {
+    current: { account },
+  } = useAuthn();
   const navigate = useNavigate();
   const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
@@ -9,7 +13,10 @@ export default function NewTicket() {
     const data = new FormData(event.target);
     const response = await fetch("/api/tickets", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        authorization: "Bearer " + account,
+      },
       body: JSON.stringify(Object.fromEntries(data.entries())),
     }).then((res) => res.json());
 

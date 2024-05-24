@@ -7,13 +7,13 @@ export default function useAccounts() {
   useEffect(() => {
     fetch("/accounts.json")
       .then((res) => res.json())
-      .then((data) => {
+      .then(({ accounts }) => {
         setAccounts(
-          data.accounts.reduce((accounts, account) => {
-            const { tenant, user } = getTenantUser(account);
-            accounts[tenant] ??= [];
-            accounts[tenant].push({ account, name: user });
-            return accounts;
+          accounts.reduce((acc, account) => {
+            const { tenant, user: name } = getTenantUser(account);
+            acc[tenant] ??= [];
+            acc[tenant].push({ account, name });
+            return acc;
           }, {}),
         );
       });
@@ -24,8 +24,10 @@ export default function useAccounts() {
       return;
     }
 
+    // pick first
     const [tenant] = Object.values(accounts);
     const [user] = tenant;
+
     setAccountCookie(user.account);
     setCurrent(getTenantUser(user.account));
   }, [accounts, current]);
@@ -58,6 +60,6 @@ function setAccountCookie(account) {
 }
 
 function getTenantUser(account) {
-  const [tenant, user] = account.split("/").map((account) => account.trim());
+  const [tenant, user] = account.split(" / ");
   return { tenant, user, account };
 }
