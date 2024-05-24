@@ -3,51 +3,50 @@
     "version": "0.3.0",
     "type": "module",
     "scripts": {
-      "start": "node ./src/server",
-      "start:dev": "nodemon",
-      "lint": "npx eslint ."
+        "start": "node ./src/server",
+        "start:dev": "nodemon",
+        "lint": "npx eslint ."
     },
     "nodemonConfig": {
-      "watch": [
-        "src"
-      ],
-      "ext": "js, html",
-      "exec": "node ./src/server"
+        "watch": [
+            "src"
+        ],
+        "ext": "js, html",
+        "exec": "node ./src/server"
     },
     "eslintConfig": {
-      "parserOptions": {
-        "ecmaVersion": 6,
-        "sourceType": "module"
-      },
-      "rules": {
-        "max-len": [
-          "error",
-          {
-            "code": 100
-          }
-        ],
-        "no-console": 1,
-        "no-extra-boolean-cast": 0
-      }
+        "parserOptions": {
+            "ecmaVersion": 6,
+            "sourceType": "module"
+        },
+        "rules": {
+            "max-len": [
+                "error",
+                {
+                    "code": 100
+                }
+            ],
+            "no-console": 1,
+            "no-extra-boolean-cast": 0
+        }
     },
     "eslintIgnore": [
-      "src/public/"
+        "src/public/"
     ],
     "dependencies": {
-      "express": "^4.19.2",
-      "http-status-codes": "^2.3.0",
-      "module-alias": "^2.2.3",
-      "morgan": "^1.10.0"
+        "express": "^4.19.2",
+        "http-status-codes": "^2.3.0",
+        "module-alias": "^2.2.3",
+        "morgan": "^1.10.0"
     },
     "devDependencies": {
-      "eslint": "^9.3.0",
-      "eslint-plugin-import": "^2.29.1",
-      "eslint-plugin-node": "^11.1.0",
-      "eslint-plugin-sort-imports-es6-autofix": "^0.6.0",
-      "eslint-plugin-sort-requires": "^2.1.0",
-      "find": "^0.3.0",
-      "fs-extra": "^11.2.0",
-      "nodemon": "^3.1.0"
+        "eslint": "^8.57.0",
+        "eslint-plugin-import": "^2.29.1",
+        "eslint-plugin-node": "^11.1.0",
+        "eslint-plugin-sort-imports-es6-autofix": "^0.6.0",
+        "eslint-plugin-sort-requires": "^2.1.0",
+        "find": "^0.3.0",
+        "fs-extra": "^11.2.0",
+        "nodemon": "^3.1.0"
     }
-  }
-  
+}
