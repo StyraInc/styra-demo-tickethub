@@ -7,6 +7,12 @@ The TicketHub sample application to show off using the Styra OPA SDKs:
 * [Typescript / Javascript SDK repository](https://github.com/StyraInc/opa-typescript)
 * [C# SDK repository](https://github.com/StyraInc/opa-csharp)
 
+## Build the OPA Bundle
+
+On the first checkout, or whenever something in `policies/` is changed, the OPA bundle needs to be rebuild:
+```sh
+make policies/bundle.tar.gz
+```
 
 ## Running the Tickethub app
 

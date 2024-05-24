@@ -28,6 +28,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: open-policy-agent/setup-opa@v2
+      - name: build bundle
+        run: make policies/bundle.tar.gz
+        env:
+          OPA: opa
       - name: setup
         run: docker compose --profile ${{ matrix.server }} up --quiet-pull --wait --wait-timeout 300
       - name: test

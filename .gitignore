@@ -6,3 +6,4 @@ dist/
 node_modules/
 server/java/bin
 server/java/libs
+policies/bundle.tar.gz

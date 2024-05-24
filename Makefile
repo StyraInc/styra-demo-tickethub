@@ -1,4 +1,10 @@
 PROJECTS = $(wildcard ./client/* ./server/*)
+OPA_IMAGE ?= docker.io/openpolicyagent/opa:latest
+OPA ?= docker run -v ${PWD}/policies:/w/policies -w /w ${OPA_IMAGE}
+
+files := $(wildcard ./policies/*.rego ./policies/*.json)
+policies/bundle.tar.gz: $(files)
+	$(OPA) build -o $@ $(files)
 
 run:
 	(trap 'kill 0' SIGINT; \
