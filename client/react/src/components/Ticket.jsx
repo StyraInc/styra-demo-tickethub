@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
+import { useAuthn } from "../AuthnContext";
 export default function Ticket() {
+  const {
+    current: { account },
+  } = useAuthn();
   const { ticketId } = useParams();
   const [ticket, setTicket] = useState();
   const [fetchTicket, setFetchTicket] = useState(true);
@@ -12,7 +15,12 @@ export default function Ticket() {
       return;
     }
 
-    fetch(`/api/tickets/${ticketId}`)
+    fetch(`/api/tickets/${ticketId}`, {
+      headers: {
+        "content-type": "application/json",
+        authorization: "Bearer " + account,
+      },
+    })
       .then((res) => res.json())
       .then((data) => setTicket(data));
 
@@ -25,7 +33,10 @@ export default function Ticket() {
 
       const response = await fetch(`/api/tickets/${ticketId}/resolve`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          authorization: "Bearer " + account,
+        },
         body: JSON.stringify({ resolved: !ticket.resolved }),
       });
 

@@ -1,12 +1,21 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuthn } from "../AuthnContext";
 
 export default function Tickets() {
+  const {
+    current: { account },
+  } = useAuthn();
   const navigate = useNavigate();
   const [tickets, setTickets] = useState();
 
   useEffect(() => {
-    fetch("/api/tickets")
+    fetch("/api/tickets", {
+      headers: {
+        "content-type": "application/json",
+        authorization: "Bearer " + account,
+      },
+    })
       .then((res) => res.json())
       .then((data) => setTickets(data.tickets));
   }, []);

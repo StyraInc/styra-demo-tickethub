@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Nav from "./Nav";
+import AuthnProvider from "../AuthnContext";
 
 import { Types } from "../types";
 import "../style.css";
@@ -34,8 +35,10 @@ export default function App() {
 
   return (
     <div>
-      <Nav type={type} />
-      <Outlet />
+      <AuthnProvider>
+        <Nav type={type} />
+        <Outlet />
+      </AuthnProvider>
     </div>
   );
 }

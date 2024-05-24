@@ -1,5 +1,6 @@
 GET http://{{host}}:4000/api/tickets/1
 Content-Type: application/json
+Authorization: Bearer acmecorp / alice
 [Cookies]
 user: acmecorp / alice
 HTTP 200
@@ -11,6 +12,7 @@ jsonpath "$.resolved" == false
 
 GET http://{{host}}:4000/api/tickets
 Content-Type: application/json
+Authorization: Bearer acmecorp / alice
 [Cookies]
 user: acmecorp / alice
 HTTP 200
@@ -20,6 +22,7 @@ old_count: jsonpath "$.tickets" count
 # Bob (reader) cannot create a ticket
 POST http://{{host}}:4000/api/tickets
 Content-Type: application/json
+Authorization: Bearer acmecorp / bob
 [Cookies]
 user: acmecorp / bob
 {
@@ -30,6 +33,7 @@ HTTP 403
 
 POST http://{{host}}:4000/api/tickets
 Content-Type: application/json
+Authorization: Bearer acmecorp / alice
 [Cookies]
 user: acmecorp / alice
 {
@@ -45,6 +49,7 @@ ticket_id: jsonpath "$.id"
 # "all tickets" doesn't include other tenant's tickets
 GET http://{{host}}:4000/api/tickets
 Content-Type: application/json
+Authorization: Bearer acmecorp / bob
 [Cookies]
 user: acmecorp / bob
 HTTP 200
@@ -58,6 +63,7 @@ jsonpath "$.tickets[*].customer" not includes "Tyrell Corp."
 
 GET http://{{host}}:4000/api/tickets
 Content-Type: application/json
+Authorization: Bearer hooli / dylan
 [Cookies]
 user: hooli / dylan
 HTTP 200
@@ -71,6 +77,7 @@ jsonpath "$.tickets[*].customer" includes "Tyrell Corp."
 # Bob (reader) cannot resolve a ticket
 POST http://{{host}}:4000/api/tickets/{{ticket_id}}/resolve
 Content-Type: application/json
+Authorization: Bearer acmecorp / bob
 [Cookies]
 user: acmecorp / bob
 { "resolved": true }
@@ -79,6 +86,7 @@ HTTP 403
 # Ceasar (resolver) can resolve a ticket
 POST http://{{host}}:4000/api/tickets/{{ticket_id}}/resolve
 Content-Type: application/json
+Authorization: Bearer acmecorp / ceasar
 [Cookies]
 user: acmecorp / ceasar
 { "resolved": true }

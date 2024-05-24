@@ -2,11 +2,10 @@ import PropTypes from "prop-types";
 import { useCallback } from "react";
 import { Types } from "../types";
 import { useParams, Link } from "react-router-dom";
-
-import useAccounts from "../useAccounts";
+import { useAuthn } from "../AuthnContext";
 
 export default function Nav({ type }) {
-  const { current } = useAccounts();
+  const { current } = useAuthn();
   const { ticketId } = useParams();
 
   const tickets =
@@ -39,7 +38,7 @@ Nav.propTypes = {
 };
 
 function Menu() {
-  const { current, accounts, handleSetAccount } = useAccounts();
+  const { current, accounts, handleSetAccount } = useAuthn();
 
   const handleChangeAccount = useCallback(
     (event) => {
