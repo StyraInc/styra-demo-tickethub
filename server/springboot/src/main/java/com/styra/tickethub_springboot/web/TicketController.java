@@ -6,6 +6,8 @@ import com.styra.tickethub_springboot.web.errors.TicketNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import com.styra.opa.OPAClient;
 
@@ -23,7 +25,29 @@ import java.util.List;
 @RestController
 public class TicketController {
 
-  private boolean doAuth(String authHeader, String action) {
+  private String tenantFromHeader(String authHeader) {
+      var components = authHeader.split("\\s*[\\s+/]\\s*", 3);
+      String tenant;
+      if (components.length != 3) {
+        System.out.println("ERROR: invalid auth header: " + authHeader);
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "auth header is malformed");
+      }
+      tenant = components[1].trim();
+      return tenant;
+  }
+
+  private String userFromHeader(String authHeader) {
+      var components = authHeader.split("\\s*[\\s+/]\\s*", 3);
+      String user;
+      if (components.length != 3) {
+        System.out.println("ERROR: invalid auth header: " + authHeader);
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "auth header is malformed");
+      }
+      user = components[2].trim();
+      return user;
+  }
+
+  private void verifyAuth(String authHeader, String action) {
       // TODO: opa client object should be re-used
       String opaURL = "http://localhost:8181";
       String opaURLEnv = System.getenv("OPA_URL");
@@ -34,18 +58,8 @@ public class TicketController {
 
       OPAClient opa = new OPAClient(opaURL);
 
-      var components = authHeader.split("\\s*[\\s+/]\\s*", 3);
-      String tenant;
-      String user;
-
-      System.out.printf("DEBUG: components %s\n", components);
-
-      if (components.length != 3) {
-        System.out.println("ERROR: invalid auth header: " + authHeader);
-        return false;
-      }
-      tenant = components[1].trim();
-      user = components[2].trim();
+      String tenant = tenantFromHeader(authHeader);
+      String user = userFromHeader(authHeader);
 
       java.util.Map<String, Object> iMap = java.util.Map.ofEntries(
           entry("user", user),
@@ -60,58 +74,79 @@ public class TicketController {
       try {
         allow = opa.check("tickets/allow", iMap);
       } catch (Exception e) {
-        System.out.printf("ERROR: request threw exception: %s\n", e);
-        return false;
+        System.out.printf("DEBUG: exception while obtaining policy decision: %s\n", e);
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "failed to obtain policy decision");
       }
 
-      return allow;
+      System.out.printf("policy decision was: %s\n", allow);
+
+      if (!allow) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "access denined by policy");
+      }
   }
 
   @Autowired
   TicketRepository ticketRepository;
 
   @GetMapping("/tickets")
-  List<Ticket> all(@RequestHeader("authorization") String authHeader) {
-    doAuth(authHeader, "list");
-    return ticketRepository.findAll();
+  Map<String, List<Ticket>> all(@RequestHeader("authorization") String authHeader) {
+    verifyAuth(authHeader, "list");
+    return java.util.Map.ofEntries(entry("tickets", ticketRepository.findByTenant(tenantFromHeader(authHeader))));
   }
 
   @GetMapping("/tickets/{id}")
-  Ticket getById(@PathVariable Long id) {
+  Ticket getById(@RequestHeader("authorization") String authHeader, @PathVariable Long id) {
+    verifyAuth(authHeader, "get");
 
-    return ticketRepository.findById(id)
-        .orElseThrow(() -> new TicketNotFoundException(id));
+    List<Ticket> matches = ticketRepository.findByTenantAndId(tenantFromHeader(authHeader), id);
+
+    if (matches.size() == 0) {
+        throw new TicketNotFoundException(id);
+    } else if (matches.size() == 1) {
+        return matches.get(0);
+    } else {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "multiple matches to ticket lookup by ID, this code should be unreachable");
+    }
   }
 
   @PostMapping("/tickets")
-  Ticket createNew(@Valid @RequestBody Ticket newTicket) {
+  Ticket createNew(@RequestHeader("authorization") String authHeader, @Valid @RequestBody Ticket newTicket) {
+    verifyAuth(authHeader, "create");
+    newTicket.setTenant(tenantFromHeader(authHeader));
     return ticketRepository.save(newTicket);
   }
 
-  @DeleteMapping("/tickets/{id}")
-  void delete(@PathVariable Long id) {
-    ticketRepository.deleteById(id);
-  }
+  //@DeleteMapping("/tickets/{id}")
+  //void delete(@RequestHeader("authorization") String authHeader, @PathVariable Long id) {
+  //  verifyAuth(authHeader, "delete");
+  //  ticketRepository.deleteById(id);
+  //}
 
   @PutMapping("/tickets/{id}")
-  Ticket updateOrCreate(@RequestBody Ticket newTicket, @PathVariable Long id) {
+  Ticket updateOrCreate(@RequestHeader("authorization") String authHeader, @RequestBody Ticket newTicket, @PathVariable Long id) {
+    verifyAuth(authHeader, "modify");
 
-    return ticketRepository.findById(id)
-        .map(ticket -> {
-          ticket.setCustomer(newTicket.getCustomer());
-          ticket.setDescription(newTicket.getDescription());
-          ticket.setResolved(newTicket.getResolved());
-          return ticketRepository.save(ticket);
-        })
-        .orElseGet(() -> {
-          newTicket.setId(id);
-          return ticketRepository.save(newTicket);
-        });
+    try {
+      Ticket t = getById(authHeader, id);
+      t.setCustomer(newTicket.getCustomer());
+      t.setDescription(newTicket.getDescription());
+      t.setResolved(newTicket.getResolved());
+      t.setTenant(newTicket.getTenant());
+      return ticketRepository.save(t);
+
+    } catch (TicketNotFoundException e) {
+      newTicket.setId(id);
+      newTicket.setTenant(tenantFromHeader(authHeader));
+      return ticketRepository.save(newTicket);
+
+    }
   }
 
   @PostMapping("/tickets/{id}/resolve")
-  void resolve(@PathVariable Long id) {
-    Ticket t = getById(id);
+  Ticket resolve(@RequestHeader("authorization") String authHeader, @PathVariable Long id) {
+    verifyAuth(authHeader, "resolve");
+    Ticket t = getById(authHeader, id);
     t.setResolved(true);
+    return ticketRepository.save(t);
   }
 }

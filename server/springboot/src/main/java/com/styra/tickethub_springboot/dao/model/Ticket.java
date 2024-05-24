@@ -1,5 +1,6 @@
 package com.styra.tickethub_springboot.dao.model;
 
+import jakarta.persistence.Table;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,7 +19,9 @@ import java.util.Optional;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = Ticket.TABLE_NAME)
 public class Ticket {
+  public static final String TABLE_NAME = "Tickets";
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
