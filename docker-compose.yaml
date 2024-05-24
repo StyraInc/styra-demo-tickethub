@@ -90,10 +90,11 @@ services:
       - --server
       - --addr=:8181
       - --log-level=debug
-      - policies
+      - --bundle
+      - bundle.tar.gz
     working_dir: /work
     volumes:
-      - ./policies:/work/policies
+      - ./policies:/work
 
   integration-tests:
     image: ghcr.io/orange-opensource/hurl:latest
