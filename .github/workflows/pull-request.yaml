@@ -16,6 +16,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  build-clients:
+    name: build client
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        client: [html, react]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: open-policy-agent/setup-opa@v2
+      - name: build bundle
+        run: make policies/bundle.tar.gz
+        env:
+          OPA: opa
+      - name: setup
+        run: docker compose --profile ${{ matrix.client }} up --quiet-pull --wait --wait-timeout 300
+      - name: smoke test
+        run: curl --retry 5 --retry-connrefused --retry-max-time 120 http://127.0.0.1:3000
+
   test-e2e:
     name: Test E2E
     runs-on: ubuntu-22.04
