@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Nav from "./Nav";
 import AuthnProvider from "../AuthnContext";
+import AuthzProvider from "opa-react";
 
 import { Types } from "../types";
 import "../style.css";
@@ -36,8 +37,10 @@ export default function App() {
   return (
     <div>
       <AuthnProvider>
-        <Nav type={type} />
-        <Outlet />
+        <AuthzProvider endpoint={window.location.href + "opa/"} path="tickets">
+          <Nav type={type} />
+          <Outlet />
+        </AuthzProvider>
       </AuthnProvider>
     </div>
   );

@@ -7,6 +7,8 @@
     "build": "react-scripts build"
   },
   "dependencies": {
+    "@styra/opa": "^0.5.3",
+    "opa-react": "file:./packages/opa-react",
     "react": "^18.3.0",
     "react-dom": "^18.3.1",
     "react-router": "^6.23.1",
