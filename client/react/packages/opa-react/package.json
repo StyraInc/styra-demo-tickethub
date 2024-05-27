@@ -1,0 +1,23 @@
+{
+  "name": "opa-react",
+  "version": "0.0.1",
+  "description": "react hooks and components for frontend authorization based on @styra/opa",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/react": ">=18.0.0",
+    "@types/lodash": "^4.17.4",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^7.7.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
+}
