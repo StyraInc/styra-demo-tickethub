@@ -4,6 +4,7 @@ services:
     profiles:
       - node
     environment:
+      - SERVER_PORT=4000
       - OPA_URL=http://localhost:8181
       - DATABASE_URL=postgresql://postgres:schmickethub@localhost:5432/postgres?schema=public
     depends_on:
@@ -18,8 +19,8 @@ services:
     profiles:
       - csharp
     environment:
-      OPA_URL: 'http://localhost:8181'
-      DATABASE_CONN_STR: 'Host=localhost;Database=postgres;Username=postgres;Password=schmickethub'
+      OPA_URL: "http://localhost:8181"
+      DATABASE_CONN_STR: "Host=localhost;Database=postgres;Username=postgres;Password=schmickethub"
     depends_on:
       - database
       - opa
@@ -80,6 +81,18 @@ services:
     network_mode: host
     expose:
       - 3000
+    depends_on:
+      - proxy-react
+
+  proxy-react:
+    image: caddy:latest
+    network_mode: host
+    volumes:
+      - ${PWD}/caddy/Caddyfile-local:/etc/caddy/Caddyfile
+    expose:
+      - 4001
+    depends_on:
+      - opa
 
   opa:
     image: ${OPA_IMAGE:-docker.io/openpolicyagent/opa:latest}

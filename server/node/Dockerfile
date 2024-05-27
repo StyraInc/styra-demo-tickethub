@@ -4,6 +4,6 @@ WORKDIR /opt/app
 COPY package.json package-lock.json prisma ./
 RUN npm install
 COPY src src
-EXPOSE 4000
+EXPOSE 4001
 ENV SERVER_HOST "0.0.0.0"
 CMD [ "npm", "start"]

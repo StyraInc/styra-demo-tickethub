@@ -2,6 +2,11 @@
 
 The TicketHub sample app client component.
 
+## Prepare other services
+
+1. `make policies/bundle.tar.gz`
+2. `docker compose --profile node --profile react up proxy-react server-node`
+
 ## How to run
 
 1. `make run`.
