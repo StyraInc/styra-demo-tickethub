@@ -34,10 +34,15 @@ export default function App() {
     document.title = `${titles[type]} - ${current?.tenant}`;
   }, [type, current]);
 
+  const href = window.location.toString();
+  // TODO(sr): better way?!
+  const u = new URL(href);
+  u.pathname = "opa";
+  const endpoint = u.toString();
   return (
     <div>
       <AuthnProvider>
-        <AuthzProvider endpoint={window.location.href + "opa/"} path="tickets">
+        <AuthzProvider endpoint={endpoint} path="tickets">
           <Nav type={type} />
           <Outlet />
         </AuthzProvider>
