@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
-import { /* useAuthz,*/ Authz } from "opa-react";
+import { /* useAuthz,*/ Authz, Denied } from "opa-react";
 
 export default function Tickets() {
   const {
@@ -58,7 +58,14 @@ export default function Tickets() {
         path="tickets/allow"
         input={{ action: "create", resource: "ticket" }}
       >
-        <Link className="button-large" to="/tickets/new">
+        {
+          // TODO(sr): DISABLED doesn't work, it's hidden
+        }
+        <Link
+          authz={Denied.DISABLED}
+          className="button-large"
+          to="/tickets/new"
+        >
           + New ticket
         </Link>
       </Authz>
