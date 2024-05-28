@@ -1,19 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
-import { useAuthz } from "opa-react";
+import { /* useAuthz,*/ Authz } from "opa-react";
 
 export default function Tickets() {
   const {
     current: { account },
   } = useAuthn();
-  const resource = { resource: "ticket", action: "create " };
-  console.log(useAuthz);
-  const { isLoading, decision } = useAuthz([resource]);
-  console.log({ isLoading, decision });
-  if (isLoading) {
-    // return null;
-  }
+  // const resource = { resource: "ticket", action: "create" };
+  // const { isLoading, decision } = useAuthz([resource]);
+  // console.log({ isLoading, decision });
+  // if (isLoading) {
+  //   // return null;
+  // }
   const navigate = useNavigate();
   const [tickets, setTickets] = useState();
 
@@ -55,9 +54,14 @@ export default function Tickets() {
           ))}
         </tbody>
       </table>
-      <Link className="button-large" to="/tickets/new">
-        + New ticket
-      </Link>
+      <Authz
+        path="tickets/allow"
+        input={{ action: "create", resource: "ticket" }}
+      >
+        <Link className="button-large" to="/tickets/new">
+          + New ticket
+        </Link>
+      </Authz>
     </main>
   );
 }

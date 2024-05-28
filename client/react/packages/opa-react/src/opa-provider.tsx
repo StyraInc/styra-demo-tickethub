@@ -7,11 +7,13 @@ import {
   useState,
 } from "react";
 import isEqual from "lodash/isEqual";
+import merge from "lodash/merge";
 import { OPAClient, Input, Result } from "@styra/opa";
 
 interface AuthzProviderContext {
   result: Result | undefined;
   setInput: (_?: Input) => void;
+  setPath: (_: string) => void;
 }
 
 // Reference: https://reacttraining.com/blog/react-context-with-typescript
@@ -49,14 +51,15 @@ type AuthzProviderProps = PropsWithChildren<{
 export default function AuthzProvider({
   children,
   sdk,
-  path,
+  path: parentPath,
   defaultInput,
 }: AuthzProviderProps) {
+  const [path, setPath] = useState<string | undefined>();
   const [input, setInput] = useState<Input | undefined>();
   const [result, setResult] = useState<Result>();
 
   const context = useMemo<AuthzProviderContext>(
-    () => ({ result, setInput }),
+    () => ({ result, setInput, setPath }),
     [result, setInput],
   );
 
@@ -76,15 +79,21 @@ export default function AuthzProvider({
   useEffect(() => {
     // debounce authz API request
     const timeout = setTimeout(() => {
-      sdk
-        .evaluate<any, Result>(path, input)
-        .then((result) => handleResult(result));
+      const p = path ?? parentPath;
+      const i = mergeInput(input, defaultInput);
+      sdk.evaluate<Input, Result>(p, i).then((result) => handleResult(result));
     }, 100);
 
     return () => clearTimeout(timeout);
-  }, [defaultInput, input, path, sdk, handleResult]);
+  }, [defaultInput, input, path, sdk, parentPath, handleResult]);
 
   return (
     <AuthzContext.Provider value={context}>{children}</AuthzContext.Provider>
   );
+}
+
+function mergeInput(input?: Input, defaultInput?: Input): Input | undefined {
+  if (!input) return defaultInput;
+  if (!defaultInput) return input;
+  return merge(input, defaultInput);
 }

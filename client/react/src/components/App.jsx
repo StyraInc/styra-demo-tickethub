@@ -24,6 +24,8 @@ const titles = {
 
 export default function App() {
   const { current } = useAccounts();
+  const user = current.user;
+  const tenant = current.tenant;
   const location = useLocation();
 
   const [, type] =
@@ -43,7 +45,7 @@ export default function App() {
   return (
     <div>
       <AuthnProvider>
-        <AuthzProvider sdk={sdk} path="tickets">
+        <AuthzProvider sdk={sdk} path="tickets" defaultInput={{ user, tenant }}>
           <Nav type={type} />
           <Outlet />
         </AuthzProvider>

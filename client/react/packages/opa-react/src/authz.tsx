@@ -17,6 +17,7 @@ export enum Denied {
 
 type AuthzProps = PropsWithChildren<{
   input?: Input;
+  path?: string;
   strict?: boolean;
 }>;
 
@@ -24,37 +25,6 @@ type AuthzProps = PropsWithChildren<{
 These diagrams should provide further understanding of the authz process.
 You can view these directly from this file in VSCode via the
 `Open Preview` command from the `Markdown Preview Enhanced` plugin.
-
-```mermaid
----
-title: Authorization in DAS Front-End
----
-sequenceDiagram
-    autonumber
-    participant A as Authz Element
-    participant P as Provider
-    participant E as AuthZ Endpoint
-    participant R as Rego Engine
-    loop For each guarded node
-        A->>+P: IsAuthorized?
-        note over A: [resource, action]
-        P->>+E: IsAuthorized?
-        note over P: [resource, action, endpoint]
-        E->>+R: IsAuthorized?
-        alt
-            R-->>E: Allow
-            E-->>P: Allow
-            P-->>A: Allow
-            note over A: Render!
-       else
-            R--x-E: Deny
-            E--x-P: Deny
-            P--x-A: Deny
-            note over A: Hide or Disable
-        end
-    end
-```
-
 
 ```mermaid
 ---
@@ -81,40 +51,15 @@ stateDiagram-v2
     Disable --> process
 ```
 
-
-```mermaid
----
-title: Decision Mode
----
-stateDiagram-v2
-    ifStrict: < Authz > specifies... ?
-    strictChoice: how many resources allowed ?
-    laxChoice: how many resources allowed ?
-
-    classDef denyState fill:#f00,color:white,font-weight:bold
-    classDef allowState fill:#4e0,color:white,font-weight:bold
-
-    [*] --> ifStrict
-    ifStrict --> strictChoice: strict
-    ifStrict --> laxChoice: lax
-    strictChoice --> Allow:::allowState: all
-    strictChoice --> Deny:::denyState: some
-    strictChoice --> Deny: none
-    laxChoice --> Allow: all
-    laxChoice --> Allow: some
-    laxChoice --> Deny: none
-```
-*/
-
 /**
  * Conditionally renders components based on authorization decisions for a specified
- * set of resources (URL and action) for the current user.
+ * policy path and input for the current user.
  *
  * The simplest use looks like that shown below; just wrap some arbitrary content
- * and specify a set of resources.
+ * and specify path and input.
  * If allowed, the content will be rendered and if denied, the content will be hidden.
  *
- *   <Authz resources={resources}>
+ *   <Authz path={path} input={input}>
  *      ...any content here...
  *   </Authz>
  *
@@ -122,28 +67,8 @@ stateDiagram-v2
  *
  * Configuration involves defining an API endpoint for authorization along with a context
  * that can be used to access authorization decisions throughout the application.
- * The configuration for DAS has already been done;
- * look for {@link AuthzProvider} use in {@link AuthenticatedRoot}.
  * The <AuthzProvider/> wrapper needs to be as high as possible in the component tree,
  * since <Authz/> (or `useAuthz`) may only be used inside that wrapper.
- *
- * ## All vs. any: Setting the Decision Mode
- *
- * The `resources` property is a list. When you provide more than a single resource,
- * the default decision mode requires all of them to be allowed for an "allowed" decision.
- * You may, however, employ the `strict` property to change the decision mode.
- * When true (the default), all of the resources must be allowed for an "allowed" decision.
- * When false, then only one resource among the set must be allowed for an "allowed" decision.
- *
- * These three are equivalent in setting the decision mode to `strict`:
- *
- *   <Authz resources={resources}>...</Authz>
- *   <Authz resources={resources} strict>...</Authz>
- *   <Authz resources={resources} strict={true}>...</Authz>
- *
- * To set the decision mode to lax, there is only one form:
- *
- *   <Authz resources={resources} strict={false}>...</Authz>
  *
  * ## Hiding vs Disabling: Setting the Restriction Mode
  *
@@ -161,7 +86,7 @@ stateDiagram-v2
  * everything below is disabled but still visible. Thus you may add further refinements;
  * here you see a contained button is hidden with a further `authz` specification.
  *
- *   <Authz resources={resources}>
+ *   <Authz path={path}>
  *     <p>
  *       ...more content here...
  *     </p>
@@ -171,62 +96,26 @@ stateDiagram-v2
  *     </div>
  *   </Authz
  *
- * These three are equivalent in setting the restriction mode to `hidden`.
- * The third shows that an invalid value is ignored (though TypeScript will throw scorn upon you),
- * so it is really the same as the first.
+ * These are equivalent in setting the restriction mode to `hidden`.
  *
- *   <Authz resources={resources}>
+ *   <Authz path={path} input={input}>
  *     <div>...</div>
  *   </Authz
  *
- *   <Authz resources={resources}>
+ *   <Authz path={path} input={input}>
  *     <div authz={Denied.HIDDEN}>...</div>
  *   </Authz
  *
- *   <Authz resources={resources}>
- *     <div authz="some random string">...</div>
- *   </Authz
- *
- * ## Hardcoding a Denied Decision
- *
- * You can force a denied decision by omitting the `resources` list.
- * This may be useful for pending work, diagnostics, and so forth.
- * All of these are equivalent:
- *
- *   <Authz>
- *      ...any content here will be hidden...
- *   </Authz
- *
- *   <Authz strict={true}>
- *      ...any content here will be hidden...
- *   </Authz
- *
- *   <Authz strict={false}>
- *      ...any content here will be hidden...
- *   </Authz
- *
- * ## Identifying Resources
- *
- * All the examples thus far have referred to `resources`, an array of {@link Resource} type.
- * For role-based access control (RBAC), we need to specify a subject (the current user),
- * an API endpoint (the thing we want access to), and an action (the operation we want to perform).
- * The user is supplied implicitly by being logged in; it is also essentially a constant.
- * To identify the endpoint and action you need to identify the API path and parameters.
- * Do not create a Resource with magic strings; rather, use the appropriate {@link ApiType}.
- * A few examples:
- * - workspace-level: types.READ_WORKSPACE.resource()
- * - system-level: SystemsTypes[SystemKinds.SYSTEMS].CREATE_SYSTEM.resource()
- * - parameterized: apiTokensTypes.DELETE_API_TOKEN.resource({ id })
- *
- * Since all API calls should already be defined in the `ui` code base, search for `new ApiType`
- * to browse the candidate pool.
- *
  * @param props.children The content over which the authz decision will apply.
- * @param props.resources - A list of resources to be checked for authorization.
+ * @param props.path - The policy path to evaluate
+ * @param props.input - The input
  */
-export default function Authz({ children, input }: AuthzProps) {
-  const { result: allowed, isLoading } = useAuthz(input);
-  console.log({ isLoading }); // TODO(sr): what to do with this here?
+export default function Authz({ children, path, input }: AuthzProps) {
+  const { result: allowed, isLoading } = useAuthz(path, input);
+  if (isLoading) {
+    console.log({ isLoading }); // TODO(sr): what to do with this here?
+    return null;
+  }
 
   return children ? renderChildren(children, !!allowed, 0) : null;
 }

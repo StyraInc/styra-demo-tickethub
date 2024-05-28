@@ -1,4 +1,4 @@
-import { useContext, useMemo } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import { AuthzContext } from "./opa-provider";
 import { Input, Result } from "@styra/opa";
 
@@ -44,18 +44,24 @@ export interface UseAuthzResult {
  *   )
  * }
  */
-export default function useAuthz(input?: Input): UseAuthzResult {
+export default function useAuthz(path?: string, input?: Input): UseAuthzResult {
   const context = useContext(AuthzContext);
   if (context === null) {
     throw Error("Authz/useAuthz can only be used inside an AuthzProvider");
   }
-  const { result, setInput } = context;
+  const { result, setInput, setPath } = context;
+  useEffect(() => {
+    setInput(input);
+  }, [input]);
+
+  useEffect(() => {
+    if (path) setPath(path);
+  }, [path]);
 
   return useMemo<UseAuthzResult>(() => {
-    setInput(input);
     return {
       result,
       isLoading: result === undefined,
     };
-  }, [result, input, setInput]);
+  }, [result, input, path, setInput]);
 }
