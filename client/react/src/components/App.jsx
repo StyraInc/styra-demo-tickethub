@@ -38,7 +38,7 @@ export default function App() {
   const href = window.location.toString();
   // TODO(sr): better way?!
   const u = new URL(href);
-  u.pathname = "opa";
+  u.pathname = "";
   const sdk = new OPAClient(u.toString());
   return (
     <div>
