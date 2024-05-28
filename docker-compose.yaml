@@ -1,30 +1,30 @@
 services:
   server-node:
     build: server/node/
+    hostname: server
     profiles:
       - node
     environment:
       - SERVER_PORT=4000
-      - OPA_URL=http://localhost:8181
-      - DATABASE_URL=postgresql://postgres:schmickethub@localhost:5432/postgres?schema=public
+      - OPA_URL=http://opa:8181
+      - DATABASE_URL=postgresql://postgres:schmickethub@database:5432/postgres?schema=public
     depends_on:
       - database
       - opa
-    network_mode: host
     expose:
       - 4000
 
   server-csharp:
     build: server/csharp/
+    hostname: server
     profiles:
       - csharp
     environment:
-      OPA_URL: "http://localhost:8181"
-      DATABASE_CONN_STR: "Host=localhost;Database=postgres;Username=postgres;Password=schmickethub"
+      OPA_URL: "http://opa:8181"
+      DATABASE_CONN_STR: "Host=database;Database=postgres;Username=postgres;Password=schmickethub"
     depends_on:
       - database
       - opa
-    network_mode: host
     expose:
       - 4000
 
@@ -37,7 +37,6 @@ services:
       - "./server/node/database/init.sql:/docker-entrypoint-initdb.d/init.sql"
     environment:
       POSTGRES_PASSWORD: schmickethub
-    network_mode: host
     expose:
       - 5432
 
@@ -45,12 +44,12 @@ services:
   # adminer:
   #   image: adminer
   #   restart: always
-  #   network_mode: host
   #   expose:
   #     - 8080
 
   server-java:
     build: server/java/
+    hostname: server
     init: true
     environment:
       - OPA_URL=http://opa:8181
@@ -70,7 +69,6 @@ services:
       SERVER_PORT: 4000
       CLIENT_HOST: 127.0.0.1
       CLIENT_SERVER: 3000
-    network_mode: host
     expose:
       - 3000
 
@@ -78,21 +76,20 @@ services:
     build: client/react/
     profiles:
       - react
-    network_mode: host
     expose:
       - 3000
-    depends_on:
-      - proxy-react
+    ports:
+      - "3000:3000"
 
-  proxy-react:
-    image: caddy:latest
-    network_mode: host
-    volumes:
-      - ${PWD}/caddy/Caddyfile-local:/etc/caddy/Caddyfile
-    expose:
-      - 4001
-    depends_on:
-      - opa
+  # proxy-react:
+  #   image: caddy:latest
+  #   network_mode: host
+  #   volumes:
+  #     - ${PWD}/caddy/Caddyfile-local:/etc/caddy/Caddyfile
+  #   expose:
+  #     - 4001
+  #   depends_on:
+  #     - opa
 
   opa:
     init: true

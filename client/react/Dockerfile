@@ -1,11 +1,13 @@
-FROM node:21-alpine
-RUN mkdir -p /opt/app
-WORKDIR /opt/app
+FROM node:21-alpine AS builder
+WORKDIR /app
 COPY package.json package-lock.json ./
 COPY packages packages
 RUN npm install
 COPY src src
 COPY public public
-EXPOSE 3000
-ENV SERVER_HOST "0.0.0.0"
-CMD [ "npm", "start"]
+RUN npm run build
+
+FROM caddy:latest
+EXPOSE 4001
+COPY --from=builder /app/build /usr/share/caddy/
+COPY caddy/Caddyfile /etc/caddy/Caddyfile
