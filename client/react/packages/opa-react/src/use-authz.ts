@@ -1,8 +1,9 @@
-import { useContext, useEffect, useMemo, useState } from "react";
-import { AuthzContext, Resource } from "./opa-provider";
+import { useContext, useMemo } from "react";
+import { AuthzContext } from "./opa-provider";
+import { Input, Result } from "@styra/opa";
 
 export interface UseAuthzResult {
-  decision: boolean[];
+  result: Result | undefined;
   isLoading: boolean;
 }
 
@@ -43,41 +44,18 @@ export interface UseAuthzResult {
  *   )
  * }
  */
-export default function useAuthz(
-  resources: Resource[] | undefined,
-): UseAuthzResult {
+export default function useAuthz(input?: Input): UseAuthzResult {
   const context = useContext(AuthzContext);
   if (context === null) {
     throw Error("Authz/useAuthz can only be used inside an AuthzProvider");
   }
-  const { addResource, decision } = context;
-  const [resourceCache, setResourceCache] = useState<Set<Resource>>(new Set());
-
-  useEffect(() => {
-    if (!resources) {
-      return;
-    }
-
-    setResourceCache(new Set(resources));
-  }, [resources]);
-
-  useEffect(() => {
-    resourceCache.forEach((resource) => {
-      addResource(resource);
-    });
-  }, [addResource, resourceCache]);
+  const { result, setInput } = context;
 
   return useMemo<UseAuthzResult>(() => {
-    if (resourceCache.size === 0) {
-      return { decision: [], isLoading: false };
-    }
+    setInput(input);
     return {
-      decision: [...resourceCache].map(
-        (resource) => decision[resource.url] ?? false,
-      ),
-      isLoading: [...resourceCache].some(
-        (resource) => !(resource.url in decision),
-      ),
+      result,
+      isLoading: result === undefined,
     };
-  }, [decision, resourceCache]);
+  }, [result, input, setInput]);
 }

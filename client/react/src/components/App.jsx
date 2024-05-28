@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import Nav from "./Nav";
 import AuthnProvider from "../AuthnContext";
 import AuthzProvider from "opa-react";
+import { OPAClient } from "@styra/opa";
 
 import { Types } from "../types";
 import "../style.css";
@@ -38,11 +39,11 @@ export default function App() {
   // TODO(sr): better way?!
   const u = new URL(href);
   u.pathname = "opa";
-  const endpoint = u.toString();
+  const sdk = new OPAClient(u.toString());
   return (
     <div>
       <AuthnProvider>
-        <AuthzProvider endpoint={endpoint} path="tickets">
+        <AuthzProvider sdk={sdk} path="tickets">
           <Nav type={type} />
           <Outlet />
         </AuthzProvider>

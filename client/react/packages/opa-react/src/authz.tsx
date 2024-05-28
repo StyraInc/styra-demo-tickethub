@@ -5,11 +5,10 @@ import {
   ReactNode,
   cloneElement,
   isValidElement,
-  useMemo,
 } from "react";
 
 import useAuthz from "./use-authz";
-import { Resource } from "./opa-provider";
+import { Input } from "@styra/opa";
 
 export enum Denied {
   DISABLED = "deny-disabled",
@@ -17,7 +16,7 @@ export enum Denied {
 }
 
 type AuthzProps = PropsWithChildren<{
-  resources?: Resource[];
+  input?: Input;
   strict?: boolean;
 }>;
 
@@ -224,27 +223,12 @@ stateDiagram-v2
  *
  * @param props.children The content over which the authz decision will apply.
  * @param props.resources - A list of resources to be checked for authorization.
- * @param props.strict - When true (default), all resources must be allowed for
- * an "allow" outcome; when false, requires only one resource to be allowed.
  */
-export default function Authz({
-  children,
-  resources,
-  strict = true,
-}: AuthzProps) {
-  const { decision, isLoading } = useAuthz(resources);
+export default function Authz({ children, input }: AuthzProps) {
+  const { result: allowed, isLoading } = useAuthz(input);
+  console.log({ isLoading }); // TODO(sr): what to do with this here?
 
-  const allowed = useMemo(
-    () =>
-      decision.length
-        ? strict
-          ? decision.every((item) => item) && !isLoading
-          : decision.some((item) => item)
-        : false,
-    [decision, isLoading, strict],
-  );
-
-  return children ? renderChildren(children, allowed, 0) : null;
+  return children ? renderChildren(children, !!allowed, 0) : null;
 }
 
 function renderChildren(children: ReactNode, allowed: boolean, depth: number) {
