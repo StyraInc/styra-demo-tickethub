@@ -42,10 +42,10 @@ export default function useAuthz(
       const { defaultPath, defaultInput, input, path } = requestMemo;
       const p = path ?? defaultPath;
       const i = mergeInput(input, defaultInput);
-      const request = { fetchOptions: { signal } };
+      const fetchOptions = { signal };
       return p
-        ? sdk.evaluate(p, i, { request })
-        : sdk.evaluateDefault(i, { request });
+        ? sdk.evaluate(p, i, { fetchOptions })
+        : sdk.evaluateDefault(i, { fetchOptions });
     },
     [sdk, requestMemo],
   );
