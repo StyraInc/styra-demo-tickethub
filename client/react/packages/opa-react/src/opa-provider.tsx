@@ -1,19 +1,10 @@
-import {
-  PropsWithChildren,
-  createContext,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import isEqual from "lodash/isEqual";
-import merge from "lodash/merge";
-import { OPAClient, Input, Result } from "@styra/opa";
+import { PropsWithChildren, createContext, useMemo } from "react";
+import { OPAClient } from "@styra/opa";
 
 interface AuthzProviderContext {
-  result: Result | undefined;
-  setInput: (_?: Input) => void;
-  setPath: (_: string) => void;
+  sdk: OPAClient;
+  defaultPath: string | undefined;
+  defaultInput: Record<string, any> | undefined;
 }
 
 // Reference: https://reacttraining.com/blog/react-context-with-typescript
@@ -21,29 +12,24 @@ export const AuthzContext = createContext<AuthzProviderContext | null>(null);
 
 type AuthzProviderProps = PropsWithChildren<{
   sdk: OPAClient;
-  path: string;
-  defaultInput?: Record<string, string>;
+  defaultPath?: string; // to be overridden (or not)
+  defaultInput?: Record<string, any>; // to be merged
 }>;
 
 /**
- * Configures the authorization endpoint, enabling batch query requests with caching.
+ * Configures the authorization SDK, with default path/input of applicable.
  * The <AuthzProvider/> wrapper needs to be as high as possible in the component tree,
  * since <Authz/> or `useAuthz` may only be used inside that wrapper.
  *
- * If all API calls need to include one or more constant query parameters,
- * use the `defaultInput` prop.
- * Any individual <Authz/> or `useAuthz` will have those automatically applied.
- * Any individual <Authz/> or `useAuthz` may also override those defaults
- * by specifying a query parameter of the same name.
- * (Note that you cannot remove a query parameter coming from the `defaultInput` set;
- * you can only modify it or empty it (with an empty value).
- *
  * @param props.children The content over which the authz context will apply.
- * @param props.endpoint  API endpoint to check authorization decisions.
- * @param props.defaultInput Default input for every decision unless overridden.
+ * @param props.sdk The `@styra/opa` OPAClient instance to use.
+ * @param props.defaultPath Default path for every decision. Override by
+ * providing `path`.
+ * @param props.defaultInput Default input for every decision, merged with
+ * any passed-in input. Use the latter to override the defaults.
  *
  * @example
- *   <AuthzProvider sdk={sdk} defaultInput={{tenant: 'acme-corp'}}>
+ *   <AuthzProvider sdk={sdk} defaultPath="tickets" defaultInput={{tenant: 'acme-corp'}}>
  *     <App/>
  *   </AuthzProvider>
  */
@@ -51,49 +37,15 @@ type AuthzProviderProps = PropsWithChildren<{
 export default function AuthzProvider({
   children,
   sdk,
-  path: parentPath,
+  defaultPath,
   defaultInput,
 }: AuthzProviderProps) {
-  const [path, setPath] = useState<string | undefined>();
-  const [input, setInput] = useState<Input | undefined>();
-  const [result, setResult] = useState<Result>();
-
-  const context = useMemo<AuthzProviderContext>(
-    () => ({ result, setInput, setPath }),
-    [result, setInput],
+  const context = useMemo<AuthzProviderContext>( // TODO(sr): Is useMemo still the right thing?
+    () => ({ sdk, defaultPath, defaultInput }),
+    [sdk, defaultPath, defaultInput],
   );
-
-  const handleResult = useCallback(
-    (newResult: Result) => {
-      if (!newResult) {
-        return;
-      }
-
-      if (!isEqual(result, newResult)) {
-        setResult(newResult);
-      }
-    },
-    [result],
-  );
-
-  useEffect(() => {
-    // debounce authz API request
-    const timeout = setTimeout(() => {
-      const p = path ?? parentPath;
-      const i = mergeInput(input, defaultInput);
-      sdk.evaluate<Input, Result>(p, i).then((result) => handleResult(result));
-    }, 100);
-
-    return () => clearTimeout(timeout);
-  }, [defaultInput, input, path, sdk, parentPath, handleResult]);
 
   return (
     <AuthzContext.Provider value={context}>{children}</AuthzContext.Provider>
   );
-}
-
-function mergeInput(input?: Input, defaultInput?: Input): Input | undefined {
-  if (!input) return defaultInput;
-  if (!defaultInput) return input;
-  return merge(input, defaultInput);
 }

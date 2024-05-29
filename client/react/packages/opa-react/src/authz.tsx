@@ -113,7 +113,6 @@ stateDiagram-v2
 export default function Authz({ children, path, input }: AuthzProps) {
   const { result: allowed, isLoading } = useAuthz(path, input);
   if (isLoading) {
-    console.log({ isLoading }); // TODO(sr): what to do with this here?
     return null;
   }
 
