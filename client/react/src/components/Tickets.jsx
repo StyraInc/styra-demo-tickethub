@@ -5,8 +5,6 @@ import { /* useAuthz,*/ Authz, Denied } from "opa-react";
 
 export default function Tickets() {
   const { current } = useAuthn();
-  if (!current) return null;
-  const { account } = current;
   // const resource = { resource: "ticket", action: "create" };
   // const { isLoading, decision } = useAuthz([resource]);
   // console.log({ isLoading, decision });
@@ -17,6 +15,8 @@ export default function Tickets() {
   const [tickets, setTickets] = useState();
 
   useEffect(() => {
+    if (!current) return;
+    const { account } = current;
     fetch("/api/tickets", {
       headers: {
         "content-type": "application/json",
@@ -25,7 +25,7 @@ export default function Tickets() {
     })
       .then((res) => res.json())
       .then((data) => setTickets(data.tickets));
-  }, []);
+  }, [current]);
 
   return (
     <main>

@@ -35,13 +35,18 @@ export default function App() {
   }, [type, current]);
 
   if (!current) return <div>Loading...</div>;
-  const { user, tenant } = current;
+  const { account, user, tenant } = current;
 
   const href = window.location.toString();
   // TODO(sr): better way?!
   const u = new URL(href);
-  u.pathname = "";
-  const sdk = new OPAClient(u.toString());
+  u.pathname = "opa";
+  u.search = "";
+  const sdk = new OPAClient(u.toString(), {
+    headers: {
+      Authorization: "Bearer " + account,
+    },
+  });
   return (
     <div>
       <AuthnProvider>

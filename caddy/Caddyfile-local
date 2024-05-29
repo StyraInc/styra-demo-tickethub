@@ -5,7 +5,12 @@
     handle /api/* {
         reverse_proxy http://localhost:4000
     }
-    handle /v1/* {
+    # proxy OPA requests to OPA, if there's an authorization header
+    # NOTE: if header-based authentication was realistic, we would do
+    # more here to check the token
+    handle_path /opa/* {
+        @unauthenticated header !Authorization
+        respond @unauthenticated 401
         reverse_proxy http://localhost:8181
     }
 }

@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { useCallback } from "react";
 import { Types } from "../types";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
 
 export default function Nav({ type }) {
@@ -39,11 +39,12 @@ Nav.propTypes = {
 
 function Menu() {
   const { current, accounts, handleSetAccount } = useAuthn();
+  const navigate = useNavigate();
 
   const handleChangeAccount = useCallback(
     (event) => {
       handleSetAccount(event.target.value);
-      window.location.reload();
+      navigate(`/?user=${event.target.value}`);
     },
     [handleSetAccount],
   );

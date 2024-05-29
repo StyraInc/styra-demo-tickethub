@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 export default function useAccounts() {
+  const location = useLocation();
   const [current, setCurrent] = useState();
   const [accounts, setAccounts] = useState();
 
@@ -15,22 +17,27 @@ export default function useAccounts() {
           return acc;
         }, {});
         setAccounts(accs);
-        // pick first
-        const [account] = accounts;
-        const [user, tenant] = account.split(" / ");
-        console.log({ setCurrent: { user, tenant, account } });
+
+        // use query string or pick first
+        const [account] = getUser(location) ?? accounts;
+        const [tenant, user] = account.split(" / ");
         setCurrent({ user, tenant, account });
       });
-  }, []);
+  }, [location]);
 
   return useMemo(() => {
     return {
       current,
       accounts,
       handleSetAccount: (account) => {
-        console.log("handleSetAccount");
-        setCurrent({ account });
+        const [tenant, user] = account.split(" / ");
+        setCurrent({ account, user, tenant });
       },
     };
   }, [current, accounts]);
+}
+
+function getUser(loc) {
+  const u = new URLSearchParams(loc.search).get("user");
+  return u ? [u] : undefined;
 }
