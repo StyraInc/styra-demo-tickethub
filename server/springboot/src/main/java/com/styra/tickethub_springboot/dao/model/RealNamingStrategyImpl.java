@@ -17,6 +17,7 @@ public class RealNamingStrategyImpl extends PhysicalNamingStrategyStandardImpl i
 
     @Override
     public Identifier toPhysicalColumnName(Identifier name, JdbcEnvironment context) {
+        System.out.printf("XXX column name '%s'\n", name.getText());
         return new Identifier(name.getText(), true);
     }
 

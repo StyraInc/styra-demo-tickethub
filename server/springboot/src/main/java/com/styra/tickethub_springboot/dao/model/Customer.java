@@ -22,38 +22,21 @@ import java.util.Optional;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = Ticket.TABLE_NAME)
-public class Ticket {
-  public static final String TABLE_NAME = "Tickets";
+@Table(name = Customer.TABLE_NAME)
+public class Customer {
+  public static final String TABLE_NAME = "Customers";
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name="id")
   private Integer id;
 
-  @NotBlank(message = "Ticket tenant must not be blank")
+  @NotBlank(message = "Customer tenant must not be blank")
   @JoinColumn(name = "tenant", referencedColumnName = "id")
   @ManyToOne
   private Tenant tenant;
 
-  @NotBlank(message = "Ticket customer must not be blank")
-  @JoinColumn(name="customer", referencedColumnName = "id")
-  @ManyToOne
-  private Customer customer;
-
-  @Column(name="description")
-  private String description;
-
-  @Column(name="resolved")
-  private Boolean resolved;
-
-  @Column(name="last_updated")
-  private Instant lastUpdated;
-
-  // https://stackoverflow.com/a/221827
-  @PreUpdate
-  @PrePersist
-  protected void onUpdate() {
-    lastUpdated = Optional.ofNullable(lastUpdated).orElse(Instant.now());
-  }
+  @NotBlank(message = "Customer name must not be blank")
+  @Column(name="name")
+  private String name;
 }

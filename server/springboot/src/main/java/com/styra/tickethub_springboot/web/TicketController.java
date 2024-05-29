@@ -1,7 +1,10 @@
 package com.styra.tickethub_springboot.web;
 
 import com.styra.tickethub_springboot.dao.model.Ticket;
+import com.styra.tickethub_springboot.dao.model.Tenant;
 import com.styra.tickethub_springboot.dao.model.TicketRepository;
+import com.styra.tickethub_springboot.dao.model.TenantRepository;
+import com.styra.tickethub_springboot.dao.model.CustomerRepository;
 import com.styra.tickethub_springboot.web.errors.TicketNotFoundException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,7 @@ import java.util.Map;
 import static java.util.Map.entry;
 
 import java.util.List;
+import java.util.Optional;
 
 // This code was initially based on this guide
 // https://howtodoinjava.com/spring-boot/spring-boot-rest-api-example/
@@ -25,15 +29,19 @@ import java.util.List;
 @RestController
 public class TicketController {
 
-  private String tenantFromHeader(String authHeader) {
+  private Tenant tenantFromHeader(String authHeader) {
       var components = authHeader.split("\\s*[\\s+/]\\s*", 3);
-      String tenant;
+      String tenantName;
       if (components.length != 3) {
         System.out.println("ERROR: invalid auth header: " + authHeader);
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "auth header is malformed");
       }
-      tenant = components[1].trim();
-      return tenant;
+      tenantName = components[1].trim();
+      Optional<Tenant> tenantBox = tenantRepository.findByName(tenantName);
+      if (!tenantBox.isPresent()) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "auth header specifies nonexistant tenant");
+      }
+      return tenantBox.get();
   }
 
   private String userFromHeader(String authHeader) {
@@ -58,12 +66,12 @@ public class TicketController {
 
       OPAClient opa = new OPAClient(opaURL);
 
-      String tenant = tenantFromHeader(authHeader);
+      Tenant tenant = tenantFromHeader(authHeader);
       String user = userFromHeader(authHeader);
 
       java.util.Map<String, Object> iMap = java.util.Map.ofEntries(
           entry("user", user),
-          entry("tenant", tenant),
+          entry("tenant", tenant.getName()),
           entry("action", action)
           );
 
@@ -88,6 +96,12 @@ public class TicketController {
   @Autowired
   TicketRepository ticketRepository;
 
+  @Autowired
+  TenantRepository tenantRepository;
+
+  @Autowired
+  CustomerRepository customerRepository;
+
   @GetMapping("/tickets")
   Map<String, List<Ticket>> all(@RequestHeader("authorization") String authHeader) {
     verifyAuth(authHeader, "list");
@@ -95,7 +109,7 @@ public class TicketController {
   }
 
   @GetMapping("/tickets/{id}")
-  Ticket getById(@RequestHeader("authorization") String authHeader, @PathVariable Long id) {
+  Ticket getById(@RequestHeader("authorization") String authHeader, @PathVariable Integer id) {
     verifyAuth(authHeader, "get");
 
     List<Ticket> matches = ticketRepository.findByTenantAndId(tenantFromHeader(authHeader), id);
@@ -117,13 +131,13 @@ public class TicketController {
   }
 
   //@DeleteMapping("/tickets/{id}")
-  //void delete(@RequestHeader("authorization") String authHeader, @PathVariable Long id) {
+  //void delete(@RequestHeader("authorization") String authHeader, @PathVariable Integer id) {
   //  verifyAuth(authHeader, "delete");
   //  ticketRepository.deleteById(id);
   //}
 
   @PutMapping("/tickets/{id}")
-  Ticket updateOrCreate(@RequestHeader("authorization") String authHeader, @RequestBody Ticket newTicket, @PathVariable Long id) {
+  Ticket updateOrCreate(@RequestHeader("authorization") String authHeader, @RequestBody Ticket newTicket, @PathVariable Integer id) {
     verifyAuth(authHeader, "modify");
 
     try {
@@ -143,7 +157,7 @@ public class TicketController {
   }
 
   @PostMapping("/tickets/{id}/resolve")
-  Ticket resolve(@RequestHeader("authorization") String authHeader, @PathVariable Long id) {
+  Ticket resolve(@RequestHeader("authorization") String authHeader, @PathVariable Integer id) {
     verifyAuth(authHeader, "resolve");
     Ticket t = getById(authHeader, id);
     t.setResolved(true);
