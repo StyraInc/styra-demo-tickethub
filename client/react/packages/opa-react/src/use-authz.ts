@@ -38,12 +38,14 @@ export default function useAuthz(
   });
 
   const evaluate = useCallback<(signal: AbortSignal) => Promise<Result>>(
-    async (_: AbortSignal): Promise<Result> => {
-      // TODO(sr): our SDK doesn't do signal handling...
+    async (signal: AbortSignal): Promise<Result> => {
       const { defaultPath, defaultInput, input, path } = requestMemo;
       const p = path ?? defaultPath;
       const i = mergeInput(input, defaultInput);
-      return p ? sdk.evaluate(p, i) : sdk.evaluateDefault(i);
+      const request = { fetchOptions: { signal } };
+      return p
+        ? sdk.evaluate(p, i, { request })
+        : sdk.evaluateDefault(i, { request });
     },
     [sdk, requestMemo],
   );
