@@ -44,7 +44,7 @@ function Menu() {
   const handleChangeAccount = useCallback(
     (event) => {
       handleSetAccount(event.target.value);
-      navigate(`/?user=${event.target.value}`);
+      navigate(`?user=${event.target.value}`);
     },
     [handleSetAccount],
   );

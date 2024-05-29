@@ -1,16 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
-import { /* useAuthz,*/ Authz, Denied } from "opa-react";
+import { Authz, Denied } from "opa-react";
 
 export default function Tickets() {
   const { current } = useAuthn();
-  // const resource = { resource: "ticket", action: "create" };
-  // const { isLoading, decision } = useAuthz([resource]);
-  // console.log({ isLoading, decision });
-  // if (isLoading) {
-  //   // return null;
-  // }
   const navigate = useNavigate();
   const [tickets, setTickets] = useState();
 

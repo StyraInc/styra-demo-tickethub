@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
+import { Authz, Denied } from "opa-react";
+
 export default function Ticket() {
   const { current } = useAuthn();
   const account = current?.account;
@@ -70,11 +72,16 @@ export default function Ticket() {
         <label htmlFor="resolved">Resolved</label>
         <div id="resolved">{ticket.resolved ? "yes" : "no"}</div>
 
-        <div>
-          <button type="submit">
-            {ticket.resolved ? "Unresolve" : "Resolve"}
-          </button>
-        </div>
+        <Authz
+          path="tickets/allow"
+          input={{ action: "resolve", resource: "ticket" }}
+        >
+          <div authz={Denied.DISABLED}>
+            <button type="submit">
+              {ticket.resolved ? "Unresolve" : "Resolve"}
+            </button>
+          </div>
+        </Authz>
         <div>{message && <span className="update-status">{message}</span>}</div>
       </form>
     </main>
