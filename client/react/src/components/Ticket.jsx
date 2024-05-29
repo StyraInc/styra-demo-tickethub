@@ -2,18 +2,15 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
 export default function Ticket() {
-  const {
-    current: { account },
-  } = useAuthn();
+  const { current } = useAuthn();
+  const account = current?.account;
   const { ticketId } = useParams();
   const [ticket, setTicket] = useState();
   const [fetchTicket, setFetchTicket] = useState(true);
   const [message, setMessage] = useState();
 
   useEffect(() => {
-    if (!fetchTicket) {
-      return;
-    }
+    if (!fetchTicket || !account) return;
 
     fetch(`/api/tickets/${ticketId}`, {
       headers: {
@@ -25,7 +22,7 @@ export default function Ticket() {
       .then((data) => setTicket(data));
 
     setFetchTicket(false);
-  }, [ticketId, fetchTicket]);
+  }, [ticketId, account, fetchTicket]);
 
   const handleSubmit = useCallback(
     async (event) => {

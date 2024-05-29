@@ -24,10 +24,7 @@ const titles = {
 
 export default function App() {
   const { current } = useAccounts();
-  const user = current.user;
-  const tenant = current.tenant;
   const location = useLocation();
-
   const [, type] =
     Object.entries(paths).find(([path]) =>
       location.pathname.startsWith(path),
@@ -36,6 +33,9 @@ export default function App() {
   useEffect(() => {
     document.title = `${titles[type]} - ${current?.tenant}`;
   }, [type, current]);
+
+  if (!current) return <div>Loading...</div>;
+  const { user, tenant } = current;
 
   const href = window.location.toString();
   // TODO(sr): better way?!

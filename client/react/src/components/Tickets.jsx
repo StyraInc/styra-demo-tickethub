@@ -4,9 +4,9 @@ import { useAuthn } from "../AuthnContext";
 import { /* useAuthz,*/ Authz, Denied } from "opa-react";
 
 export default function Tickets() {
-  const {
-    current: { account },
-  } = useAuthn();
+  const { current } = useAuthn();
+  if (!current) return null;
+  const { account } = current;
   // const resource = { resource: "ticket", action: "create" };
   // const { isLoading, decision } = useAuthz([resource]);
   // console.log({ isLoading, decision });
