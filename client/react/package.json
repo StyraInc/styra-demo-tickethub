@@ -7,7 +7,7 @@
     "build": "react-scripts build"
   },
   "dependencies": {
-    "@styra/opa": "^0.5.4",
+    "@styra/opa": "github:StyraInc/opa-typescript#sr/options-grab-bag",
     "opa-react": "file:./packages/opa-react",
     "react": "^18.3.0",
     "react-dom": "^18.3.1",
