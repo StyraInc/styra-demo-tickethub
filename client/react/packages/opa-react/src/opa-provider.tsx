@@ -13,7 +13,7 @@ export const AuthzContext = createContext<AuthzProviderContext | null>(null);
 type AuthzProviderProps = PropsWithChildren<{
   sdk: OPAClient;
   defaultPath?: string; // to be overridden (or not)
-  defaultInput?: Record<string, any>; // to be merged
+  defaultInput?: { [k: string]: any }; // to be merged
 }>;
 
 /**

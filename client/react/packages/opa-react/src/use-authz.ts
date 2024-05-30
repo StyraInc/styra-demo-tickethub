@@ -72,7 +72,7 @@ export default function useAuthz(
           setError(
             error instanceof Error
               ? error
-              : new Error("An unexpected error occurred", { cause: error }),
+              : new Error(`An unexpected error occurred: ${error}`),
           );
         }
       });
