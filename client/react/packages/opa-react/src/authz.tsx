@@ -18,38 +18,13 @@ export enum Denied {
 type AuthzProps = PropsWithChildren<{
   input?: Input;
   path?: string;
-  strict?: boolean;
 }>;
 
-/*
-These diagrams should provide further understanding of the authz process.
-You can view these directly from this file in VSCode via the
-`Open Preview` command from the `Markdown Preview Enhanced` plugin.
-
-```mermaid
----
-title: Restriction Mode
----
-stateDiagram-v2
-    ifDecision: Decision is... ?
-    ifResources: < Authz > has resources ?
-    ifChildAuthz: " authz " attribute <br/> on immediate child ?
-    process: Process hidden/disabled children...
-
-    classDef hideState fill:#f00,color:white,font-weight:bold
-    classDef disableState fill:#963,color:white,font-weight:bold
-    classDef showState fill:#4e0,color:white,font-weight:bold
-
-    [*] --> ifResources
-    ifDecision --> ifChildAuthz: denied
-    ifDecision --> Show:::showState: allowed
-    ifResources --> Hide:::hideState: none
-    ifResources --> ifDecision: some
-    ifChildAuthz --> Hide: none
-    ifChildAuthz --> Disable:::disableState: disabled
-    ifChildAuthz --> Hide: hidden
-    Disable --> process
-```
+interface AuthzChildProps extends PropsWithChildren {
+  authz: Denied;
+  disabled?: boolean;
+  hidden?: boolean;
+}
 
 /**
  * Conditionally renders components based on authorization decisions for a specified
@@ -111,12 +86,10 @@ stateDiagram-v2
  * @param props.input - The input
  */
 export default function Authz({ children, path, input }: AuthzProps) {
-  const { result: allowed, isLoading } = useAuthz(path, input);
-  if (isLoading) {
-    return null;
-  }
+  const { result, isLoading } = useAuthz(path, input);
+  const allowed = !isLoading && !!result;
 
-  return children ? renderChildren(children, !!allowed, 0) : null;
+  return children ? renderChildren(children, allowed, 0) : null;
 }
 
 function renderChildren(children: ReactNode, allowed: boolean, depth: number) {
@@ -128,9 +101,8 @@ function renderChildren(children: ReactNode, allowed: boolean, depth: number) {
       return allowed || depth > 0 ? child : <span hidden={true}>{child}</span>;
     }
 
-    const { authz = undefined, ...props } = {
-      ...(child as ReactElement)?.props,
-    };
+    const childAuthzElement = child as ReactElement<AuthzChildProps>;
+    const { authz, ...props } = childAuthzElement?.props ?? {};
 
     if (props.children) {
       props.children = renderChildren(props.children, allowed, depth + 1);
@@ -144,9 +116,11 @@ function renderChildren(children: ReactNode, allowed: boolean, depth: number) {
       }
     }
 
-    // cloneElement props arg is an override!
-    // Thus, must specifically set authz to undefined here in case it was present.
-    return cloneElement(child as ReactElement, {
+    // The `cloneElement` props argument is an override, so must specifically
+    // set `authz` to undefined here in case it was present.
+    // We want to remove it because it is meaningless in the rendered HTML;
+    // rather, it is an instruction to this component to prepare for rendering.
+    return cloneElement(childAuthzElement, {
       ...props,
       authz: undefined,
     });
