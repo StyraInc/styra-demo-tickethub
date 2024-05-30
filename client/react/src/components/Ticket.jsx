@@ -4,27 +4,26 @@ import { useAuthn } from "../AuthnContext";
 import { Authz, Denied } from "opa-react";
 
 export default function Ticket() {
-  const { current } = useAuthn();
-  const account = current?.account;
+  const { user, tenant } = useAuthn();
   const { ticketId } = useParams();
   const [ticket, setTicket] = useState();
-  const [fetchTicket, setFetchTicket] = useState(true);
   const [message, setMessage] = useState();
 
-  useEffect(() => {
-    if (!fetchTicket || !account) return;
-
+  const loadTicket = async function (ticketId, user, tenant, setTicket) {
     fetch(`/api/tickets/${ticketId}`, {
       headers: {
         "content-type": "application/json",
-        authorization: "Bearer " + account,
+        authorization: `Bearer ${tenant} / ${user}`,
       },
     })
       .then((res) => res.json())
       .then((data) => setTicket(data));
+  };
 
-    setFetchTicket(false);
-  }, [ticketId, account, fetchTicket]);
+  useEffect(() => {
+    if (!user) return; // wait for user to be set
+    loadTicket(ticketId, user, tenant, setTicket);
+  }, [user, tenant, ticketId, setTicket]);
 
   const handleSubmit = useCallback(
     async (event) => {
@@ -34,7 +33,7 @@ export default function Ticket() {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          authorization: "Bearer " + account,
+          authorization: `Bearer ${tenant} / ${user}`,
         },
         body: JSON.stringify({ resolved: !ticket.resolved }),
       });
@@ -48,9 +47,9 @@ export default function Ticket() {
         setMessage("Error: user unauthorized to perform operation");
       }
 
-      setFetchTicket(true);
+      await loadTicket(ticketId, user, tenant, setTicket);
     },
-    [ticketId, ticket],
+    [ticketId, ticket, user, tenant, setTicket],
   );
 
   if (!ticket) {

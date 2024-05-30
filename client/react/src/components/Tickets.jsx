@@ -4,22 +4,21 @@ import { useAuthn } from "../AuthnContext";
 import { Authz, Denied } from "opa-react";
 
 export default function Tickets() {
-  const { current } = useAuthn();
+  const { user, tenant } = useAuthn();
   const navigate = useNavigate();
   const [tickets, setTickets] = useState();
 
   useEffect(() => {
-    if (!current) return;
-    const { account } = current;
+    if (!user) return;
     fetch("/api/tickets", {
       headers: {
         "content-type": "application/json",
-        authorization: "Bearer " + account,
+        authorization: `Bearer ${tenant} / ${user}`,
       },
     })
       .then((res) => res.json())
       .then((data) => setTickets(data.tickets));
-  }, [current]);
+  }, [tenant, user]);
 
   return (
     <main>

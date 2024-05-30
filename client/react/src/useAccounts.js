@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useAuthn } from "./AuthnContext";
 
+// useAccounts is only t here for fetching the accounts.json from the mock
+// backend and providing it to Nav's Menu.
 export default function useAccounts() {
-  const location = useLocation();
-  const [current, setCurrent] = useState();
+  const { user, setTenant, setUser } = useAuthn();
   const [accounts, setAccounts] = useState();
 
+  // This should only happen ONCE
   useEffect(() => {
+    if (user) return;
     fetch("/accounts.json")
       .then((res) => res.json())
       .then(({ accounts }) => {
@@ -18,26 +21,19 @@ export default function useAccounts() {
         }, {});
         setAccounts(accs);
 
-        // use query string or pick first
-        const [account] = getUser(location) ?? accounts;
-        const [tenant, user] = account.split(" / ");
-        setCurrent({ user, tenant, account });
+        // if unset, pick first
+        if (!user) {
+          const [account] = accounts;
+          const [tenant0, user0] = account.split(" / ");
+          setUser(user0);
+          setTenant(tenant0);
+        }
       });
-  }, [location]);
+  }, [user]);
 
   return useMemo(() => {
     return {
-      current,
       accounts,
-      handleSetAccount: (account) => {
-        const [tenant, user] = account.split(" / ");
-        setCurrent({ account, user, tenant });
-      },
     };
-  }, [current, accounts]);
-}
-
-function getUser(loc) {
-  const u = new URLSearchParams(loc.search).get("user");
-  return u ? [u] : undefined;
+  }, [accounts]);
 }

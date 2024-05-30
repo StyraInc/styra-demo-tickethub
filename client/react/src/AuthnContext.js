@@ -1,11 +1,12 @@
-import { useContext, createContext } from "react";
+import { useContext, useState, createContext } from "react";
+
 const AuthnContext = createContext();
-import useAccounts from "./useAccounts";
 
 const AuthnProvider = ({ children }) => {
-  const { current, accounts, handleSetAccount } = useAccounts();
+  const [user, setUser] = useState();
+  const [tenant, setTenant] = useState();
   return (
-    <AuthnContext.Provider value={{ current, accounts, handleSetAccount }}>
+    <AuthnContext.Provider value={{ user, tenant, setUser, setTenant }}>
       {children}
     </AuthnContext.Provider>
   );

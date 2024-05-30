@@ -3,9 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
 
 export default function NewTicket() {
-  const {
-    current: { account },
-  } = useAuthn();
+  const { user, tenant } = useAuthn();
   const navigate = useNavigate();
   const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
@@ -15,7 +13,7 @@ export default function NewTicket() {
       method: "POST",
       headers: {
         "content-type": "application/json",
-        authorization: "Bearer " + account,
+        authorization: `Bearer ${tenant} / ${user}`,
       },
       body: JSON.stringify(Object.fromEntries(data.entries())),
     }).then((res) => res.json());

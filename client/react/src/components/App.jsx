@@ -1,14 +1,12 @@
 import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Nav from "./Nav";
-import AuthnProvider from "../AuthnContext";
+import { useAuthn } from "../AuthnContext";
 import AuthzProvider from "opa-react";
 import { OPAClient } from "@styra/opa";
 
 import { Types } from "../types";
 import "../style.css";
-
-import useAccounts from "../useAccounts";
 
 const paths = {
   "/tickets/new": Types.NEW_TICKET,
@@ -23,7 +21,7 @@ const titles = {
 };
 
 export default function App() {
-  const { current } = useAccounts();
+  const { user, tenant } = useAuthn();
   const location = useLocation();
   const [, type] =
     Object.entries(paths).find(([path]) =>
@@ -31,11 +29,8 @@ export default function App() {
     ) ?? [];
 
   useEffect(() => {
-    document.title = `${titles[type]} - ${current?.tenant}`;
-  }, [type, current]);
-
-  if (!current) return <div>Loading...</div>;
-  const { account, user, tenant } = current;
+    document.title = `${titles[type]} - ${tenant}`;
+  }, [type, tenant]);
 
   const href = window.location.toString();
   // TODO(sr): better way?!
@@ -44,17 +39,13 @@ export default function App() {
   u.search = "";
   const sdk = new OPAClient(u.toString(), {
     headers: {
-      Authorization: "Bearer " + account,
+      Authorization: `Bearer ${tenant} / ${user}`,
     },
   });
   return (
-    <div>
-      <AuthnProvider>
-        <AuthzProvider sdk={sdk} path="tickets" defaultInput={{ user, tenant }}>
-          <Nav type={type} />
-          <Outlet />
-        </AuthzProvider>
-      </AuthnProvider>
-    </div>
+    <AuthzProvider sdk={sdk} path="tickets" defaultInput={{ user, tenant }}>
+      <Nav type={type} />
+      <Outlet />
+    </AuthzProvider>
   );
 }

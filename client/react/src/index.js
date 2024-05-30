@@ -2,6 +2,7 @@ import * as React from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 
+import AuthnProvider from "./AuthnContext";
 import App from "./components/App";
 import NewTicket from "./components/NewTicket";
 import Tickets from "./components/Tickets";
@@ -10,7 +11,11 @@ import Ticket from "./components/Ticket";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: (
+      <AuthnProvider>
+        <App />
+      </AuthnProvider>
+    ),
     children: [
       {
         path: "",
