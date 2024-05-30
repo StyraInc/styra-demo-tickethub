@@ -52,15 +52,8 @@ export default function Tickets() {
         path="tickets/allow"
         input={{ action: "create", resource: "ticket" }}
       >
-        {
-          // TODO(sr): DISABLED doesn't work, it's hidden
-        }
-        <Link
-          authz={Denied.DISABLED}
-          className="button-large"
-          to="/tickets/new"
-        >
-          + New ticket
+        <Link authz={Denied.DISABLED} to="/tickets/new">
+          <button authz={Denied.DISABLED}>+ New ticket</button>
         </Link>
       </Authz>
     </main>
