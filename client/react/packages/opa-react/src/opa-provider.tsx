@@ -1,8 +1,21 @@
 import { PropsWithChildren, createContext, useMemo } from "react";
-import { OPAClient } from "@styra/opa";
+import { OPAClient, Input, ToInput, RequestOptions } from "@styra/opa";
+
+interface SDK {
+  evaluate<In extends Input | ToInput, Res>(
+    path: string,
+    input?: In,
+    opts?: RequestOptions<Res>,
+  ): Promise<Res>;
+
+  evaluateDefault<In extends Input | ToInput, Res>(
+    input?: In,
+    opts?: RequestOptions<Res>,
+  ): Promise<Res>;
+}
 
 interface AuthzProviderContext {
-  sdk: OPAClient;
+  sdk: SDK;
   defaultPath: string | undefined;
   defaultInput: Record<string, any> | undefined;
 }
@@ -11,7 +24,7 @@ interface AuthzProviderContext {
 export const AuthzContext = createContext<AuthzProviderContext | null>(null);
 
 type AuthzProviderProps = PropsWithChildren<{
-  sdk: OPAClient;
+  sdk: SDK;
   defaultPath?: string; // to be overridden (or not)
   defaultInput?: { [k: string]: any }; // to be merged
 }>;
