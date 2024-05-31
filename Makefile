@@ -2,9 +2,16 @@ PROJECTS = $(wildcard ./client/* ./server/*)
 OPA_IMAGE ?= docker.io/openpolicyagent/opa:latest
 OPA ?= docker run -v ${PWD}/policies:/w/policies -w /w ${OPA_IMAGE}
 
+entrypoint := "tickets/allow"
 files := $(wildcard ./policies/*.rego ./policies/*.json)
 policies/bundle.tar.gz: $(files)
 	$(OPA) build -o $@ $(files)
+
+client/react/public/opa.wasm: $(files)
+	$(OPA) build -t wasm -o policies/tmp.tar.gz -e $(entrypoint) $(files)
+	tar zxf policies/tmp.tar.gz /policy.wasm
+	mv policy.wasm $@
+	rm policies/tmp.tar.gz
 
 run:
 	(trap 'kill 0' SIGINT; \

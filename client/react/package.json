@@ -7,6 +7,7 @@
     "build": "react-scripts build"
   },
   "dependencies": {
+    "@open-policy-agent/opa-wasm": "^1.8.1",
     "@styra/opa": "^0.5.5",
     "opa-react": "file:./packages/opa-react",
     "react": "^18.3.0",

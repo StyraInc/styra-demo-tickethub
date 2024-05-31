@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import Nav from "./Nav";
 import { useAuthn } from "../AuthnContext";
 import AuthzProvider from "opa-react";
+import { WasmSDK } from "opa-react";
 import { OPAClient } from "@styra/opa";
 
 import { Types } from "../types";
@@ -32,16 +33,31 @@ export default function App() {
     document.title = `${titles[type]} - ${tenant}`;
   }, [type, tenant]);
 
-  const href = window.location.toString();
-  // TODO(sr): better way?!
-  const u = new URL(href);
-  u.pathname = "opa";
-  u.search = "";
-  const sdk = new OPAClient(u.toString(), {
-    headers: {
-      Authorization: `Bearer ${tenant} / ${user}`,
-    },
-  });
+  const wasm = process.env.REACT_APP_USE_WASM;
+  console.log({ wasm });
+
+  let sdk;
+  useEffect(() => {
+    console.log(WasmSDK);
+    async function wasmInit() {
+      sdk = new WasmSDK(wasm);
+      await sdk.init();
+    }
+    if (wasm) {
+      wasmInit();
+    } else {
+      const href = window.location.toString();
+      // TODO(sr): better way?!
+      const u = new URL(href);
+      u.pathname = "opa";
+      u.search = "";
+      sdk = new OPAClient(u.toString(), {
+        headers: {
+          Authorization: `Bearer ${tenant} / ${user}`,
+        },
+      });
+    }
+  }, [wasm, tenant, user]);
   return (
     <AuthzProvider sdk={sdk} path="tickets" defaultInput={{ user, tenant }}>
       <Nav type={type} />

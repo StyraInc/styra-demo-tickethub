@@ -21,7 +21,7 @@ type AuthzProps = PropsWithChildren<{
 }>;
 
 interface AuthzChildProps extends PropsWithChildren {
-  authz: Denied;
+  authz: Denied | undefined;
   disabled?: boolean;
   hidden?: boolean;
 }
