@@ -14,7 +14,7 @@ updates:
       jetty:
         patterns:
           - "org.eclipse.jetty:*"
-          - "org.glassfish.jersey.containers:*"
+          - "org.glassfish.jersey.*"
       jackson:
         patterns:
           - "com.fasterxml.jackson*"
