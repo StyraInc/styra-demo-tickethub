@@ -14,11 +14,12 @@ updates:
       jetty:
         patterns:
           - "org.eclipse.jetty:*"
+      jersey:
+        patterns:
           - "org.glassfish.jersey.*"
       jackson:
         patterns:
           - "com.fasterxml.jackson*"
-          - "org.glassfish.jersey.media:jersey-media-json-jackson"
       slf4j:
         patterns:
           - "org.slf4j:*"
