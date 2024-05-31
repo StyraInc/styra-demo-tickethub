@@ -10,6 +10,14 @@ updates:
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
+    groups:
+      jetty:
+        patterns:
+          - "org.eclipse.jetty:*"
+          - "org.glassfish.jersey.containers:*"
+      jackson:
+        patterns:
+          - "com.fasterxml.jackson*"
   - package-ecosystem: "nuget"
     directory: "/server/csharp"
     schedule:
