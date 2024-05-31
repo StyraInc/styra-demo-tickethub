@@ -1,65 +1,39 @@
 import { useEffect, useMemo, useState } from "react";
+import { useAuthn } from "./AuthnContext";
 
+// useAccounts is only t here for fetching the accounts.json from the mock
+// backend and providing it to Nav's Menu.
 export default function useAccounts() {
-  const [current, setCurrent] = useState(getAccountFromCookie());
+  const { user, setTenant, setUser } = useAuthn();
   const [accounts, setAccounts] = useState();
 
+  // This should only happen ONCE
   useEffect(() => {
+    if (user) return;
     fetch("/accounts.json")
       .then((res) => res.json())
       .then(({ accounts }) => {
-        setAccounts(
-          accounts.reduce((acc, account) => {
-            const { tenant, user: name } = getTenantUser(account);
-            acc[tenant] ??= [];
-            acc[tenant].push({ account, name });
-            return acc;
-          }, {}),
-        );
+        const accs = accounts.reduce((acc, account) => {
+          const [tenant, name] = account.split(" / ");
+          acc[tenant] ??= [];
+          acc[tenant].push({ account, name });
+          return acc;
+        }, {});
+        setAccounts(accs);
+
+        // if unset, pick first
+        if (!user) {
+          const [account] = accounts;
+          const [tenant0, user0] = account.split(" / ");
+          setUser(user0);
+          setTenant(tenant0);
+        }
       });
-  }, []);
-
-  useEffect(() => {
-    if (!accounts || current) {
-      return;
-    }
-
-    // pick first
-    const [tenant] = Object.values(accounts);
-    const [user] = tenant;
-
-    setAccountCookie(user.account);
-    setCurrent(getTenantUser(user.account));
-  }, [accounts, current]);
+  }, [user]);
 
   return useMemo(() => {
     return {
-      current,
       accounts,
-      handleSetAccount: (account) => {
-        setAccountCookie(account);
-        setCurrent({ account });
-      },
     };
-  }, [current, accounts]);
-}
-
-function getAccountFromCookie() {
-  let current;
-  document.cookie.split("; ").forEach((cookie) => {
-    const [cookieName, cookieAccount] = cookie.split("=");
-    if (cookieName === "user") {
-      current = getTenantUser(cookieAccount);
-    }
-  });
-  return current;
-}
-
-function setAccountCookie(account) {
-  document.cookie = `user=${account}; Path=/; SameSite=Lax`;
-}
-
-function getTenantUser(account) {
-  const [tenant, user] = account.split(" / ");
-  return { tenant, user, account };
+  }, [accounts]);
 }

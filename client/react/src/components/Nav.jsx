@@ -3,9 +3,10 @@ import { useCallback } from "react";
 import { Types } from "../types";
 import { useParams, Link } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
+import useAccounts from "../useAccounts";
 
 export default function Nav({ type }) {
-  const { current } = useAuthn();
+  const { tenant } = useAuthn();
   const { ticketId } = useParams();
 
   const tickets =
@@ -15,7 +16,7 @@ export default function Nav({ type }) {
   return (
     <nav>
       <div>
-        <h1>{current?.tenant}</h1>
+        <h1>{tenant}</h1>
         <div className="nav-menu">
           <span>{tickets}</span>
           {(ticketId || newTicket) && (
@@ -38,33 +39,34 @@ Nav.propTypes = {
 };
 
 function Menu() {
-  const { current, accounts, handleSetAccount } = useAuthn();
+  const { accounts } = useAccounts();
+  const { user, tenant, setUser, setTenant } = useAuthn();
 
   const handleChangeAccount = useCallback(
-    (event) => {
-      handleSetAccount(event.target.value);
-      window.location.reload();
+    ({ target: { value } }) => {
+      const [tenant, user] = value.split("/");
+      setUser(user);
+      setTenant(tenant);
     },
-    [handleSetAccount],
+    [setUser, setTenant],
   );
 
-  if (!current || !accounts) {
+  if (!user || !tenant || !accounts) {
     return null;
   }
-
   return (
     <div className="login-menu">
       <span>
         User{" "}
         <select
           className="login-select"
-          value={current.account}
+          value={`${tenant}/${user}`}
           onChange={handleChangeAccount}
         >
           {Object.entries(accounts).map(([tenant, users]) => (
             <optgroup key={tenant} label={tenant}>
-              {users.map(({ name, account }) => (
-                <option key={account} value={account}>
+              {users.map(({ name }) => (
+                <option key={`${tenant}/${name}`} value={`${tenant}/${name}`}>
                   {name}
                 </option>
               ))}

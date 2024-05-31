@@ -27,24 +27,23 @@ function readToken(val) {
 
 // authentication
 app.use(async (req, res, next) => {
-  if ("user" in req.cookies) {
-    let [tenantName, subject] = readToken(req.headers.authorization);
-    if (!tenantName || !subject) {
-      [tenantName, subject] = req.cookies.user.split(" / "); // fallback to cookie
-    }
-    const tenantRecord = await prisma.tenants.findFirstOrThrow({
-      where: { name: tenantName },
-    });
-    req.auth = {
-      tenant: { name: tenantRecord.name, id: tenantRecord.id },
-      subject,
-    };
-    next();
-  } else {
+  let [tenantName, subject] = readToken(req.headers.authorization);
+  if ((!tenantName || !subject) && "user" in req.cookies) {
+    [tenantName, subject] = req.cookies.user.split(" / "); // fallback to cookie
+  }
+  if (!tenantName || !subject) {
     res.status(UNAUTHORIZED).json({
       error: "authentication error: user credentials not provided",
     });
   }
+  const tenantRecord = await prisma.tenants.findFirstOrThrow({
+    where: { name: tenantName },
+  });
+  req.auth = {
+    tenant: { name: tenantRecord.name, id: tenantRecord.id },
+    subject,
+  };
+  next();
 });
 
 // API

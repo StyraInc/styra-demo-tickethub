@@ -1,24 +1,24 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
+import { Authz, Denied } from "opa-react";
 
 export default function Tickets() {
-  const {
-    current: { account },
-  } = useAuthn();
+  const { user, tenant } = useAuthn();
   const navigate = useNavigate();
   const [tickets, setTickets] = useState();
 
   useEffect(() => {
+    if (!user) return;
     fetch("/api/tickets", {
       headers: {
         "content-type": "application/json",
-        authorization: "Bearer " + account,
+        authorization: `Bearer ${tenant} / ${user}`,
       },
     })
       .then((res) => res.json())
       .then((data) => setTickets(data.tickets));
-  }, []);
+  }, [tenant, user]);
 
   return (
     <main>
@@ -47,9 +47,14 @@ export default function Tickets() {
           ))}
         </tbody>
       </table>
-      <Link className="button-large" to="/tickets/new">
-        + New ticket
-      </Link>
+      <Authz
+        path="tickets/allow"
+        input={{ action: "create", resource: "ticket" }}
+      >
+        <Link authz={Denied.DISABLED} to="/tickets/new">
+          <button authz={Denied.DISABLED}>+ New ticket</button>
+        </Link>
+      </Authz>
     </main>
   );
 }

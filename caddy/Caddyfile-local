@@ -1,0 +1,16 @@
+# This Caddyfile is for local development: It's exposing port 4001, what
+# the dev setup of `client/react` will proxy TO.
+# It's acting as reverse proxy for server-* (listening on 4000) and OPA (8181).
+:4001 {
+    handle /api/* {
+        reverse_proxy http://localhost:4000
+    }
+    # proxy OPA requests to OPA, if there's an authorization header
+    # NOTE: if header-based authentication was realistic, we would do
+    # more here to check the token
+    handle_path /opa/* {
+        @unauthenticated header !Authorization
+        respond @unauthenticated 401
+        reverse_proxy http://localhost:8181
+    }
+}

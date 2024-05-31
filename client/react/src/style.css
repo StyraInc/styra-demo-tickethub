@@ -18,8 +18,7 @@ select {
     cursor: pointer;
 }
 
-button,
-.button-large {
+button {
     cursor: pointer;
     height: 30px;
     border: none;

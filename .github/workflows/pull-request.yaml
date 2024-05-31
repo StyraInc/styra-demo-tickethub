@@ -16,6 +16,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  unit-test-react:
+    name: opa-react (unit tests)
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+      - name: setup and test
+        run: |
+          npm ci
+          npm test
+        working-directory: client/react/packages/opa-react
+
   build-clients:
     name: build client
     runs-on: ubuntu-22.04
