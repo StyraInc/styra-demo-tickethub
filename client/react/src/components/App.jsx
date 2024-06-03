@@ -34,30 +34,46 @@ export default function App() {
   }, [type, tenant]);
 
   const wasm = process.env.REACT_APP_USE_WASM;
-  console.log({ wasm });
 
   let sdk;
-  useEffect(() => {
-    console.log(WasmSDK);
-    async function wasmInit() {
-      sdk = new WasmSDK(wasm);
-      await sdk.init();
-    }
-    if (wasm) {
-      wasmInit();
-    } else {
-      const href = window.location.toString();
-      // TODO(sr): better way?!
-      const u = new URL(href);
-      u.pathname = "opa";
-      u.search = "";
-      sdk = new OPAClient(u.toString(), {
-        headers: {
-          Authorization: `Bearer ${tenant} / ${user}`,
+  async function wasmInit() {
+    sdk = new WasmSDK(wasm);
+    await sdk.init();
+    sdk.setData({
+      roles: {
+        acmecorp: {
+          alice: ["admin"],
+          bob: ["reader"],
+          ceasar: ["reader", "resolver"],
         },
-      });
-    }
-  }, [wasm, tenant, user]);
+        hooli: {
+          dylan: ["admin"],
+        },
+      },
+    });
+  }
+  if (wasm) wasmInit();
+  // TODO(sr): Fix Wasm vs API selection here
+  // useEffect(() => {
+  //   async function wasmInit() {
+  //     sdk = new WasmSDK(wasm);
+  //     await sdk.init();
+  //   }
+  //   if (wasm) {
+  //     wasmInit();
+  //   } else {
+  //     const href = window.location.toString();
+  //     // TODO(sr): better way?!
+  //     const u = new URL(href);
+  //     u.pathname = "opa";
+  //     u.search = "";
+  //     sdk = new OPAClient(u.toString(), {
+  //       headers: {
+  //         Authorization: `Bearer ${tenant} / ${user}`,
+  //       },
+  //     });
+  //   }
+  // }, [wasm, tenant, user]);
   return (
     <AuthzProvider sdk={sdk} path="tickets" defaultInput={{ user, tenant }}>
       <Nav type={type} />
