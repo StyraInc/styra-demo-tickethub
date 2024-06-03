@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import Nav from "./Nav";
 import { useAuthn } from "../AuthnContext";
@@ -22,6 +22,7 @@ const titles = {
 };
 
 export default function App() {
+  const [sdk, setSDK] = useState();
   const { user, tenant } = useAuthn();
   const location = useLocation();
   const [, type] =
@@ -35,49 +36,51 @@ export default function App() {
 
   const wasm = process.env.REACT_APP_USE_WASM;
 
-  let sdk;
-  async function wasmInit() {
-    sdk = new WasmSDK(wasm);
-    await sdk.init();
-    sdk.setData({
-      roles: {
-        acmecorp: {
-          alice: ["admin"],
-          bob: ["reader"],
-          ceasar: ["reader", "resolver"],
-        },
-        hooli: {
-          dylan: ["admin"],
-        },
-      },
-    });
-  }
-  if (wasm) wasmInit();
-  // TODO(sr): Fix Wasm vs API selection here
-  // useEffect(() => {
-  //   async function wasmInit() {
-  //     sdk = new WasmSDK(wasm);
-  //     await sdk.init();
-  //   }
-  //   if (wasm) {
-  //     wasmInit();
-  //   } else {
-  //     const href = window.location.toString();
-  //     // TODO(sr): better way?!
-  //     const u = new URL(href);
-  //     u.pathname = "opa";
-  //     u.search = "";
-  //     sdk = new OPAClient(u.toString(), {
-  //       headers: {
-  //         Authorization: `Bearer ${tenant} / ${user}`,
-  //       },
-  //     });
-  //   }
-  // }, [wasm, tenant, user]);
+  useEffect(() => {
+    if (wasm) {
+      async function wasmInit() {
+        const userData = await getUserData(user, tenant);
+        const sdk0 = new WasmSDK(wasm);
+        await sdk0.init();
+        sdk0.setData(userData);
+        setSDK(sdk0);
+        console.log({ userData });
+      }
+      if (wasm) wasmInit();
+    } else {
+      // HTTP SDK
+      const href = window.location.toString();
+      const u = new URL(href); // TODO(sr): better way?!
+      u.pathname = "opa";
+      u.search = "";
+      setSDK(
+        new OPAClient(u.toString(), {
+          headers: {
+            Authorization: `Bearer ${tenant} / ${user}`,
+          },
+        }),
+      );
+    }
+  }, [user, tenant]);
   return (
     <AuthzProvider sdk={sdk} path="tickets" defaultInput={{ user, tenant }}>
       <Nav type={type} />
       <Outlet />
     </AuthzProvider>
   );
+}
+
+async function getUserData(user, tenant) {
+  const href = window.location.toString();
+  // TODO(sr): better way?!
+  const u = new URL(href);
+  u.pathname = "opa";
+  u.search = "";
+  const sdk = new OPAClient(u.toString(), {
+    headers: {
+      Authorization: `Bearer ${tenant} / ${user}`,
+    },
+  });
+
+  return sdk.evaluate("userdata", { user, tenant });
 }
