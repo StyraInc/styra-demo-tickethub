@@ -39,7 +39,7 @@ public class TicketController {
       tenantName = components[1].trim();
       Optional<Tenant> tenantBox = tenantRepository.findByName(tenantName);
       if (!tenantBox.isPresent()) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "auth header specifies nonexistant tenant");
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "auth header specifies nonexistant tenant");
       }
       return tenantBox.get();
   }
