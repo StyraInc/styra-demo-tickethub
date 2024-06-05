@@ -3,7 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import Nav from "./Nav";
 import { useAuthn } from "../AuthnContext";
 import AuthzProvider from "opa-react";
-import { WasmSDK } from "opa-react";
+import { WasmSDK } from "opa-wasm";
 import { OPAClient } from "@styra/opa";
 
 import { Types } from "../types";

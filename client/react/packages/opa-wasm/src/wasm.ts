@@ -15,6 +15,7 @@ export class WasmSDK {
 
   evaluate(path: string, input: Input): Promise<Result> {
     if (!this.policy) throw new Error("WasmSDK not initizalized");
+    console.log({ input, path });
     const resultSet = this.policy?.evaluate(input, path);
     if (resultSet?.length != 1)
       throw new Error(`expected one result, got ${resultSet?.length}`);
