@@ -44,8 +44,12 @@ public class Ticket {
   @Column(name="description")
   private String description;
 
+  // We need to explicitly set a default value here because Spring does not
+  // know about the NOT NULL constraint on the column, will try to generate SQL
+  // that puts NULL in this column, and then promptly throw a
+  // org.springframework.dao.DataIntegrityViolationException.
   @Column(name="resolved")
-  private Boolean resolved;
+  private Boolean resolved = false;
 
   @Column(name="last_updated")
   private Instant lastUpdated;
