@@ -3,12 +3,17 @@
   "version": "0.0.1",
   "description": "TS SDK for using OPA's Wasm modules from TS/JS",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "node --import tsx --test tests/**/*.ts"
+  },
   "author": "",
   "license": "Apache-2.0",
   "devDependencies": {
+    "serve-handler": "^6.1.5",
+    "tsx": "^4.11.2",
     "typescript": "^5.4.5",
-    "typescript-eslint": "^7.7.0"
-  },
-  "dependencies": {}
+    "typescript-eslint": "^7.7.0",
+    "undici": "^6.18.2",
+    "zx": "^8.1.2"
+  }
 }

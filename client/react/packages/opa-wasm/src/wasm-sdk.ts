@@ -1,3 +1,4 @@
+import { builtins as builtinFuncs } from "./builtins";
 // Based on npm-opa-wasm:
 // Copyright 2018 The OPA Authors.  All rights reserved.
 // Use of this source code is governed by an Apache2
@@ -74,8 +75,6 @@ function _dumpJSONRaw<T>(memory: WebAssembly.Memory, addr: number): T {
   return JSON.parse(jsonAsText);
 }
 
-// const builtinFuncs = builtIns;
-
 /**
  * _builtinCall dispatches the built-in function. The built-in function
  * arguments are loaded from Wasm and back in using JSON serialization.
@@ -88,11 +87,13 @@ function _builtinCall(
   builtinId: number,
   ...argArray: any
 ) {
-  const builtInName = builtins[builtinId];
+  const builtinName = builtins[builtinId];
+  if (!builtinName) return;
 
-  const impl = /*builtinFuncs[builtInName] ||*/ builtInName
-    ? customBuiltins[builtInName]
-    : undefined;
+  const impl =
+    builtinFuncs[builtinName] || builtinName
+      ? customBuiltins[builtinName]
+      : undefined;
 
   if (impl === undefined) {
     throw {
