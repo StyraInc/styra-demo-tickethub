@@ -3,7 +3,7 @@ import assert from "node:assert";
 import { readFile } from "fs/promises";
 import { MockAgent, setGlobalDispatcher } from "undici";
 import { Shell, $, tmpdir, tmpfile } from "zx";
-import { WasmSDK } from "../wasm";
+import { WasmSDK } from "../src/wasm";
 
 describe("evaluate", async () => {
   const policy = `package test

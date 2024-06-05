@@ -4,11 +4,12 @@
   "description": "TS SDK for using OPA's Wasm modules from TS/JS",
   "main": "index.js",
   "scripts": {
-    "test": "node --import tsx --test tests/**/*.ts"
+    "test": "glob -c\"node --import tsx --test\" tests/**/*.ts"
   },
   "author": "",
   "license": "Apache-2.0",
   "devDependencies": {
+    "glob": "^10.4.1",
     "serve-handler": "^6.1.5",
     "tsx": "^4.11.2",
     "typescript": "^5.4.5",
