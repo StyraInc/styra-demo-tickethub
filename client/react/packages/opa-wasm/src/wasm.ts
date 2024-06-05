@@ -1,5 +1,5 @@
-import { Input, Result } from "@styra/opa";
-import { loadPolicy, LoadedPolicy } from "./wasm-sdk";
+import { Input, ToInput, Result } from "@styra/opa";
+import { loadPolicy, LoadedPolicy, ResultSet } from "./wasm-sdk";
 
 export class WasmSDK {
   private source: string;
@@ -13,26 +13,32 @@ export class WasmSDK {
     this.policy = await loadPolicy(fetch(this.source));
   }
 
-  evaluate(path: string, input?: Input): Promise<Result> {
+  evaluate(path?: string, input?: Input): Promise<Result> {
     if (!this.policy) throw new Error("WasmSDK not initizalized");
-
-    const resultSet = this.policy?.evaluate(input, path);
-    if (resultSet?.length != 1)
-      throw new Error(`expected one result, got ${resultSet?.length}`);
-    return resultSet[0].result;
+    if (input && implementsToInput(input)) input = input.toInput();
+    return promise(this.policy?.evaluate(input, path));
   }
 
   evaluateDefault(input?: Input): Promise<Result> {
-    if (!this.policy) throw new Error("WasmSDK not initizalized");
-
-    const resultSet = this.policy?.evaluate(input);
-    if (resultSet?.length != 1)
-      throw new Error(`expected one result, got ${resultSet?.length}`);
-    return resultSet[0].result;
+    return this.evaluate(undefined, input);
   }
 
   setData(data: { [k: string]: any }) {
     if (!this.policy) throw new Error("WasmSDK not initizalized");
     this.policy.setData(data);
   }
+}
+
+function implementsToInput(object: any): object is ToInput {
+  const u = object as ToInput;
+  return u.toInput !== undefined && typeof u.toInput == "function";
+}
+
+function promise(rs: ResultSet): Promise<Result> {
+  return new Promise((resolve, reject) => {
+    if (rs?.length > 1)
+      throw new Error(`expected one result, got ${rs?.length}`);
+    if (rs?.length === 1) resolve(rs[0]?.result as Result);
+    return reject("empty result");
+  });
 }

@@ -8,8 +8,18 @@ import { WasmSDK } from "../src/wasm";
 describe("evaluate", async () => {
   const policy = `package test
 import rego.v1
+
 p_bool if true
+
 p_bool_builtin if json.is_valid(input.foo)
+
+p_bool_false if input == false
+
+has_type.type := type_name(input)
+
+compound_input.foo := "bar" if input == {"name": "alice", "list": [1, 2, true]}
+
+compound_result.allowed := true
 `;
   let $$: Shell;
   let sdk: WasmSDK;
@@ -48,6 +58,16 @@ p_bool_builtin if json.is_valid(input.foo)
 
   it("can be called without types, with builtin", async () => {
     const res = await sdk.evaluate("test/p_bool_builtin", { foo: '"bar"' });
+    assert.strictEqual(res, true);
+  });
+
+  it("default can be called without input", async () => {
+    const res = await sdk.evaluateDefault();
+    assert.strictEqual(res, true);
+  });
+
+  it("default can be called with input", async () => {
+    const res = await sdk.evaluateDefault("this is ignored by the rule");
     assert.strictEqual(res, true);
   });
 

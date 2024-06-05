@@ -110,7 +110,7 @@ function _builtinCall(
   return _loadJSON(wasmInstance, memory, result);
 }
 
-type ResultSet = [
+export type ResultSet = [
   {
     result: any;
   },
