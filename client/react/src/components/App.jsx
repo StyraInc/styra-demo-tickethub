@@ -44,7 +44,6 @@ export default function App() {
         await sdk0.init();
         sdk0.setData(userData);
         setSDK(sdk0);
-        console.log({ userData });
       }
       if (wasm) wasmInit();
     } else {
