@@ -13,10 +13,19 @@ export class WasmSDK {
     this.policy = await loadPolicy(fetch(this.source));
   }
 
-  evaluate(path: string, input: Input): Promise<Result> {
+  evaluate(path: string, input?: Input): Promise<Result> {
     if (!this.policy) throw new Error("WasmSDK not initizalized");
-    console.log({ input, path });
+
     const resultSet = this.policy?.evaluate(input, path);
+    if (resultSet?.length != 1)
+      throw new Error(`expected one result, got ${resultSet?.length}`);
+    return resultSet[0].result;
+  }
+
+  evaluateDefault(input?: Input): Promise<Result> {
+    if (!this.policy) throw new Error("WasmSDK not initizalized");
+
+    const resultSet = this.policy?.evaluate(input);
     if (resultSet?.length != 1)
       throw new Error(`expected one result, got ${resultSet?.length}`);
     return resultSet[0].result;
