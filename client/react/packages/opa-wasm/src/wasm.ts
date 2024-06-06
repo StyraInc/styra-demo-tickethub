@@ -19,7 +19,7 @@ export class WasmSDK {
   ): Promise<Res> {
     if (!this.policy) throw new Error("WasmSDK not initizalized");
     let inp: Input | undefined;
-    if (input && implementsToInput(input)) {
+    if (input !== undefined && implementsToInput(input)) {
       inp = input.toInput();
     } else {
       inp = input;

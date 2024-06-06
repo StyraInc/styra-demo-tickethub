@@ -363,7 +363,7 @@ export class LoadedPolicy {
       let inputBuf = null;
       let inputLen = 0;
       let inputAddr = 0;
-      if (input) {
+      if (input !== undefined) {
         if (input instanceof ArrayBuffer) {
           inputBuf = new Uint8Array(input);
         } else {
