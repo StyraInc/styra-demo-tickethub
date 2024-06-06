@@ -17,19 +17,26 @@ concurrency:
 
 jobs:
   unit-test-react:
-    name: opa-react (unit tests)
+    name: node packages
     runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        pkg: [opa-wasm, opa-react]
     steps:
       - name: Check out code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v4
+        with:
+          node-version: "21.x"
+      - uses: open-policy-agent/setup-opa@v2
       - name: setup and test
         run: |
           npm ci
           npm test
-        working-directory: client/react/packages/opa-react
+        working-directory: client/react/packages/${{ matrix.pkg }}
 
   build-clients:
     name: build client
