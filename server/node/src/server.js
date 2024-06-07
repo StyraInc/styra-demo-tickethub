@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 function readToken(val) {
-  if (!val) return;
+  if (!val) return [];
   return val.slice(7).split(" / ");
 }
 
@@ -32,7 +32,7 @@ app.use(async (req, res, next) => {
     [tenantName, subject] = req.cookies.user.split(" / "); // fallback to cookie
   }
   if (!tenantName || !subject) {
-    res.status(UNAUTHORIZED).json({
+    return res.status(UNAUTHORIZED).json({
       error: "authentication error: user credentials not provided",
     });
   }
