@@ -1,4 +1,4 @@
-FROM eclipse-temurin:19-alpine
+FROM eclipse-temurin:19
 
 ADD . /src/tickethub-java
 
