@@ -95,7 +95,10 @@ services:
       - opa
 
   opa:
-    image: ${OPA_IMAGE:-docker.io/openpolicyagent/opa:latest}
+    init: true
+    build:
+      context: .
+      dockerfile: opa.Dockerfile
     ports:
       - "8181:8181"
     command:
@@ -105,9 +108,9 @@ services:
       - --log-level=debug
       - --bundle
       - bundle.tar.gz
-    working_dir: /work
+    working_dir: /
     volumes:
-      - ./policies:/work
+      - ./policies:/policies
 
   integration-tests:
     image: ghcr.io/orange-opensource/hurl:latest

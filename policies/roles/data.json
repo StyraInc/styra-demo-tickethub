@@ -1,0 +1,10 @@
+{
+    "acmecorp": {
+        "alice": ["admin"],
+        "bob": ["reader"],
+        "ceasar": ["reader", "resolver"]
+    },
+    "hooli": {
+        "dylan": ["admin"]
+    }
+}
