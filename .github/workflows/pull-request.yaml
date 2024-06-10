@@ -51,14 +51,15 @@ jobs:
         with:
           fetch-depth: 0
       - uses: open-policy-agent/setup-opa@v2
-      - name: build bundle
-        run: make policies/bundle.tar.gz
+      - name: build wasm bundle
+        run: make client/react/public/opa.wasm
         env:
           OPA: opa
+        if: ${{ matrix.client == 'react' }}
       - name: setup
-        run: docker compose --profile ${{ matrix.client }} up --quiet-pull --wait --wait-timeout 300
+        run: docker compose --profile ${{ matrix.client }} up --quiet-pull --wait --wait-timeout 300 --build
       - name: smoke test
-        run: curl --retry 5 --retry-connrefused --retry-max-time 120 http://127.0.0.1:3000
+        run: curl --retry 5 --retry-connrefused --retry-max-time 120 http://127.0.0.1:3000 -v
 
   test-e2e:
     name: Test E2E
