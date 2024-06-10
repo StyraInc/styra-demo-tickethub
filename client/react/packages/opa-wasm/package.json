@@ -16,5 +16,8 @@
     "typescript-eslint": "^7.7.0",
     "undici": "^6.18.2",
     "zx": "^8.1.2"
+  },
+  "dependencies": {
+    "@styra/opa": "^1.0.1"
   }
 }
