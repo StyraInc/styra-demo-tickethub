@@ -56,7 +56,7 @@ function Menu() {
   }
   return (
     <div className="login-menu">
-      <span>
+      <label>
         User{" "}
         <select
           className="login-select"
@@ -73,7 +73,7 @@ function Menu() {
             </optgroup>
           ))}
         </select>
-      </span>
+      </label>
     </div>
   );
 }
