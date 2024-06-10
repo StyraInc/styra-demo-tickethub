@@ -9,9 +9,9 @@ The TicketHub sample application to show off using the Styra OPA SDKs:
 
 ## Build the OPA Bundle
 
-On the first checkout, or whenever something in `policies/` is changed, the OPA bundle needs to be rebuild:
+On the first checkout, or whenever something in `policies/` is changed, the OPA Wasm bundle needs to be rebuild for use in `client/react`:
 ```sh
-make policies/bundle.tar.gz
+make client/react/public/opa.wasm
 ```
 
 ## Running the Tickethub app
@@ -39,6 +39,6 @@ docker compose --profile node --profile react up
 Then open the browser at `http://localhost:3000`
 
 > [!WARNING]
-> Using docker compose requires `networking_mode: host`. 
+> Using docker compose requires `networking_mode: host`.
 > This is disabled by default on MacOS and Windows for Docker Desktop.
 > See the [Docker Desktop documentation](https://docs.docker.com/network/drivers/host/) for information on how to enable this mode.
