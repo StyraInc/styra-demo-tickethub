@@ -81,16 +81,6 @@ services:
     ports:
       - "3000:3000"
 
-  # proxy-react:
-  #   image: caddy:latest
-  #   network_mode: host
-  #   volumes:
-  #     - ${PWD}/caddy/Caddyfile-local:/etc/caddy/Caddyfile
-  #   expose:
-  #     - 4001
-  #   depends_on:
-  #     - opa
-
   opa:
     init: true
     build:
@@ -120,7 +110,6 @@ services:
       - --report-junit=tests/api/report.xml
       - tests/api/basic.hurl
     environment:
-      - HURL_host=localhost
+      - HURL_host=server
     profiles:
       - tools
-    network_mode: host
