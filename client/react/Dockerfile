@@ -3,6 +3,8 @@ RUN mkdir -p /opt/app
 WORKDIR /opt/app
 COPY package.json package-lock.json ./
 COPY packages packages
+RUN cd packages/opa-wasm && npm ci && npx tsc
+RUN cd packages/opa-react && npm ci && npx tsc
 RUN npm install
 COPY src src
 COPY public public
