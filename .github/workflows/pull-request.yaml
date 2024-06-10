@@ -80,6 +80,7 @@ jobs:
           OPA: opa
       - name: setup
         run: docker compose --profile ${{ matrix.server }} --profile react up --quiet-pull --wait --wait-timeout 300
+      - run: "docker ps"
       - name: Install dependencies
         run: npm ci
         working-directory: e2e
@@ -92,7 +93,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.server }}
           path: e2e/playwright-report/
           retention-days: 7
       - name: Run hurl API tests
