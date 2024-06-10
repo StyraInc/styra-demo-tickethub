@@ -7,13 +7,6 @@ The TicketHub sample application to show off using the Styra OPA SDKs:
 * [Typescript / Javascript SDK repository](https://github.com/StyraInc/opa-typescript)
 * [C# SDK repository](https://github.com/StyraInc/opa-csharp)
 
-## Build the OPA Bundle
-
-On the first checkout, or whenever something in `policies/` is changed, the OPA Wasm bundle needs to be rebuild for use in `client/react`:
-```sh
-make client/react/public/opa.wasm
-```
-
 ## Running the Tickethub app
 
 To run the Tickethub app you need to select which server and client implementations to use when running `docker compose up`
