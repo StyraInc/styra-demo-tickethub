@@ -25,6 +25,7 @@ docker compose --profile <SERVER_IMPLEMENTATION> --profile <CLIENT_IMPLEMENTATIO
 The list of `<SERVER_IMPLEMENTATION>` is:
 - `node`
 - `csharp`
+- `java`
 
 The list of `<CLIENT_IMPLEMENTATION>` is:
 - `html`

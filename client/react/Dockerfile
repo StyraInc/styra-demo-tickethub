@@ -6,6 +6,7 @@ COPY packages packages
 RUN cd packages/opa-wasm && npm ci && npx tsc
 RUN cd packages/opa-react && npm ci && npx tsc
 RUN npm install
+RUN cd packages/opa-react && npm link ../../node_modules/react
 COPY src src
 COPY public public
 EXPOSE 3000
