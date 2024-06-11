@@ -27,6 +27,7 @@ export default function useAccounts() {
           const [tenant0, user0] = account.split(" / ");
           setUser(user0);
           setTenant(tenant0);
+          document.cookie = `user=${tenant0} / ${user0}; Path=/; SameSite=Lax`;
         }
       });
   }, [user]);

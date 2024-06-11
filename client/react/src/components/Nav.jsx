@@ -47,6 +47,7 @@ function Menu() {
       const [tenant, user] = value.split("/");
       setUser(user);
       setTenant(tenant);
+      document.cookie = `user=${tenant} / ${user}; Path=/; SameSite=Lax`;
     },
     [setUser, setTenant],
   );
