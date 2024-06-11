@@ -49,3 +49,12 @@ updates:
     directory: /
     schedule:
       interval: daily
+  - package-ecosystem: "npm"
+    directory: "/tests/e2e"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    groups:
+      all:
+        patterns:
+          - "*"
