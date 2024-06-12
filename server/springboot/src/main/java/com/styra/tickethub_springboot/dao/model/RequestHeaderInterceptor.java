@@ -28,7 +28,7 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
         String userName = components[2].trim();
 
         MDC.put("TENANT_NAME", tenantName);
-        MDC.put("USER_NAME", tenantName);
+        MDC.put("USER_NAME", userName);
 
         System.out.printf("DEBUG: setting using MDC tenant='%s' user='%s'\n", tenantName, userName);
 
