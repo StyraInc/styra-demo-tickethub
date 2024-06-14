@@ -38,16 +38,43 @@ public class TicketController {
   @Autowired
   CustomerRepository customerRepository;
 
+  // It would be nice to somehow unify the MDC version of the user and tenant
+  // that are extracted earlier on and the @RequestHeader logic in this file.
+  // Maybe the solution is to just use the MDC versions everywhere?
+
+  private Tenant tenantFromHeader(String authHeader) {
+      var components = authHeader.split("\\s*[\\s+/]\\s*", 3);
+      String tenantName;
+      if (components.length != 3) {
+          System.out.println("ERROR: invalid auth header: " + authHeader);
+          throw new ResponseStatusException(HttpStatus.FORBIDDEN, "auth header is malformed");
+      }
+      tenantName = components[1].trim();
+      Optional<Tenant> tenantBox = tenantRepository.findByName(tenantName);
+      if (!tenantBox.isPresent()) {
+          throw new ResponseStatusException(HttpStatus.FORBIDDEN, "auth header specifies nonexistant tenant");
+      }
+      return tenantBox.get();
+  }
+
+  private String userFromHeader(String authHeader) {
+      var components = authHeader.split("\\s*[\\s+/]\\s*", 3);
+      String user;
+      if (components.length != 3) {
+          System.out.println("ERROR: invalid auth header: " + authHeader);
+          throw new ResponseStatusException(HttpStatus.FORBIDDEN, "auth header is malformed");
+      }
+      user = components[2].trim();
+      return user;
+  }
+
   @GetMapping("/tickets")
   Map<String, List<Ticket>> all(@RequestHeader("authorization") String authHeader) {
-    verifyAuth(authHeader, "list");
-    return java.util.Map.ofEntries(entry("tickets", ticketRepository.findByTenant(tenantFromHeader(authHeader))));
+      return java.util.Map.ofEntries(entry("tickets", ticketRepository.findByTenant(tenantFromHeader(authHeader))));
   }
 
   @GetMapping("/tickets/{id}")
   Ticket getById(@RequestHeader("authorization") String authHeader, @PathVariable Integer id) {
-    verifyAuth(authHeader, "get");
-
     List<Ticket> matches = ticketRepository.findByTenantAndId(tenantFromHeader(authHeader), id);
 
     if (matches.size() == 0) {
@@ -61,21 +88,12 @@ public class TicketController {
 
   @PostMapping("/tickets")
   Ticket createNew(@RequestHeader("authorization") String authHeader, @Valid @RequestBody Ticket newTicket) {
-    verifyAuth(authHeader, "create");
     newTicket.setTenant(tenantFromHeader(authHeader));
     return ticketRepository.save(newTicket);
   }
 
-  //@DeleteMapping("/tickets/{id}")
-  //void delete(@RequestHeader("authorization") String authHeader, @PathVariable Integer id) {
-  //  verifyAuth(authHeader, "delete");
-  //  ticketRepository.deleteById(id);
-  //}
-
   @PutMapping("/tickets/{id}")
   Ticket updateOrCreate(@RequestHeader("authorization") String authHeader, @RequestBody Ticket newTicket, @PathVariable Integer id) {
-    verifyAuth(authHeader, "modify");
-
     try {
       Ticket t = getById(authHeader, id);
       t.setCustomer(newTicket.getCustomer());
@@ -94,7 +112,6 @@ public class TicketController {
 
   @PostMapping("/tickets/{id}/resolve")
   Ticket resolve(@RequestHeader("authorization") String authHeader, @PathVariable Integer id) {
-    verifyAuth(authHeader, "resolve");
     Ticket t = getById(authHeader, id);
     t.setResolved(true);
     return ticketRepository.save(t);
