@@ -136,8 +136,7 @@ services:
       - ./tests:/tests
     command:
       - --test
-      #- --retry=10
-      - --retry=1
+      - --retry=10
       - --verbose
       - --report-junit=tests/api/report.xml
       - tests/api/basic.hurl
