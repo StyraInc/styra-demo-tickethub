@@ -12,6 +12,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -21,6 +23,8 @@ import java.util.Optional;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = Tenant.TABLE_NAME)
+@JsonDeserialize(using = TenantDeserializer.class)
+@JsonSerialize(using = TenantSerializer.class)
 public class Tenant {
   public static final String TABLE_NAME = "Tenants";
 

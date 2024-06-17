@@ -38,6 +38,7 @@ public class SerializationConfig {
         module.addDeserializer(Tenant.class, tenantDeserializer);
         module.addDeserializer(Customer.class, customerDeserializer);
         builder.modules(module, new JavaTimeModule());
+        System.out.printf("DEBUG: registered serializers and deserializers\n");
         return builder;
     }
 }
