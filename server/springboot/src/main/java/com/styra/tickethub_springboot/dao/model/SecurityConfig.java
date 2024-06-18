@@ -85,14 +85,6 @@ public class SecurityConfig {
 
         String method = request.getMethod();
         String servletPath = request.getServletPath();
-
-        System.out.printf("DEBUG: servletPath is %s\n", servletPath);
-        System.out.printf("DEBUG: url is %s\n", request.getRequestURL());
-        System.out.printf("DEBUG: 'method is %s\n", method);
-        System.out.printf("DEBUG: '%s' matches /^/tickets/[0-9]+$/: %s\n", servletPath, servletPath.matches("^/tickets/[0-9]+$"));
-        System.out.printf("DEBUG: '%s' matches /^/tickets/[0-9]+/resolve$/: %s\n", servletPath, servletPath.matches("^/tickets/[0-9]+/resolve$"));
-        System.out.printf("DEBUG: '%s' == '/tickets': %s\n", servletPath, servletPath.equals("/tickets"));
-
         String action = "";
 
         if (method.equals("GET") && servletPath.equals("/tickets")) {
@@ -119,9 +111,6 @@ public class SecurityConfig {
     @Bean
     AuthorizationManager<RequestAuthorizationContext> customAuthManager() {
         return (authentication, object) -> {
-            System.out.printf("DEBUG: getting auth decision, authn='%s' object='%s'\n", authentication, object.toString());
-            System.out.printf("DEBUG: request for auth: '%s'\n", object.getRequest());
-
             HttpServletRequest request = object.getRequest();
             // NOTE: it is possible that authHeader could be null. In this
             // case, the server will throw a null pointer exception, and Spring
@@ -130,11 +119,6 @@ public class SecurityConfig {
             // header is missing, but in a production setting, this case should
             // be handled a little more gracefully.
             String authHeader = request.getHeader("authorization");
-            System.out.printf("DEBUG: authorization header: %s\n", authHeader);
-
-            //boolean nextBoolean = new Random().nextBoolean();
-            //System.out.println("nextBoolean=" + nextBoolean);
-            //return new AuthorizationDecision(nextBoolean);
 
             // TODO: opa client object should be re-used
             String opaURL = "http://localhost:8181";
@@ -142,8 +126,6 @@ public class SecurityConfig {
             if (opaURLEnv != null) {
                 opaURL = opaURLEnv;
             }
-            System.out.printf("DEBUG: using OPA URL: %s\n", opaURL);
-
             OPAClient opa = new OPAClient(opaURL);
 
             Tenant tenant = tenantFromHeader(authHeader);
@@ -152,18 +134,13 @@ public class SecurityConfig {
 
             java.util.Map<String, Object> iMap = opaInputFromRequest(user, tenant.getName(), request);
 
-            System.out.printf("DEBUG: OPA input is: %s\n", iMap);
-
             boolean allow;
 
             try {
                 allow = opa.check("tickets/allow", iMap);
             } catch (Exception e) {
-                System.out.printf("DEBUG: exception while obtaining policy decision: %s\n", e);
                 return new AuthorizationDecision(false);
             }
-
-            System.out.printf("policy decision was: %s\n", allow);
 
             return new AuthorizationDecision(allow);
         };

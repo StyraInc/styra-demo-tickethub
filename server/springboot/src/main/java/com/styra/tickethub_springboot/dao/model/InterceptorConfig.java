@@ -15,7 +15,6 @@ public class InterceptorConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        System.out.printf("DEBUG: registering request header interceptor\n");
         registry.addInterceptor(requestHeaderInterceptor);
     }
 }

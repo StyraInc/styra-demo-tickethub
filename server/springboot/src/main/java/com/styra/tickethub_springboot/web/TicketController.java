@@ -39,9 +39,28 @@ public class TicketController {
   @Autowired
   CustomerRepository customerRepository;
 
-  // It would be nice to somehow unify the MDC version of the user and tenant
-  // that are extracted earlier on and the @RequestHeader logic in this file.
-  // Maybe the solution is to just use the MDC versions everywhere?
+  // Note that there are 3 ways that the user and tenant are determined, which
+  // are kept separate for separation of concerns.
+  //
+  // 1) In dao/model/SecurityConfig, they are accessed directly from the
+  //    request object to be authorized. These values are used only to
+  //    perform request authorization with OPA.
+  //
+  // 2) In dao/model/InterceptorConfig, the RequestHeaderInterceptor class is
+  //    used to insert the tenant name and user name into MDC as TENANT_NAME
+  //    and USER_NAME respectively. These values are used only for
+  //    serialization and deserialization, since creating fully hydrated
+  //    Ticket, Customer, and Tenant objects requires knowing these values.
+  //
+  // 3. Here, in the TicketController, the authorization header is accessed
+  //    using @RequestHeader() annotated function arguments. These are used for
+  //    implementing multi-tenancy, since requests to the data layer must
+  //    include the tenant.
+  //
+  // In principle, the MDC values could be set up during (1) and then re-used
+  // during (3). The reason I have not done this is to avoid cross-pollinating
+  // across different concerns, risking any of those abstractions leaking into
+  // others.
 
   private Tenant tenantFromHeader(String authHeader) {
       var components = authHeader.split("\\s*[\\s+/]\\s*", 3);

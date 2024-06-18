@@ -94,3 +94,16 @@ HTTP 200
 [Asserts]
 jsonpath "$.id" == {{ticket_id}}
 jsonpath "$.resolved" == true
+
+# Ceasar (resolver) can unresolve a previously resolved ticket
+POST http://{{host}}:4000/api/tickets/{{ticket_id}}/resolve
+Content-Type: application/json
+Authorization: Bearer acmecorp / ceasar
+[Cookies]
+user: acmecorp / ceasar
+{ "resolved": false }
+HTTP 200
+[Asserts]
+jsonpath "$.id" == {{ticket_id}}
+jsonpath "$.resolved" == false
+
