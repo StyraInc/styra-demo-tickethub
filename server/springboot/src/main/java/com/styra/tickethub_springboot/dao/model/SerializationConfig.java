@@ -31,6 +31,10 @@ public class SerializationConfig {
 
     @Bean
     public Jackson2ObjectMapperBuilder jackson2ObjectMapperBuilder() {
+        // NOTE: the serializers and deserializers need to be registered here,
+        // and if an security is enabled (it is), the must ALSO be registered 
+        // by adding @Json{Deserialize,Serialize} annotations to the classes
+        // they apply to, or else Spring will simply ignore them.
         Jackson2ObjectMapperBuilder builder = new Jackson2ObjectMapperBuilder();
         SimpleModule module = new SimpleModule();
         module.addSerializer(Tenant.class, tenantSerializer);
