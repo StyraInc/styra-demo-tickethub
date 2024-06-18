@@ -38,14 +38,14 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // NOTE: The `.csrf().disable()` disables CSRF protections. This could
+        // NOTE: The `.csrf(...)` disables CSRF protections. This could
         // be a serious security vulnerability in a production environment.
         // However, since this API is intended for educational and development
         // purposes, it is disabled because it makes it easier to work with
         // locally. If you want to use any of this code for a production
         // service, it is important to re-enable CSRF protection.
         http.authorizeHttpRequests(authorize -> authorize
-                .anyRequest().access(customAuthManager())).csrf().disable();
+                .anyRequest().access(customAuthManager())).csrf(csrf -> csrf.disable());
 
         return http.build();
     }
@@ -123,6 +123,12 @@ public class SecurityConfig {
             System.out.printf("DEBUG: request for auth: '%s'\n", object.getRequest());
 
             HttpServletRequest request = object.getRequest();
+            // NOTE: it is possible that authHeader could be null. In this
+            // case, the server will throw a null pointer exception, and Spring
+            // will bounce the request. This is the "correct" behavior in the
+            // sense that it prevents access to any endpoints if the auth
+            // header is missing, but in a production setting, this case should
+            // be handled a little more gracefully.
             String authHeader = request.getHeader("authorization");
             System.out.printf("DEBUG: authorization header: %s\n", authHeader);
 

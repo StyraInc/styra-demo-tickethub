@@ -8,8 +8,8 @@ function initialize() {
   login(false);
 }
 
-// Renders the user dropdown menu
-function displayUsers() {
+// Retrieve the current tenant and user from document.cookie
+function getTenantAndUser() {
   let [currentAccount] = accounts;
 
   document.cookie.split("; ").forEach((cookie) => {
@@ -19,6 +19,24 @@ function displayUsers() {
     }
   });
 
+  const [currentTenant, currentUser] = currentAccount
+    .split("/")
+    .map((account) => account.trim());
+
+  return [currentTenant, currentUser];
+}
+
+// Generates a string value suitable for using as the auth header with the
+// tenant and user in it. This is to support the SpringBoot server, which is
+// unable to support the cookie-style auth that the other servers use.
+export function makeAuthHeader() {
+  const [t, u] = getTenantAndUser();
+  return `Bearer ${t} / ${u}`
+}
+
+// Renders the user dropdown menu
+function displayUsers() {
+
   const menu = document.getElementById("login-menu");
   const tenantUsers = accounts.reduce((tenantUsers, account) => {
     const [tenant, user] = account.split("/").map((account) => account.trim());
@@ -27,9 +45,7 @@ function displayUsers() {
     return tenantUsers;
   }, {});
 
-  const [currentTenant, currentUser] = currentAccount
-    .split("/")
-    .map((account) => account.trim());
+  const [currentTenant, currentUser] = getTenantAndUser();
 
   menu.innerHTML = `\
   <form id="login">

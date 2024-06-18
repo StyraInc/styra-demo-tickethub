@@ -1,5 +1,6 @@
 package com.styra.tickethub_springboot.web;
 
+import com.styra.tickethub_springboot.dao.model.ResolveState;
 import com.styra.tickethub_springboot.dao.model.Ticket;
 import com.styra.tickethub_springboot.dao.model.Tenant;
 import com.styra.tickethub_springboot.dao.model.TicketRepository;
@@ -111,9 +112,9 @@ public class TicketController {
   }
 
   @PostMapping("/tickets/{id}/resolve")
-  Ticket resolve(@RequestHeader("authorization") String authHeader, @PathVariable Integer id) {
+  Ticket resolve(@RequestHeader("authorization") String authHeader, @RequestBody ResolveState targetState, @PathVariable Integer id) {
     Ticket t = getById(authHeader, id);
-    t.setResolved(true);
+    t.setResolved(targetState.getResolved());
     return ticketRepository.save(t);
   }
 }

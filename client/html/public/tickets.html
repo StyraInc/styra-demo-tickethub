@@ -7,6 +7,8 @@
 
         <script type="module" src="/scripts/login.js"></script>
         <script type="module">
+            import { makeAuthHeader } from "/scripts/login.js";
+
             async function displayTickets() {
                 const table = document.getElementById("ticket-list");
                 table.innerHTML = `\
@@ -20,7 +22,7 @@
         </tr>
       </thead>`;
 
-                const { tickets } = await fetch("/api/tickets").then((res) =>
+                const { tickets } = await fetch("/api/tickets", {headers: {Authorization: makeAuthHeader()}}).then((res) =>
                     res.json(),
                 );
                 const tbody = document.createElement("tbody");

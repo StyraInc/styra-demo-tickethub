@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -52,6 +53,7 @@ public class Ticket {
   private Boolean resolved = false;
 
   @Column(name="last_updated")
+  @JsonProperty("last_updated")
   private Instant lastUpdated;
 
   // https://stackoverflow.com/a/221827
