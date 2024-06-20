@@ -1,32 +1,25 @@
-import {
-  Children,
-  PropsWithChildren,
-  ReactElement,
-  ReactNode,
-  cloneElement,
-  isValidElement,
-} from "react";
+import { PropsWithChildren, ReactNode } from "react";
 
 import useAuthz from "./use-authz";
 import { Input } from "@styra/opa";
 
-export enum Denied {
-  DISABLED = "deny-disabled",
-  HIDDEN = "deny-hidden",
-}
-
 type AuthzProps = PropsWithChildren<{
   input?: Input;
   path?: string;
+  /**
+   * `loading` mimics React.Suspense
+   * Will display when loading so we have the option to display skeletons instead of the disabled option.
+   */
+  loading?: ReactNode;
+  /**
+   * Component to display when result is falsey
+   */
+  fallback?: ReactNode;
+  children?: ReactNode | ((result: unknown) => ReactNode);
 }>;
 
-interface AuthzChildProps extends PropsWithChildren {
-  authz: Denied | undefined;
-  disabled?: boolean;
-  hidden?: boolean;
-}
-
 /**
+ * TODO(sr): update
  * Conditionally renders components based on authorization decisions for a specified
  * policy path and input for the current user.
  *
@@ -85,44 +78,22 @@ interface AuthzChildProps extends PropsWithChildren {
  * @param props.path - The policy path to evaluate
  * @param props.input - The input
  */
-export default function Authz({ children, path, input }: AuthzProps) {
+export default ({
+  children,
+  path,
+  loading,
+  input,
+  fallback = null,
+}: AuthzProps) => {
   const { result, isLoading } = useAuthz(path, input);
-  const allowed = !isLoading && !!result;
 
-  return children ? renderChildren(children, allowed, 0) : null;
-}
+  if (isLoading) {
+    return loading;
+  }
 
-function renderChildren(children: ReactNode, allowed: boolean, depth: number) {
-  return Children.map(children, (child) => {
-    if (!isValidElement(child)) {
-      // if <Authz/> directly wraps a text node, need to explicitly wrap in 'hidden'.
-      // Otherwise, included text nodes must NOT be wrapped, as the containers
-      // will be subject to hidden/disabled choices.
-      return allowed || depth > 0 ? child : <span hidden={true}>{child}</span>;
-    }
+  if (typeof children === "function") {
+    return children(result);
+  }
 
-    const childAuthzElement = child as ReactElement<AuthzChildProps>;
-    const { authz, ...props } = childAuthzElement?.props ?? {};
-
-    if (props.children) {
-      props.children = renderChildren(props.children, allowed, depth + 1);
-    }
-
-    if (!allowed) {
-      if (authz === Denied.DISABLED) {
-        props.disabled = true;
-      } else if (authz === Denied.HIDDEN || depth === 0) {
-        props.hidden = true;
-      }
-    }
-
-    // The `cloneElement` props argument is an override, so must specifically
-    // set `authz` to undefined here in case it was present.
-    // We want to remove it because it is meaningless in the rendered HTML;
-    // rather, it is an instruction to this component to prepare for rendering.
-    return cloneElement(childAuthzElement, {
-      ...props,
-      authz: undefined,
-    });
-  });
-}
+  return !!result ? children : fallback;
+};

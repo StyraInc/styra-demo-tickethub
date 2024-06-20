@@ -75,9 +75,11 @@ export default function Ticket() {
           path="tickets/allow"
           input={{ action: "resolve", resource: "ticket" }}
         >
-          <button authz={Denied.DISABLED} type="submit">
-            {ticket.resolved ? "Unresolve" : "Resolve"}
-          </button>
+          {(result) => (
+            <button disabled={!result} type="submit">
+              {ticket.resolved ? "Unresolve" : "Resolve"}
+            </button>
+          )}
         </Authz>
         <div>{message && <span className="update-status">{message}</span>}</div>
       </form>

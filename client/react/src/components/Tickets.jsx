@@ -51,9 +51,11 @@ export default function Tickets() {
         path="tickets/allow"
         input={{ action: "create", resource: "ticket" }}
       >
-        <Link authz={Denied.DISABLED} to="/tickets/new">
-          <button authz={Denied.DISABLED}>+ New ticket</button>
-        </Link>
+        {(result) => (
+          <Link disabled={!result} to="/tickets/new">
+            <button disabled={!result}>+ New ticket</button>
+          </Link>
+        )}
       </Authz>
     </main>
   );
