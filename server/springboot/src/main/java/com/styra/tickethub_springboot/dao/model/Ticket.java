@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -52,14 +53,16 @@ public class Ticket {
   @Column(name="resolved")
   private Boolean resolved = false;
 
+  // https://github.com/spring-projects/spring-boot/issues/2225#issuecomment-70092564
   @Column(name="last_updated")
   @JsonProperty("last_updated")
+  @JsonFormat(shape = JsonFormat.Shape.STRING)
   private Instant lastUpdated;
 
   // https://stackoverflow.com/a/221827
   @PreUpdate
   @PrePersist
   protected void onUpdate() {
-    lastUpdated = Optional.ofNullable(lastUpdated).orElse(Instant.now());
+    lastUpdated = Instant.now();
   }
 }

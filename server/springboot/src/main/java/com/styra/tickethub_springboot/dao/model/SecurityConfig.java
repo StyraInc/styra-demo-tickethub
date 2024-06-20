@@ -139,6 +139,7 @@ public class SecurityConfig {
             try {
                 allow = opa.check("tickets/allow", iMap);
             } catch (Exception e) {
+                System.out.printf("ERROR: got exception from opa client: %s\n", e);
                 return new AuthorizationDecision(false);
             }
 

@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
-import com.styra.opa.OPAClient;
-
 import java.util.Map;
 import static java.util.Map.entry;
 
@@ -108,6 +106,13 @@ public class TicketController {
 
   @PostMapping("/tickets")
   Ticket createNew(@RequestHeader("authorization") String authHeader, @Valid @RequestBody Ticket newTicket) {
+    // NOTE: it is a currently known limitation that for a new ticket to
+    // be created, the customer the ticket references has to already exist in
+    // the repository (postgres, in our case). If not, then we get an error
+    // condition. If someone wants to lift this limitation in the future,
+    // I would suggest creating a custom ticket deserializer that automatically
+    // inserts the required customer entries into the db as part of the deser
+    // process.
     newTicket.setTenant(tenantFromHeader(authHeader));
     return ticketRepository.save(newTicket);
   }

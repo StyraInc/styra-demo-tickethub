@@ -1,11 +1,13 @@
 package com.styra.tickethub_springboot.dao.model;
 
+import java.text.SimpleDateFormat;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Configuration
@@ -41,7 +43,12 @@ public class SerializationConfig {
         module.addSerializer(Customer.class, customerSerializer);
         module.addDeserializer(Tenant.class, tenantDeserializer);
         module.addDeserializer(Customer.class, customerDeserializer);
-        builder.modules(module, new JavaTimeModule());
+        builder = builder.modules(module, new JavaTimeModule());
+
+        // Use RFC3339 compliant dates.
+        builder = builder.dateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
+
         return builder;
     }
+
 }
