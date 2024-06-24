@@ -1,9 +1,9 @@
-import { PropsWithChildren, ReactNode } from "react";
+import { ReactNode } from "react";
 
 import useAuthz from "./use-authz";
 import { Input } from "@styra/opa";
 
-type AuthzProps = PropsWithChildren<{
+type AuthzProps = {
   input?: Input;
   path?: string;
   /**
@@ -16,7 +16,7 @@ type AuthzProps = PropsWithChildren<{
    */
   fallback?: ReactNode;
   children?: ReactNode | ((result: unknown) => ReactNode);
-}>;
+};
 
 /**
  * Conditionally renders components based on authorization decisions for a specified
