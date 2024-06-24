@@ -9,6 +9,7 @@ jsonpath "$.id" == 1
 jsonpath "$.customer" == "Globex"
 jsonpath "$.description" == "Dooms day device needs to be refactored"
 jsonpath "$.resolved" == false
+jsonpath "$.last_updated" isIsoDate
 
 GET http://{{host}}:4000/api/tickets
 Content-Type: application/json
@@ -94,3 +95,55 @@ HTTP 200
 [Asserts]
 jsonpath "$.id" == {{ticket_id}}
 jsonpath "$.resolved" == true
+
+# Ceasar (resolver) can unresolve a previously resolved ticket
+POST http://{{host}}:4000/api/tickets/{{ticket_id}}/resolve
+Content-Type: application/json
+Authorization: Bearer acmecorp / ceasar
+[Cookies]
+user: acmecorp / ceasar
+{ "resolved": false }
+HTTP 200
+[Asserts]
+jsonpath "$.id" == {{ticket_id}}
+jsonpath "$.resolved" == false
+jsonpath "$.last_updated" isIsoDate
+
+# Get the last updated timestamp for the test ticket.
+GET http://{{host}}:4000/api/tickets/{{ticket_id}}
+Content-Type: application/json
+Authorization: Bearer acmecorp / alice
+[Cookies]
+user: acmecorp / alice
+HTTP 200
+[Asserts]
+jsonpath "$.resolved" == false
+jsonpath "$.id" == {{ticket_id}}
+[Captures]
+test_ticket_last_update_timestamp: jsonpath "$.last_updated"
+
+# Assert that the test ticket has not changed its last updated time (since we
+# haven't updated it).
+GET http://{{host}}:4000/api/tickets/{{ticket_id}}
+Content-Type: application/json
+Authorization: Bearer acmecorp / alice
+[Cookies]
+user: acmecorp / alice
+HTTP 200
+[Asserts]
+jsonpath "$.id" == {{ticket_id}}
+jsonpath "$.resolved" == false
+jsonpath "$.last_updated" == {{test_ticket_last_update_timestamp}}
+
+# Resolve ticket 1, then assert its last updated time has changed.
+POST http://{{host}}:4000/api/tickets/{{ticket_id}}/resolve
+Content-Type: application/json
+Authorization: Bearer acmecorp / alice
+[Cookies]
+user: acmecorp / alice
+{ "resolved": true }
+HTTP 200
+[Asserts]
+jsonpath "$.id" == {{ticket_id}}
+jsonpath "$.resolved" == true
+jsonpath "$.last_updated" != {{test_ticket_last_update_timestamp}}

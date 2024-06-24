@@ -50,7 +50,6 @@ public class TicketHub {
         if (opaURLEnv != null) {
             opaURL = opaURLEnv;
         }
-        System.out.printf("DEBUG: using OPA URL: %s\n", opaURL);
 
         opa = new OPAClient(opaURL);
     }
@@ -201,8 +200,6 @@ public class TicketHub {
             entry("action", action)
         );
 
-        System.out.printf("DEBUG: OPA input is: %s\n", iMap);
-
         boolean allow;
 
         try {
@@ -211,8 +208,6 @@ public class TicketHub {
             System.out.printf("ERROR: request threw exception: %s\n", e);
             return false;
         }
-
-        System.out.printf("DEBUG: %s %s %s %b\n", getSessionPath(), getSessionMethod(), getSessionAttributes(), allow);
 
         return allow;
     }

@@ -40,7 +40,6 @@ dependencies {
     implementation 'commons-io:commons-io:2.16.1'
 
     implementation group: 'com.styra', name: 'opa', version: '+'
-
 }
 
 application {

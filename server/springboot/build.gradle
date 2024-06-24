@@ -1,0 +1,51 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.0'
+	id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.styra'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '17'
+	targetCompatibility = '17'
+
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.security:spring-security-config'
+	implementation 'org.springframework.security:spring-security-web'
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'com.h2database:h2'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+	implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
+
+	implementation group: 'com.styra', name: 'opa', version: '+'
+
+	runtimeOnly 'org.postgresql:postgresql'
+	implementation 'org.hibernate:hibernate-core:6.5.2.Final'
+	implementation 'org.hibernate:hibernate-entitymanager:5.6.15.Final'
+}
+
+apply plugin: 'application'
+mainClassName = 'com.styra.tickethub_springboot.App'
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
