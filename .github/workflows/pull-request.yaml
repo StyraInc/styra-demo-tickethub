@@ -67,7 +67,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        server: [node, csharp, java]
+        server: [node, csharp, java, springboot]
     steps:
       - name: Check out code
         uses: actions/checkout@v4

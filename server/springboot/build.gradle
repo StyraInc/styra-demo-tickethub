@@ -9,7 +9,7 @@ version = '0.0.1-SNAPSHOT'
 
 java {
 	sourceCompatibility = '17'
-    targetCompatibility = '17'
+	targetCompatibility = '17'
 
 }
 
@@ -36,11 +36,11 @@ dependencies {
 	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 	implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
 
-    implementation group: 'com.styra', name: 'opa', version: '+'
+	implementation group: 'com.styra', name: 'opa', version: '+'
 
-    runtimeOnly 'org.postgresql:postgresql'
-    implementation 'org.hibernate:hibernate-core:6.5.2.Final'
-    implementation 'org.hibernate:hibernate-entitymanager:5.6.15.Final'
+	runtimeOnly 'org.postgresql:postgresql'
+	implementation 'org.hibernate:hibernate-core:6.5.2.Final'
+	implementation 'org.hibernate:hibernate-entitymanager:5.6.15.Final'
 }
 
 apply plugin: 'application'

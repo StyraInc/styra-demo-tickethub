@@ -28,7 +28,6 @@ public class ApplicationExceptionHandler {
     }
     ProblemDetail body = ProblemDetail
         .forStatusAndDetail(HttpStatusCode.valueOf(404), ex.getLocalizedMessage());
-    //body.setType(URI.create("http://my-app-host.com/errors/bad-request"));
     body.setTitle("Bad Request");
     body.setProperty("details", details);
     return ResponseEntity.badRequest()
@@ -41,7 +40,6 @@ public class ApplicationExceptionHandler {
 
     ProblemDetail body = ProblemDetail
         .forStatusAndDetail(HttpStatusCode.valueOf(404), ex.getLocalizedMessage());
-    //body.setType(URI.create("http://my-app-host.com/errors/not-found"));
     body.setTitle("Ticket Not Found");
     body.setProperty("hostname", "localhost");
     return body;
