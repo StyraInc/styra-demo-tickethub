@@ -1,0 +1,27 @@
+{
+    debug
+}
+:3000 {
+
+    # proxy API requests to the backend service,
+    # which takes care of checking the authorization header
+    handle /api/* {
+        reverse_proxy http://localhost:4000
+    }
+
+    # proxy OPA requests to OPA, if there's an authorization header
+    # NOTE: if header-based authentication was realistic, we would do
+    # more here to check the token
+    handle_path /opa/* {
+        @unauthenticated header !Authorization
+        respond @unauthenticated 401
+        reverse_proxy http://localhost:8181
+    }
+
+    # serve the react app
+    handle {
+      root * /usr/share/caddy
+      try_files {path} /
+      file_server
+   }
+}
