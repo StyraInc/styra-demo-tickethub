@@ -1,14 +1,17 @@
-FROM node:21-alpine
+FROM node:21-alpine AS builder
 RUN mkdir -p /opt/app
 WORKDIR /opt/app
 COPY package.json package-lock.json ./
 COPY packages packages
 RUN cd packages/opa-wasm && npm ci && npx tsc
 RUN cd packages/opa-react && npm ci && npx tsc
-RUN npm install
+RUN npm ci
 RUN cd packages/opa-react && npm link ../../node_modules/react
 COPY src src
 COPY public public
+RUN npm run build
+
+FROM caddy:latest
 EXPOSE 3000
-ENV SERVER_HOST "0.0.0.0"
-CMD [ "npm", "start"]
+COPY --from=builder /opt/app/build /usr/share/caddy/
+COPY caddy/Caddyfile /etc/caddy/Caddyfile
