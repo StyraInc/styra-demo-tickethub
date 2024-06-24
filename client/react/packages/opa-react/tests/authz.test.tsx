@@ -7,9 +7,10 @@ import { describe, test, expect, vi } from "vitest";
 // vi.mock is hoisted--even before the imports (https://vitest.dev/api/vi.html#vi-mock)
 vi.mock("../src/use-authz");
 
+const useAuthzMock = await import("../src/use-authz");
+
 describe("Authz component", () => {
-  async function setUseAuthzMockResult(result: Result) {
-    const useAuthzMock = await import("../src/use-authz");
+  function setUseAuthzMockResult(result: Result) {
     useAuthzMock.default = vi.fn(() => ({
       result,
       isLoading: false,
@@ -25,50 +26,47 @@ describe("Authz component", () => {
 
     describe("when allowed", () => {
       test("renders children that depend on result (disabled)", async () => {
-        await setUseAuthzMockResult(true);
+        setUseAuthzMockResult(true);
         render(
           <Authz path={path} input={input}>
-            {(result) => (
-              <button disabled={!result} data-testid="myButton">
-                Press Here
-              </button>
-            )}
+            {(result) => <button disabled={!result}>Press Here</button>}
           </Authz>,
         );
-        expect(screen.getByText("Press Here")).toBeInTheDocument();
-        expect(screen.getByRole("button")).not.toHaveAttribute("hidden");
-        expect(screen.getByRole("button")).not.toHaveAttribute("disabled");
+        const button = screen.getByRole("button");
+        expect(button).toBeInTheDocument();
+        expect(button).not.toHaveAttribute("hidden");
+        expect(button).not.toHaveAttribute("disabled");
       });
 
       test("renders children that depend on result (hidden)", async () => {
-        await setUseAuthzMockResult(true);
+        setUseAuthzMockResult(true);
         render(
           <Authz path={path} input={input}>
-            {(result) => (
-              <button hidden={!result} data-testid="myButton">
-                Press Here
-              </button>
-            )}
+            {(result) => <button hidden={!result}>Press Here</button>}
           </Authz>,
         );
-        expect(screen.getByText("Press Here")).toBeInTheDocument();
-        expect(screen.getByRole("button")).not.toHaveAttribute("hidden");
-        expect(screen.getByRole("button")).not.toHaveAttribute("disabled");
+        const button = screen.getByRole("button");
+        expect(button).toBeInTheDocument();
+        expect(button).not.toHaveAttribute("hidden");
+        expect(button).not.toHaveAttribute("disabled");
       });
 
-      test("renders children without dependence on result", async () => {
-        await setUseAuthzMockResult(true);
+      test("renders children when result is truthy, ignores fallback", async () => {
+        setUseAuthzMockResult(true);
         render(
-          <Authz path={path} input={input}>
+          <Authz path={path} input={input} fallback={<div>unauthorized</div>}>
             <button>Press Here</button>
           </Authz>,
         );
-        expect(screen.getByRole("button")).not.toHaveAttribute("disabled");
-        expect(screen.getByRole("button")).not.toHaveAttribute("hidden");
+        const button = screen.getByRole("button");
+        expect(button).toBeInTheDocument();
+        expect(button).not.toHaveAttribute("hidden");
+        expect(button).not.toHaveAttribute("disabled");
+        expect(screen.queryByText("unauthorized")).not.toBeInTheDocument();
       });
 
       test("renders unmodified text node", async () => {
-        await setUseAuthzMockResult([true]);
+        setUseAuthzMockResult(true);
         render(
           <p data-testid="container">
             <Authz path={path} input={input}>
@@ -85,84 +83,75 @@ describe("Authz component", () => {
 
     describe("when denied", () => {
       test("hides children that depend on result (hidden)", async () => {
-        await setUseAuthzMockResult(false);
+        setUseAuthzMockResult(false);
         render(
           <Authz path={path} input={input}>
-            {(result) => (
-              <button hidden={!result} data-testid="myButton">
-                Press Here
-              </button>
-            )}
+            {(result) => <button hidden={!result}>Press Here</button>}
           </Authz>,
         );
-        expect(screen.getByText("Press Here")).toBeInTheDocument();
-        expect(screen.getByTestId("myButton")).toHaveAttribute("hidden");
-        expect(screen.getByTestId("myButton")).not.toHaveAttribute("disabled");
+        const button = screen.getByText("Press Here"); // hidden elements can't be access "by role"
+        expect(button).toBeInTheDocument();
+        expect(button).toHaveAttribute("hidden");
+        expect(button).not.toHaveAttribute("disabled");
       });
 
       test("disables children depending on result (disabled)", async () => {
-        await setUseAuthzMockResult(false);
+        setUseAuthzMockResult(false);
         render(
           <Authz path={path} input={input}>
             {(result) => <button disabled={!result}>Press Here</button>}
           </Authz>,
         );
-        expect(screen.getByRole("button")).toHaveAttribute("disabled");
-        expect(screen.getByRole("button")).not.toHaveAttribute("hidden");
+        const button = screen.getByText("Press Here");
+        expect(button).toBeInTheDocument();
+        expect(button).not.toHaveAttribute("hidden");
+        expect(button).toHaveAttribute("disabled");
       });
 
-      test("hides children depending on result (hidden)", async () => {
-        await setUseAuthzMockResult(false);
+      test("renders fallback when not given function", async () => {
+        setUseAuthzMockResult(false);
         render(
-          <Authz path={path} input={input}>
-            {(result) => (
-              <button hidden={!result} data-testid="myButton">
-                Press Here
-              </button>
-            )}
+          <Authz path={path} input={input} fallback={<div>unauthorized</div>}>
+            <button>Press Here</button>
           </Authz>,
         );
-        expect(screen.getByTestId("myButton")).not.toHaveAttribute("disabled");
-        expect(screen.getByTestId("myButton")).toHaveAttribute("hidden");
+        const button = screen.queryByText("Press Here");
+        expect(button).not.toBeInTheDocument();
+        expect(screen.getByText("unauthorized")).toBeInTheDocument();
+      });
+
+      test("ignores fallback when given function", async () => {
+        setUseAuthzMockResult(false);
+        render(
+          <Authz path={path} input={input} fallback={<div>unauthorized</div>}>
+            {(result) => <button disabled={!result}>Press Here</button>}
+          </Authz>,
+        );
+        const button = screen.queryByText("Press Here");
+        expect(button).toBeInTheDocument();
+        expect(screen.queryByText("unauthorized")).not.toBeInTheDocument();
       });
 
       test("combines disabled and hidden siblings", async () => {
-        await setUseAuthzMockResult(false);
+        setUseAuthzMockResult(false);
         render(
           <Authz path={path} input={input}>
             {(result) => [
-              <button data-testid="start" hidden={!result}>
+              <button key="start" data-testid="start" hidden={!result}>
                 Start
               </button>,
-              <button data-testid="stop" disabled={!result}>
+              <button key="stop" data-testid="stop" disabled={!result}>
                 Stop
               </button>,
             ]}
           </Authz>,
         );
-        expect(screen.getByTestId("start")).not.toHaveAttribute("disabled");
-        expect(screen.getByTestId("start")).toHaveAttribute("hidden");
-        expect(screen.getByTestId("stop")).toHaveAttribute("disabled");
-        expect(screen.getByTestId("stop")).not.toHaveAttribute("hidden");
-      });
-
-      test("combines disabled parent and hidden child with explicit authz on each", async () => {
-        await setUseAuthzMockResult(false);
-        render(
-          <Authz path={path} input={input}>
-            {(result) => (
-              <div data-testid="start" disabled={!result}>
-                <button data-testid="stop" hidden={!result}>
-                  Stop
-                </button>
-              </div>
-            )}
-          </Authz>,
-        );
-        expect(screen.getByTestId("start")).toHaveAttribute("disabled");
-        expect(screen.getByTestId("start")).not.toHaveAttribute("hidden");
-        expect(screen.getByTestId("stop")).not.toHaveAttribute("disabled");
-        expect(screen.getByTestId("stop")).toHaveAttribute("hidden");
+        const start = screen.getByTestId("start");
+        const stop = screen.getByTestId("stop");
+        expect(start).not.toHaveAttribute("disabled");
+        expect(start).toHaveAttribute("hidden");
+        expect(stop).toHaveAttribute("disabled");
+        expect(stop).not.toHaveAttribute("hidden");
       });
     });
   });
