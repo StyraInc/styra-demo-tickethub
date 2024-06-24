@@ -10,19 +10,39 @@ vi.mock("../src/use-authz");
 const useAuthzMock = await import("../src/use-authz");
 
 describe("Authz component", () => {
-  function setUseAuthzMockResult(result: Result) {
-    useAuthzMock.default = vi.fn(() => ({
-      result,
-      isLoading: false,
-      error: undefined,
-    }));
-    // TODO: try to add test where isLoading transitions from true to false
+  function setUseAuthzMockResult(result: Result, isLoading: boolean = false) {
+    useAuthzMock.default = vi.fn(() =>
+      !isLoading
+        ? {
+            result,
+            isLoading,
+            error: undefined,
+          }
+        : {
+            result: undefined,
+            isLoading,
+            error: undefined,
+          },
+    );
     return useAuthzMock;
   }
 
   describe("outputs are rendered appropriately", () => {
     const input = { user: "alice" };
     const path = "tickets/allow";
+
+    describe("when loading", () => {
+      test("renders loading prop", async () => {
+        setUseAuthzMockResult(true, true); // isLoading
+        render(
+          <Authz path={path} input={input} loading={<div>loading</div>}>
+            {(result) => <button disabled={!result}>Press Here</button>}
+          </Authz>,
+        );
+        expect(screen.queryByRole("button")).not.toBeInTheDocument();
+        expect(screen.getByText("loading")).toBeInTheDocument();
+      });
+    });
 
     describe("when allowed", () => {
       test("renders children that depend on result (disabled)", async () => {
