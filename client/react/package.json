@@ -12,7 +12,7 @@
     "opa-wasm": "file:./packages/opa-wasm",
     "react": "^18.3.0",
     "react-dom": "^18.3.1",
-    "react-router": "^6.23.1",
+    "react-router": "^6.24.0",
     "react-router-dom": "^6.23.1",
     "react-scripts": "^5.0.1"
   },
