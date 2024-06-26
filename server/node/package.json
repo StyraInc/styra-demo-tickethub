@@ -34,7 +34,7 @@
     }
   },
   "dependencies": {
-    "@prisma/client": "^5.15.1",
+    "@prisma/client": "^5.16.0",
     "command-line-args": "^5.2.1",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.0.0",
