@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pkg: [opa-wasm, opa-react]
+        pkg: [opa-wasm]
     steps:
       - name: Check out code
         uses: actions/checkout@v4
