@@ -6,9 +6,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build"
   },
-  "dependencies": {
+  "devDependencies": {
     "@styra/opa": "^0.5.5",
-    "opa-react": "file:./packages/opa-react",
+    "@styra/opa-react": "^0.0.4",
     "opa-wasm": "file:./packages/opa-wasm",
     "react": "^18.3.0",
     "react-dom": "^18.3.1",

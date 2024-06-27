@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
-import { Authz, Denied } from "opa-react";
+import { Authz } from "@styra/opa-react";
 
 export default function Tickets() {
   const { user, tenant } = useAuthn();
