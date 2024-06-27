@@ -22,6 +22,10 @@ import static java.util.Map.entry;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
+import static java.util.logging.Level.ALL;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 
 import com.styra.opa.openapi.OpaApiClient;
 import com.styra.opa.openapi.utils.HTTPClient;
@@ -132,7 +136,14 @@ public class SecurityConfig {
 
             //OPAClient opa = new OPAClient(opaURL);
 
-            HTTPClient client = new LatencyMeasuringHTTPClient();
+            Logger logger = Logger.getLogger("mylogger");
+            Handler handlerObj = new ConsoleHandler();
+            handlerObj.setLevel(ALL);
+            logger.addHandler(handlerObj);
+            logger.setLevel(ALL);
+            logger.setUseParentHandlers(false);
+
+            HTTPClient client = new LatencyMeasuringHTTPClient(logger);
             OpaApiClient apiClient = OpaApiClient.builder().serverURL(opaURL).client(client).build();
             OPAClient opa = new OPAClient(apiClient);
 
