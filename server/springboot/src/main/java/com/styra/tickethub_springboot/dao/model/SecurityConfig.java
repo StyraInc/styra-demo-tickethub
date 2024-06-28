@@ -23,9 +23,6 @@ import static java.util.Map.entry;
 import java.util.List;
 import java.util.Optional;
 
-import com.styra.opa.openapi.OpaApiClient;
-import com.styra.opa.openapi.utils.HTTPClient;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -84,7 +81,7 @@ public class SecurityConfig {
         //
         // In a production setting, there would be an extra step to map the
         // bearer token to some kind of user account rather than just pulling
-        // the user string right from the "token".
+        // the user string right from the "token". 
 
         String method = request.getMethod();
         String servletPath = request.getServletPath();
@@ -129,12 +126,7 @@ public class SecurityConfig {
             if (opaURLEnv != null) {
                 opaURL = opaURLEnv;
             }
-
-            //OPAClient opa = new OPAClient(opaURL);
-
-            HTTPClient client = new LatencyMeasuringHTTPClient();
-            OpaApiClient apiClient = OpaApiClient.builder().serverURL(opaURL).client(client).build();
-            OPAClient opa = new OPAClient(apiClient);
+            OPAClient opa = new OPAClient(opaURL);
 
             Tenant tenant = tenantFromHeader(authHeader);
 
