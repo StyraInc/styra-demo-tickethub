@@ -19,8 +19,6 @@ import static java.net.http.HttpRequest.Builder;
 
 import com.styra.opa.utils.OPAHTTPClient;
 
-import java.util.logging.Logger;
-
 /**
  * This HTTPClient implementation also injects additional headers provided to
  * its constructor into each HTTP request that it sends. This is meant to be
@@ -29,23 +27,17 @@ import java.util.logging.Logger;
  */
 public class LatencyMeasuringHTTPClient extends OPAHTTPClient {
 
-    Logger logger;
-
-    public LatencyMeasuringHTTPClient(Logger logger) {
-        this.logger = logger;
-    }
-
     @Override
     public HttpResponse<InputStream> send(HttpRequest request)
             throws IOException, InterruptedException, URISyntaxException {
 
         long startTime = System.nanoTime();
-        HttpResponse<InputStream> response = super.send(request);
+     HttpResponse<InputStream> response = super.send(request);
         long endTime = System.nanoTime();
 
         long sendLatency = endTime - startTime;
 
-        this.logger.fine(String.format("sendLatency=%fms\n", sendLatency/1000000.0));
+        System.out.printf("DEBUG: sendLatency=%fms\n", sendLatency/1000000.0);
 
         return response;
     }
