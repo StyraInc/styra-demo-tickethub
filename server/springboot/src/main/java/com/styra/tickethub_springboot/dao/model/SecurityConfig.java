@@ -44,8 +44,19 @@ public class SecurityConfig {
         // purposes, it is disabled because it makes it easier to work with
         // locally. If you want to use any of this code for a production
         // service, it is important to re-enable CSRF protection.
+        //http.authorizeHttpRequests(authorize -> authorize
+        //        .anyRequest().access(customAuthManager())).csrf(csrf -> csrf.disable());
+
+
+        String opaURL = "http://localhost:8181";
+        String opaURLEnv = System.getenv("OPA_URL");
+        if (opaURLEnv != null) {
+            opaURL = opaURLEnv;
+        }
+        OPAClient opa = new OPAClient(opaURL);
+
         http.authorizeHttpRequests(authorize -> authorize
-                .anyRequest().access(customAuthManager())).csrf(csrf -> csrf.disable());
+                .anyRequest().access(new OPAAuthorizationManager(opa))).csrf(csrf -> csrf.disable());
 
         return http.build();
     }
@@ -81,7 +92,7 @@ public class SecurityConfig {
         //
         // In a production setting, there would be an extra step to map the
         // bearer token to some kind of user account rather than just pulling
-        // the user string right from the "token". 
+        // the user string right from the "token".
 
         String method = request.getMethod();
         String servletPath = request.getServletPath();
