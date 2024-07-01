@@ -50,12 +50,16 @@ export default function Tickets() {
       <Authz
         path="tickets/allow"
         input={{ action: "create", resource: "ticket" }}
-      >
-        {(result) => (
-          <Link disabled={!result} to="/tickets/new">
-            <button disabled={!result}>+ New ticket</button>
+        fallback={
+          <Link disabled="true" to="/tickets/new">
+            <button disabled="true">+ New ticket</button>
           </Link>
-        )}
+        }
+      >
+        <Link to="/tickets/new">
+          <button>+ New ticket</button>
+        </Link>
+        )
       </Authz>
     </main>
   );
