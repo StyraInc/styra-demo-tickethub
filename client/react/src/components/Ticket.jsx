@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
 import { Authz } from "@styra/opa-react";
 
 export default function Ticket() {
+  const { state } = useLocation();
   const { user, tenant } = useAuthn();
   const { ticketId } = useParams();
-  const [ticket, setTicket] = useState();
+  const [ticket, setTicket] = useState(state);
   const [message, setMessage] = useState();
 
   const loadTicket = async function (ticketId, user, tenant, setTicket) {
@@ -19,11 +20,6 @@ export default function Ticket() {
       .then((res) => res.json())
       .then((data) => setTicket(data));
   };
-
-  useEffect(() => {
-    if (!user) return; // wait for user to be set
-    loadTicket(ticketId, user, tenant, setTicket);
-  }, [user, tenant, ticketId, setTicket]);
 
   const handleSubmit = useCallback(
     async (event) => {
@@ -49,42 +45,33 @@ export default function Ticket() {
 
       await loadTicket(ticketId, user, tenant, setTicket);
     },
-    [ticketId, ticket, user, tenant, setTicket],
+    [ticketId, ticket, user, tenant],
   );
 
   if (!ticket) {
     return null;
   }
+  const { customer, last_updated, description, resolved, resolveAllowed } =
+    ticket;
 
   return (
     <main>
       <form className="form-grid" onSubmit={handleSubmit}>
         <label htmlFor="customer">Customer</label>
-        <div id="customer">{ticket.customer}</div>
+        <div id="customer">{customer}</div>
 
         <label htmlFor="last_updated">Last Updated</label>
-        <div id="last_updated">{ticket.last_updated}</div>
+        <div id="last_updated">{last_updated}</div>
 
         <label htmlFor="description">Description</label>
-        <div id="description">{ticket.description}</div>
+        <div id="description">{description}</div>
 
         <label htmlFor="resolved">Resolved</label>
-        <div id="resolved">{ticket.resolved ? "yes" : "no"}</div>
+        <div id="resolved">{resolved ? "yes" : "no"}</div>
 
-        <Authz
-          path="tickets/allow"
-          input={{ action: "resolve", resource: "ticket" }}
-          fallback={
-            <button disabled="true" type="submit">
-              {ticket.resolved ? "Unresolve" : "Resolve"}
-            </button>
-          }
-        >
-          <button type="submit">
-            {ticket.resolved ? "Unresolve" : "Resolve"}
-          </button>
-          )
-        </Authz>
+        <button disabled={!resolveAllowed} type="submit">
+          {ticket.resolved ? "Unresolve" : "Resolve"}
+        </button>
         <div>{message && <span className="update-status">{message}</span>}</div>
       </form>
     </main>
