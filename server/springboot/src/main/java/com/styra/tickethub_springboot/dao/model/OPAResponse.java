@@ -1,10 +1,18 @@
 package com.styra.tickethub_springboot.dao.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 /**
  * This class models the data to be returned from an OPA-SpringBoot policy. It
  * is used for deserialization.
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class OPAResponse {
+
     private boolean decision;
 
     private OPAResponseContext context;

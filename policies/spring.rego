@@ -25,5 +25,11 @@ xform := {
 }
 
 main = x {
-    x := data.tickets.allow with xform as input
+    d := data.tickets.allow with xform as input
+    x := {
+        "decision": d,
+        "context": {
+            "reason": "sample policy"
+        }
+    }
 }

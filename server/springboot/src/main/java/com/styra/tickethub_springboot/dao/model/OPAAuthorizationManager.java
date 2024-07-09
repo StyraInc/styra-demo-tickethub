@@ -8,6 +8,7 @@ import org.springframework.security.web.access.intercept.RequestAuthorizationCon
 import org.springframework.security.core.Authentication;
 import org.springframework.security.access.AccessDeniedException;
 import com.styra.opa.OPAClient;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.function.Supplier;
 import java.util.Map;
@@ -87,9 +88,10 @@ public class OPAAuthorizationManager implements AuthorizationManager<RequestAuth
         Map<String, Object> iMap = makeRequestInput(authentication, object);
         OPAResponse resp = null;
         try {
-            resp = opa.evaluate("tickets/spring/main", iMap, OPAResponse.class);
+            resp = opa.evaluate("tickets/spring/main", iMap, new TypeReference<OPAResponse>() {});
         } catch (Exception e) {
             System.out.printf("ERROR: exception from OPA client: %s\n", e);
+            e.printStackTrace(System.out);
             return null;
         }
         return resp;
