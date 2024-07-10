@@ -129,6 +129,8 @@ services:
     working_dir: /
     volumes:
       - ./policies:/policies
+    environment:
+      EOPA_LICENSE_KEY: ${EOPA_LICENSE_KEY}
 
   integration-tests:
     image: ghcr.io/orange-opensource/hurl:latest
