@@ -75,7 +75,7 @@ export default function Ticket() {
           path="tickets/allow"
           input={{ action: "resolve", resource: "ticket" }}
           fallback={
-            <button disabled="true" type="submit">
+            <button disabled={true} type="submit">
               {ticket.resolved ? "Unresolve" : "Resolve"}
             </button>
           }
