@@ -1,7 +1,7 @@
 import PropTypes from "prop-types";
 import { useCallback } from "react";
 import { Types } from "../types";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
 import useAccounts from "../useAccounts";
 
@@ -39,7 +39,6 @@ Nav.propTypes = {
 };
 
 function Menu() {
-  const navigate = useNavigate();
   const { accounts } = useAccounts();
   const { user, tenant, setUser, setTenant } = useAuthn();
 
@@ -49,7 +48,6 @@ function Menu() {
       setUser(user);
       setTenant(tenant);
       document.cookie = `user=${tenant} / ${user}; Path=/; SameSite=Lax`;
-      navigate("/");
     },
     [setUser, setTenant],
   );
