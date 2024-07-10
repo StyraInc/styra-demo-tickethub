@@ -51,8 +51,8 @@ export default function Tickets() {
         path="tickets/allow"
         input={{ action: "create", resource: "ticket" }}
         fallback={
-          <Link disabled="true" to="/tickets/new">
-            <button disabled="true">+ New ticket</button>
+          <Link disabled={true} to="/tickets/new">
+            <button disabled={true}>+ New ticket</button>
           </Link>
         }
       >
