@@ -22,8 +22,18 @@ const titles = {
 };
 
 export default function App() {
-  const [sdk, setSDK] = useState();
   const { user, tenant } = useAuthn();
+  const [opaClient] = useState(() => {
+    const href = window.location.toString();
+    const u = new URL(href); // TODO(sr): better way?!
+    u.pathname = "opa";
+    u.search = "";
+    return new OPAClient(u.toString(), {
+      headers: {
+        Authorization: `Bearer ${tenant} / ${user}`,
+      },
+    });
+  }, [user, tenant]);
   const location = useLocation();
   const [, type] =
     Object.entries(paths).find(([path]) =>
@@ -34,35 +44,13 @@ export default function App() {
     document.title = `${titles[type]} - ${tenant}`;
   }, [type, tenant]);
 
-  const wasm = process.env.REACT_APP_USE_WASM;
-
-  useEffect(() => {
-    if (wasm) {
-      async function wasmInit() {
-        const userData = await getUserData(user, tenant);
-        const sdk0 = new WasmSDK(wasm);
-        await sdk0.init();
-        sdk0.setData(userData);
-        setSDK(sdk0);
-      }
-      if (wasm) wasmInit();
-    } else {
-      // HTTP SDK
-      const href = window.location.toString();
-      const u = new URL(href); // TODO(sr): better way?!
-      u.pathname = "opa";
-      u.search = "";
-      setSDK(
-        new OPAClient(u.toString(), {
-          headers: {
-            Authorization: `Bearer ${tenant} / ${user}`,
-          },
-        }),
-      );
-    }
-  }, [user, tenant]);
   return (
-    <AuthzProvider sdk={sdk} path="tickets" defaultInput={{ user, tenant }}>
+    <AuthzProvider
+      opaClient={opaClient}
+      defaultPath="tickets"
+      defaultInput={{ user, tenant }}
+      batch={false}
+    >
       <Nav type={type} />
       <Outlet />
     </AuthzProvider>
