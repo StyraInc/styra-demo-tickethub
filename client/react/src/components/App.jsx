@@ -3,7 +3,6 @@ import { Outlet, useLocation } from "react-router-dom";
 import Nav from "./Nav";
 import { useAuthn } from "../AuthnContext";
 import { AuthzProvider } from "@styra/opa-react";
-import { WasmSDK } from "opa-wasm";
 import { OPAClient } from "@styra/opa";
 
 import { Types } from "../types";
@@ -22,6 +21,11 @@ const titles = {
 };
 
 export default function App() {
+  const location = useLocation();
+  const [batch, setBatch] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("batch") === "true";
+  }, [location]);
   const { user, tenant } = useAuthn();
   const [opaClient] = useState(() => {
     const href = window.location.toString();
@@ -34,7 +38,6 @@ export default function App() {
       },
     });
   }, [user, tenant]);
-  const location = useLocation();
   const [, type] =
     Object.entries(paths).find(([path]) =>
       location.pathname.startsWith(path),
@@ -49,9 +52,10 @@ export default function App() {
       opaClient={opaClient}
       defaultPath="tickets"
       defaultInput={{ user, tenant }}
-      batch={false}
+      batch={batch}
     >
       <Nav type={type} />
+      <ToggleBatchingButton batch={batch} setBatch={setBatch} />
       <Outlet />
     </AuthzProvider>
   );
@@ -70,4 +74,19 @@ async function getUserData(user, tenant) {
   });
 
   return sdk.evaluate("userdata", { user, tenant });
+}
+
+function ToggleBatchingButton({ batch, setBatch }) {
+  const handleChange = () => {
+    setBatch(!batch);
+  };
+
+  return (
+    <button
+      onClick={handleChange}
+      className={`toggle-batching-button ${batch ? "on" : "off"}`}
+    >
+      {batch ? "batching enabled" : "batching disabled"}
+    </button>
+  );
 }
