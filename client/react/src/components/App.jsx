@@ -24,7 +24,7 @@ export default function App() {
   const location = useLocation();
   const [batch, setBatch] = useState(() => {
     const params = new URLSearchParams(location.search);
-    return params.get("batch") ?? false;
+    return params.get("batch") === "true";
   }, [location]);
   const { user, tenant } = useAuthn();
   const [opaClient] = useState(() => {
