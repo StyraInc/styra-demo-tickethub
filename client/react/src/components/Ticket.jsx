@@ -83,7 +83,6 @@ export default function Ticket() {
           <button type="submit">
             {ticket.resolved ? "Unresolve" : "Resolve"}
           </button>
-          )
         </Authz>
         <div>{message && <span className="update-status">{message}</span>}</div>
       </form>
