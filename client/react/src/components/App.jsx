@@ -81,6 +81,7 @@ export default function App() {
       defaultPath="tickets"
       defaultInput={{ user, tenant }}
       batch={batch}
+      retry={3}
     >
       <Nav type={type} accounts={accounts} />
       <ToggleBatchingButton batch={batch} setBatch={setBatch} />
