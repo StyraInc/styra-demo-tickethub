@@ -73,11 +73,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: open-policy-agent/setup-opa@v2
-      - name: build bundle
-        run: make client/react/public/opa.wasm
-        env:
-          OPA: opa
       - name: setup
         run: docker compose --profile ${{ matrix.server }} --profile react up --quiet-pull --wait --wait-timeout 300
       - name: Install dependencies
@@ -108,3 +103,42 @@ jobs:
         with:
           check_name: Results for server-${{ matrix.server }}
           report_paths: tests/api/report.xml
+
+  test-e2e-batch:
+    name: Test E2E Batching
+    runs-on: ubuntu-22.04
+    env:
+      eopa_license: ${{ secrets.EOPA_LICENSE_KEY }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+        if: env.eopa_license != ''
+      - name: setup
+        run: docker compose --profile node --profile react up --quiet-pull --wait --wait-timeout 300
+        env:
+          OPA_DOCKERFILE: enterprise-opa.Dockerfile
+          EOPA_LICENSE_KEY: ${{ secrets.EOPA_LICENSE_KEY }}
+        if: env.eopa_license != ''
+      - name: Install dependencies
+        run: npm ci
+        working-directory: tests/e2e
+        if: env.eopa_license != ''
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+        working-directory: tests/e2e
+        if: env.eopa_license != ''
+      - name: Run Playwright tests
+        run: npx playwright test
+        working-directory: tests/e2e
+        if: env.eopa_license != ''
+      - uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-batching-node
+          path: tests/e2e/playwright-report/
+          retention-days: 7
+        if: env.eopa_license != '' && always()
+      - name: dump logs
+        run: docker compose --profile node logs
+        if: failure()

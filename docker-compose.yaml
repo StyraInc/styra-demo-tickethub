@@ -116,7 +116,7 @@ services:
     init: true
     build:
       context: .
-      dockerfile: opa.Dockerfile
+      dockerfile: ${OPA_DOCKERFILE-opa.Dockerfile}
     ports:
       - "8181:8181"
     command:
@@ -129,6 +129,8 @@ services:
     working_dir: /
     volumes:
       - ./policies:/policies
+    environment:
+      EOPA_LICENSE_KEY: ${EOPA_LICENSE_KEY}
 
   integration-tests:
     image: ghcr.io/orange-opensource/hurl:latest

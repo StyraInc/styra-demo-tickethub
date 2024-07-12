@@ -3,7 +3,6 @@ import { Outlet, useLocation } from "react-router-dom";
 import Nav from "./Nav";
 import { useAuthn } from "../AuthnContext";
 import { AuthzProvider } from "@styra/opa-react";
-import { WasmSDK } from "opa-wasm";
 import { OPAClient } from "@styra/opa";
 
 import { Types } from "../types";
@@ -20,6 +19,8 @@ const titles = {
   [Types.TICKET]: "Ticket",
   [Types.TICKETS]: "Tickets",
 };
+
+const batch = false;
 
 export default function App() {
   const { user, tenant } = useAuthn();
@@ -49,7 +50,7 @@ export default function App() {
       opaClient={opaClient}
       defaultPath="tickets"
       defaultInput={{ user, tenant }}
-      batch={false}
+      batch={batch}
     >
       <Nav type={type} />
       <Outlet />
