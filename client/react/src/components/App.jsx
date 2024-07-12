@@ -20,9 +20,12 @@ const titles = {
   [Types.TICKETS]: "Tickets",
 };
 
-const batch = false;
-
 export default function App() {
+  const location = useLocation();
+  const [batch, setBatch] = useState(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("batch") ?? false;
+  }, [location]);
   const { user, tenant } = useAuthn();
   const [opaClient] = useState(() => {
     const href = window.location.toString();
@@ -35,7 +38,6 @@ export default function App() {
       },
     });
   }, [user, tenant]);
-  const location = useLocation();
   const [, type] =
     Object.entries(paths).find(([path]) =>
       location.pathname.startsWith(path),
@@ -53,6 +55,7 @@ export default function App() {
       batch={batch}
     >
       <Nav type={type} />
+      <ToggleBatchingButton batch={batch} setBatch={setBatch} />
       <Outlet />
     </AuthzProvider>
   );
@@ -71,4 +74,19 @@ async function getUserData(user, tenant) {
   });
 
   return sdk.evaluate("userdata", { user, tenant });
+}
+
+function ToggleBatchingButton({ batch, setBatch }) {
+  const handleChange = () => {
+    setBatch(!batch);
+  };
+
+  return (
+    <button
+      onClick={handleChange}
+      className={`toggle-batching-button ${batch ? "on" : "off"}`}
+    >
+      {batch ? "batching enabled" : "batching disabled"}
+    </button>
+  );
 }
