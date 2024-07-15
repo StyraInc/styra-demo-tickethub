@@ -3,9 +3,8 @@ import { useCallback } from "react";
 import { Types } from "../types";
 import { useParams, Link } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
-import useAccounts from "../useAccounts";
 
-export default function Nav({ type }) {
+export default function Nav({ accounts, type }) {
   const { tenant } = useAuthn();
   const { ticketId } = useParams();
 
@@ -28,7 +27,7 @@ export default function Nav({ type }) {
         </div>
       </div>
 
-      <Menu />
+      <Menu accounts={accounts} />
     </nav>
   );
 }
@@ -38,8 +37,7 @@ Nav.propTypes = {
   ticketId: PropTypes.string,
 };
 
-function Menu() {
-  const { accounts } = useAccounts();
+function Menu({ accounts }) {
   const { user, tenant, setUser, setTenant } = useAuthn();
 
   const handleChangeAccount = useCallback(

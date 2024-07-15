@@ -26,7 +26,8 @@ export default function App() {
     const params = new URLSearchParams(location.search);
     return params.get("batch") === "true";
   }, [location]);
-  const { user, tenant } = useAuthn();
+  const { user, tenant, setTenant, setUser } = useAuthn();
+  const [accounts, setAccounts] = useState();
   const [opaClient] = useState(() => {
     const href = window.location.toString();
     const u = new URL(href); // TODO(sr): better way?!
@@ -47,6 +48,33 @@ export default function App() {
     document.title = `${titles[type]} - ${tenant}`;
   }, [type, tenant]);
 
+  // This should only happen ONCE
+  useEffect(() => {
+    if (user) return;
+    fetch("/accounts.json")
+      .then((res) => res.json())
+      .then(({ accounts }) => {
+        const accs = accounts.reduce((acc, account) => {
+          const [tenant, name] = account.split(" / ");
+          acc[tenant] ??= [];
+          acc[tenant].push({ account, name });
+          return acc;
+        }, {});
+        setAccounts(accs);
+
+        // if unset, pick first
+        if (!user) {
+          const [account] = accounts;
+          const [tenant0, user0] = account.split(" / ");
+          setUser(user0);
+          setTenant(tenant0);
+          document.cookie = `user=${tenant0} / ${user0}; Path=/; SameSite=Lax`;
+        }
+      });
+  }, [user]);
+
+  if (!user || !tenant) return <div>Loading</div>;
+
   return (
     <AuthzProvider
       opaClient={opaClient}
@@ -54,7 +82,7 @@ export default function App() {
       defaultInput={{ user, tenant }}
       batch={batch}
     >
-      <Nav type={type} />
+      <Nav type={type} accounts={accounts} />
       <ToggleBatchingButton batch={batch} setBatch={setBatch} />
       <Outlet />
     </AuthzProvider>
