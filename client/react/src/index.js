@@ -7,6 +7,7 @@ import App from "./components/App";
 import NewTicket from "./components/NewTicket";
 import Tickets from "./components/Tickets";
 import Ticket from "./components/Ticket";
+import BatchDemo from "./components/BatchDemo";
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
       {
         path: "tickets/:ticketId",
         element: <Ticket />,
+      },
+      {
+        path: "demo",
+        element: <BatchDemo />,
       },
     ],
   },

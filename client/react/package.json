@@ -8,10 +8,11 @@
   },
   "devDependencies": {
     "@styra/opa": "^1.2.3",
-    "@styra/opa-react": "^0.5.0",
+    "@styra/opa-react": "^0.6.0",
     "opa-wasm": "file:./packages/opa-wasm",
     "react": "^18.3.0",
     "react-dom": "^18.3.1",
+    "react-pixel-grid": "^0.1.2",
     "react-router": "^6.24.1",
     "react-router-dom": "^6.24.1",
     "react-scripts": "^5.0.1"
