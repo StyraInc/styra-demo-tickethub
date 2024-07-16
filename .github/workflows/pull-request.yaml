@@ -143,4 +143,4 @@ jobs:
         if: env.eopa_license != '' && always()
       - name: dump logs
         run: docker compose --profile node logs
-        if: always()
+        if: env.eopa_license != '' && always()
