@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useNavigate, useSearchParams } from "react-router-dom";
 import Nav from "./Nav";
 import { useAuthn } from "../AuthnContext";
 import { AuthzProvider } from "@styra/opa-react";
@@ -11,6 +11,7 @@ import "../style.css";
 const paths = {
   "/tickets/new": Types.NEW_TICKET,
   "/tickets": Types.TICKET,
+  "/demo": Types.BATCH_DEMO,
   "/": Types.TICKETS,
 };
 
@@ -18,14 +19,16 @@ const titles = {
   [Types.NEW_TICKET]: "New ticket",
   [Types.TICKET]: "Ticket",
   [Types.TICKETS]: "Tickets",
+  [Types.BATCH_DEMO]: "Batch Demo Page",
 };
 
 export default function App() {
-  const location = useLocation();
-  const [batch, setBatch] = useState(() => {
-    const params = new URLSearchParams(location.search);
-    return params.get("batch") === "true";
-  }, [location]);
+  let [searchParams] = useSearchParams();
+  const [batch, setBatch] = useState(
+    () => searchParams.get("batch") === "true",
+    [searchParams],
+  );
+
   const { user, tenant, setTenant, setUser } = useAuthn();
   const [accounts, setAccounts] = useState();
   const [opaClient] = useState(() => {
@@ -90,24 +93,11 @@ export default function App() {
   );
 }
 
-async function getUserData(user, tenant) {
-  const href = window.location.toString();
-  // TODO(sr): better way?!
-  const u = new URL(href);
-  u.pathname = "opa";
-  u.search = "";
-  const sdk = new OPAClient(u.toString(), {
-    headers: {
-      Authorization: `Bearer ${tenant} / ${user}`,
-    },
-  });
-
-  return sdk.evaluate("userdata", { user, tenant });
-}
-
 function ToggleBatchingButton({ batch, setBatch }) {
+  const [_, setSearchParams] = useSearchParams();
   const handleChange = () => {
     setBatch(!batch);
+    setSearchParams({ batch: !batch });
   };
 
   return (
@@ -115,7 +105,7 @@ function ToggleBatchingButton({ batch, setBatch }) {
       onClick={handleChange}
       className={`toggle-batching-button ${batch ? "on" : "off"}`}
     >
-      {batch ? "batching enabled" : "batching disabled"}
+      {batch ? "disable" : "enable"} batching
     </button>
   );
 }
