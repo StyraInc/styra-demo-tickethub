@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Outlet, useNavigate, useSearchParams } from "react-router-dom";
+import { Outlet, useSearchParams } from "react-router-dom";
 import Nav from "./Nav";
 import { useAuthn } from "../AuthnContext";
 import { AuthzProvider } from "@styra/opa-react";
@@ -11,7 +11,6 @@ import "../style.css";
 const paths = {
   "/tickets/new": Types.NEW_TICKET,
   "/tickets": Types.TICKET,
-  "/demo": Types.BATCH_DEMO,
   "/": Types.TICKETS,
 };
 
@@ -19,12 +18,11 @@ const titles = {
   [Types.NEW_TICKET]: "New ticket",
   [Types.TICKET]: "Ticket",
   [Types.TICKETS]: "Tickets",
-  [Types.BATCH_DEMO]: "Batch Demo Page",
 };
 
 export default function App() {
   let [searchParams] = useSearchParams();
-  const [batch, setBatch] = useState(
+  const [batch] = useState(
     () => searchParams.get("batch") === "true",
     [searchParams],
   );
@@ -87,25 +85,7 @@ export default function App() {
       retry={3}
     >
       <Nav type={type} accounts={accounts} />
-      <ToggleBatchingButton batch={batch} setBatch={setBatch} />
       <Outlet />
     </AuthzProvider>
-  );
-}
-
-function ToggleBatchingButton({ batch, setBatch }) {
-  const [_, setSearchParams] = useSearchParams();
-  const handleChange = () => {
-    setBatch(!batch);
-    setSearchParams({ batch: !batch });
-  };
-
-  return (
-    <button
-      onClick={handleChange}
-      className={`toggle-batching-button ${batch ? "on" : "off"}`}
-    >
-      {batch ? "disable" : "enable"} batching
-    </button>
   );
 }
