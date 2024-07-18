@@ -3,19 +3,29 @@ package tickets.spring
 default main = {"decision": false}
 
 authHeader := input.action.headers.authorization
-tenant := trim(split(authHeader, "/")[0], " \t")
+tenant := trim(split(split(authHeader, "/")[0], " ")[1], " \t")
 user := trim(split(authHeader, "/")[1], " \t")
 
-action := a {
+action = a {
     input.action.name == "GET"
     input.resource.id == "/tickets"
     a := "list"
-} else := a {
+} else = a {
+    input.action.name == "GET"
+    regex.match("^/tickets/[0-9]+$", input.resource.id)
+    a := "get"
+} else = a {
     input.action.name == "POST"
     input.resource.id == "/tickets"
     a := "create"
-
-    # TODO: the other actions
+} else = a {
+    input.action.name == "PUT"
+    regex.match("^/tickets/[0-9]+$", input.resource.id)
+    a := "overwrite"
+} else = a {
+    input.action.name == "POST"
+    regex.match("^/tickets/[0-9]+/resolve$", input.resource.id)
+    a := "resolve"
 }
 
 xform := {
@@ -25,12 +35,19 @@ xform := {
 }
 
 main = x {
-    #d := data.tickets.allow with xform as input
+    d := data.tickets.allow with input as xform
     x := {
-        #"decision": d,
-        "decision": true,
+        "decision": d,
         "context": {
-            "reason": "sample policy"
+            "id": "0",
+            "reason_user": {
+                "en": "sample policy"
+            },
+            "data": {
+                "echo": input,
+                "tenant": tenant,
+                "user": user,
+            }
         }
     }
 }
