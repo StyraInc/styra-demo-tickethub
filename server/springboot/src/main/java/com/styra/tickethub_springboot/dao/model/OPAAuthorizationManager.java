@@ -9,6 +9,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.access.AccessDeniedException;
 import com.styra.opa.OPAClient;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Bean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.function.Supplier;
 import java.util.Map;
@@ -18,13 +22,27 @@ import java.util.Enumeration;
 
 import static java.util.Map.entry;
 
+@Component
 public class OPAAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
+
+    private final static Logger logger = LoggerFactory.getLogger(OPAAuthorizationManager.class);
+
 
     private OPAClient opa;
 
     private static final String SubjectType = "java_authentication";
     private static final String RequestResourceType = "endpoint";
     private static final String RequestContextType = "http";
+
+    public OPAAuthorizationManager() {
+        String opaURL = "http://localhost:8181";
+        String opaURLEnv = System.getenv("OPA_URL");
+        if (opaURLEnv != null) {
+            opaURL = opaURLEnv;
+        }
+        OPAClient opa = new OPAClient(opaURL);
+        this.opa = opa;
+    }
 
     public OPAAuthorizationManager(OPAClient opa) {
         this.opa = opa;
@@ -41,7 +59,7 @@ public class OPAAuthorizationManager implements AuthorizationManager<RequestAuth
         String actionName = request.getMethod();
         String actionProtocol = request.getProtocol();
         Enumeration<String> headerNamesEnumeration = request.getHeaderNames();
-        HashMap<String, String> headers = new HashMap();
+        HashMap<String, String> headers = new HashMap<String, String>();
         while (headerNamesEnumeration.hasMoreElements()) {
             String headerName = headerNamesEnumeration.nextElement();
             String headerValue = request.getHeader(headerName);
@@ -79,16 +97,18 @@ public class OPAAuthorizationManager implements AuthorizationManager<RequestAuth
             ))
         );
 
-        System.out.printf("XXX iMap: %s\n", iMap);
+        logger.debug(String.format("created input for OPA: %s\n", iMap));
 
         return iMap;
     }
 
     private OPAResponse opaMachinery(Supplier<Authentication> authentication, RequestAuthorizationContext object) {
+        logger.debug(String.format("opaMachinery(%s %s, %s %s)", authentication.getClass(), authentication, object.getClass(), object));
         Map<String, Object> iMap = makeRequestInput(authentication, object);
         OPAResponse resp = null;
         try {
             resp = opa.evaluate("tickets/spring/main", iMap, new TypeReference<OPAResponse>() {});
+            logger.debug("OPA response is: {}", resp);
         } catch (Exception e) {
             System.out.printf("ERROR: exception from OPA client: %s\n", e);
             e.printStackTrace(System.out);
@@ -98,6 +118,7 @@ public class OPAAuthorizationManager implements AuthorizationManager<RequestAuth
     }
 
     public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext object) {
+        logger.debug(String.format("check(%s %s, %s %s)", authentication.getClass(), authentication, object.getClass(), object));
         OPAResponse resp = this.opaMachinery(authentication, object);
         if (resp == null) {
             return new AuthorizationDecision(false);
@@ -106,6 +127,8 @@ public class OPAAuthorizationManager implements AuthorizationManager<RequestAuth
     }
 
     public void verify(Supplier<Authentication> authentication, RequestAuthorizationContext object) {
+        logger.debug(String.format("verify(%s %s, %s %s)", authentication.getClass(), authentication, object.getClass(), object));
+
         OPAResponse resp = this.opaMachinery(authentication, object);
         if (resp == null) {
             throw new AccessDeniedException("null response from policy");

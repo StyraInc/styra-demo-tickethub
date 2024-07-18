@@ -14,6 +14,7 @@ import org.slf4j.MDC;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestWrapper;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
 import com.styra.opa.OPAClient;
 
@@ -55,8 +56,13 @@ public class SecurityConfig {
         }
         OPAClient opa = new OPAClient(opaURL);
 
+        AuthorizationManager<RequestAuthorizationContext> am = new OPAAuthorizationManager(opa);
+
         http.authorizeHttpRequests(authorize -> authorize
-                .anyRequest().access(new OPAAuthorizationManager(opa))).csrf(csrf -> csrf.disable());
+                .anyRequest().access(am)).csrf(csrf -> csrf.disable());
+
+        //http.authorizeHttpRequests(authorize -> authorize
+        //        .anyRequest().access(am)).csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }

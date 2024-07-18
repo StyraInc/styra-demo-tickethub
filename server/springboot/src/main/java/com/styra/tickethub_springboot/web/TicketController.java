@@ -88,6 +88,7 @@ public class TicketController {
 
   @GetMapping("/tickets")
   Map<String, List<Ticket>> all(@RequestHeader("authorization") String authHeader) {
+      System.out.println("DEBUG 91 getting /tickets");
       return java.util.Map.ofEntries(entry("tickets", ticketRepository.findByTenant(tenantFromHeader(authHeader))));
   }
 

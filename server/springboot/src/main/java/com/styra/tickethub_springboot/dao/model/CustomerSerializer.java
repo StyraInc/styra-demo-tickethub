@@ -20,6 +20,7 @@ public class CustomerSerializer extends StdSerializer<Customer> {
 
     @Override
     public void serialize(Customer customer, JsonGenerator gen, SerializerProvider provider) throws IOException {
+        System.out.printf("XXX serializing customer %s\n", customer);
         gen.writeString(customer.getName());
     }
 }

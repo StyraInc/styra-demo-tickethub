@@ -20,6 +20,7 @@ public class TenantSerializer extends StdSerializer<Tenant> {
 
     @Override
     public void serialize(Tenant tenant, JsonGenerator gen, SerializerProvider provider) throws IOException {
+        System.out.printf("XXX serializing tenant %s\n", tenant);
         gen.writeString(tenant.getName());
     }
 }
