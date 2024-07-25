@@ -20,7 +20,6 @@ configurations {
 }
 
 repositories {
-	mavenLocal() // TODO: for local dev only
 	mavenCentral()
 }
 
