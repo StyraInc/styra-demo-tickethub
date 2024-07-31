@@ -19,6 +19,7 @@ The list of `<SERVER_IMPLEMENTATION>` is:
 - `node`
 - `csharp`
 - `java`
+- `springboot`
 
 The list of `<CLIENT_IMPLEMENTATION>` is:
 - `html`
