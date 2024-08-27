@@ -1,16 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Styra.Opa;
 using System.Net.Mime;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Collections.Generic;
 using TicketHub.Authorization;
 using TicketHub.Database;
-using Newtonsoft.Json;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
-using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace TicketHub.Controllers;
 
@@ -44,7 +36,7 @@ public class TicketController : ControllerBase
     // List all tickets.
     [HttpGet]
     [Route("tickets")]
-    [OpaAuthorization("tickets/allow", "list")]
+    [OpaRuleAuthorization("tickets/allow", "list")]
     public async Task<ActionResult<IAsyncEnumerable<Ticket>>> ListTickets()
     {
         var tName = HttpContext.Items["Tenant"]?.ToString();
@@ -64,7 +56,7 @@ public class TicketController : ControllerBase
     // Get a specific ticket.
     [HttpGet]
     [Route("tickets/{id:int}")]
-    [OpaAuthorization("tickets/allow", "get")]
+    [OpaRuleAuthorization("tickets/allow", "get")]
     public async Task<ActionResult<Ticket>> GetTicket(int id)
     {
         Ticket? ticket = await _dbContext.Tickets
@@ -77,7 +69,7 @@ public class TicketController : ControllerBase
     // Create a ticket.
     [HttpPost]
     [Route("tickets")]
-    [OpaAuthorization("tickets/allow", "create")]
+    [OpaRuleAuthorization("tickets/allow", "create")]
     public async Task<ActionResult<Ticket>> CreateTicket([FromBody] TicketFields tf)
     {
 
@@ -102,7 +94,7 @@ public class TicketController : ControllerBase
     // Resolve a ticket.
     [HttpPost]
     [Route("tickets/{id:int}/resolve")]
-    [OpaAuthorization("tickets/allow", "resolve")]
+    [OpaRuleAuthorization("tickets/allow", "resolve")]
     public async Task<ActionResult<Ticket>> ResolveTicket(int id, [FromBody] ResolveFields rf)
     {
         Ticket? ticket = await _dbContext.Tickets.FindAsync(id);

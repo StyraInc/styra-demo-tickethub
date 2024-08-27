@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Newtonsoft.Json;
 using TicketHub.Authorization;
-using TicketHub.Controllers;
 using TicketHub.Database;
 
 var builder = WebApplication.CreateBuilder(args);
