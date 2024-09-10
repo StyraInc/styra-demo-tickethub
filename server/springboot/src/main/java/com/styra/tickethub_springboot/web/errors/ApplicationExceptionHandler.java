@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,8 +12,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 
 import java.net.URI;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,4 +49,20 @@ public class ApplicationExceptionHandler {
     body.setProperty("hostname", "localhost");
     return body;
   }
+
+    //@ExceptionHandler(AccessDeniedException.class)
+    //public ResponseEntity accessDeniedException(AccessDeniedException e) throws AccessDeniedException  {
+    //    // https://stackoverflow.com/a/64845732
+    //
+    //    System.out.println("YYYYYYYYYYY global controller");
+    //
+    //    throw e;
+    //}
+
+    @ExceptionHandler(value = {AccessDeniedException.class})
+    public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
+                         AccessDeniedException accessDeniedException) throws IOException {
+
+        System.out.println("ZZZZZZZZ");
+    }
 }
