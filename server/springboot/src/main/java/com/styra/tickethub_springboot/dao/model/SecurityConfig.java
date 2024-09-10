@@ -16,6 +16,7 @@ import org.springframework.security.web.access.intercept.RequestAuthorizationCon
 import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestWrapper;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import com.styra.opa.springboot.OPAAuthorizationManager;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.styra.opa.OPAClient;
 
@@ -56,8 +57,9 @@ public class SecurityConfig {
         // purposes, it is disabled because it makes it easier to work with
         // locally. If you want to use any of this code for a production
         // service, it is important to re-enable CSRF protection.
-        http.authorizeHttpRequests(authorize -> authorize
-                .anyRequest().access(am)).csrf(csrf -> csrf.disable());
+        http.addFilterBefore(new CustomAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+            .authorizeHttpRequests(authorize -> authorize.anyRequest().access(am))
+            .csrf(csrf -> csrf.disable());
 
         return http.build();
     }
