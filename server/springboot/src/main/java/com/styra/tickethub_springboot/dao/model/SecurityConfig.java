@@ -17,6 +17,7 @@ import org.springframework.security.web.servletapi.SecurityContextHolderAwareReq
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import com.styra.opa.springboot.OPAAuthorizationManager;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.access.AccessDeniedHandler;
 
 import com.styra.opa.OPAClient;
 
@@ -25,6 +26,8 @@ import static java.util.Map.entry;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
+
 
 @Configuration
 @EnableWebSecurity
@@ -51,6 +54,8 @@ public class SecurityConfig {
 
         AuthorizationManager<RequestAuthorizationContext> am = new OPAAuthorizationManager(opa, "tickets/spring/main");
 
+        AccessDeniedHandler adh = new CustomAccessDeniedHandler(am);
+
         // NOTE: The `.csrf(...)` disables CSRF protections. This could
         // be a serious security vulnerability in a production environment.
         // However, since this API is intended for educational and development
@@ -59,10 +64,15 @@ public class SecurityConfig {
         // service, it is important to re-enable CSRF protection.
         http.addFilterBefore(new CustomAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(authorize -> authorize.anyRequest().access(am))
-            .csrf(csrf -> csrf.disable());
+            .csrf(csrf -> csrf.disable())
+            .exceptionHandling().accessDeniedHandler(adh);
 
         return http.build();
     }
 
+    //@Bean
+    //public AccessDeniedHandler accessDeniedHandler(){
+    //    return new CustomAccessDeniedHandler();
+    //}
 
 }

@@ -64,6 +64,9 @@ services:
   server-springboot:
     build: server/springboot/
     init: true
+    volumes:
+      # TODO: for local dev only
+      - "/Users/cad/f/src/opa-springboot/:/mnt/opa-springboot:ro"
     environment:
       # TODO: figure out how to get Spring to accept db URL from env
       #- OPA_URL=http://opa:8181
