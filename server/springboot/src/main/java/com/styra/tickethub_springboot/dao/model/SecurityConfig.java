@@ -54,7 +54,8 @@ public class SecurityConfig {
 
         AuthorizationManager<RequestAuthorizationContext> am = new OPAAuthorizationManager(opa, "tickets/spring/main");
 
-        AccessDeniedHandler adh = new CustomAccessDeniedHandler(am);
+        CustomAccessDeniedHandler adh = new CustomAccessDeniedHandler();
+        adh.setManager(am);
 
         // NOTE: The `.csrf(...)` disables CSRF protections. This could
         // be a serious security vulnerability in a production environment.

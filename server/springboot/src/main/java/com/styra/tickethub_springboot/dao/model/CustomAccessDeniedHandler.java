@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 
 import com.styra.opa.springboot.OPAAccessDeniedException;
 import com.styra.opa.springboot.OPAAuthorizationDecision;
+import com.styra.opa.springboot.OPAResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,9 +25,19 @@ import java.util.function.Supplier;
 @Component
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
-    private final AuthorizationManager<RequestAuthorizationContext> authorizationManager;
+    private AuthorizationManager<RequestAuthorizationContext> authorizationManager;
 
-    public CustomAccessDeniedHandler(AuthorizationManager<RequestAuthorizationContext> authorizationManager) {
+    /**
+     * This method is used to set the authorization manager, it must be called
+     * before the first time the handler is used. Normally, you would want to
+     * do this with the constructor, but that runs afoul of some esoteric java
+     * bean runtime issue, possibly because this class is declared with
+     * @component.
+     *
+     * @param authorizationManager
+     * @return
+     */
+    public void setManager(AuthorizationManager<RequestAuthorizationContext> authorizationManager) {
         this.authorizationManager = authorizationManager;
     }
 
@@ -34,34 +45,27 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
 
-        if (accessDeniedException instanceof OPAAccessDeniedException) {
-            System.out.println("ZZZZZZZZZZZZZZZ OPA type");
-        } else {
-            System.out.println("ZZZZZZZZZZZZZZZ Spring type");
-            System.out.println(accessDeniedException.getCause());
-        }
-
+        //  Reconstruct the decision that would have lead to this decision.
         RequestAuthorizationContext context = new RequestAuthorizationContext(request);
         Supplier<Authentication> auth = () -> SecurityContextHolder.getContext().getAuthentication();
-
         AuthorizationDecision dec = this.authorizationManager.check(auth, context);
 
-        //response.setContentType("application/json;charset=UTF-8");
-        //response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setContentType("application/json;charset=UTF-8");
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 
         Map<String, Object> responseBody = new HashMap<>();
-        //responseBody.put("timestamp", System.currentTimeMillis());
         responseBody.put("status", 403);
         responseBody.put("error", "Forbidden");
-        responseBody.put("reason", accessDeniedException.getMessage());
-        responseBody.put("dec", dec);
-        //responseBody.put("path", request.getRequestURI());
-        //
 
-        System.out.println("XXXXXXXXXXXXXXXXXX custom handler called!");
+        if (dec instanceof OPAAuthorizationDecision) {
+            OPAResponse opaResp = ((OPAAuthorizationDecision) dec).getOPAResponse();
+            String reason = opaResp.getReasonForDecision("en");
+            if (reason  != null) {
+                responseBody.put("reason", reason);
+            }
+        } 
 
         ObjectMapper mapper = new ObjectMapper();
-
         response.getWriter().write(mapper.writeValueAsString(responseBody));
     }
 }
