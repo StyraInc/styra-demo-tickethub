@@ -22,13 +22,19 @@
         </tr>
       </thead>`;
 
-                const { tickets } = await fetch("/api/tickets", {headers: {Authorization: makeAuthHeader()}}).then((res) =>
-                    res.json(),
-                );
+                const response = await fetch(`/api/tickets`, {headers: {Authorization: makeAuthHeader()}});
+                const tickets = (await response.json());
+
+                if (response.status !== 200) {
+                    const messageContainer = document.getElementById("message");
+                    messageContainer.innerHTML = `\
+        <span class="update-status">Error: user unauthorized list tickets: ${tickets.reason || 'no reason specified'}</span>`;
+                }
+
                 const tbody = document.createElement("tbody");
                 table.appendChild(tbody);
 
-                tbody.innerHTML = tickets
+                tbody.innerHTML = tickets["tickets"]
                     .map(
                         (ticket) => `\
       <tr onclick="window.location.href = '/ticket/${ticket.id}'">
@@ -60,6 +66,7 @@
         <main>
             <table id="ticket-list"></table>
             <a class="button-large" href="/ticket/new">+ New ticket</a>
+            <div id="message"></div>
         </main>
     </body>
 </html>
