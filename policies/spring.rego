@@ -37,7 +37,7 @@ xform := {
 main = x {
     d := data.tickets.allow with input as xform
     reason_user := data.tickets.reason_user with input as xform
-    reason_admin = data.tickets.reason_admin with input as xform
+    reason_admin := data.tickets.reason_admin with input as xform
     x := {
         "decision": d,
         "context": {
