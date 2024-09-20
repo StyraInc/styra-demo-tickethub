@@ -9,9 +9,8 @@
             import { makeAuthHeader } from "/scripts/login.js";
 
             async function displayTicket(id) {
-                const ticket = await fetch(`/api/tickets/${id}`, {headers: {Authorization: makeAuthHeader()}}).then((x) =>
-                    x.json(),
-                );
+                const response = await fetch(`/api/tickets/${id}`, {headers: {Authorization: makeAuthHeader()}});
+                const ticket = await response.json();
 
                 document.getElementById("customer").textContent =
                     ticket.customer;
@@ -23,6 +22,12 @@
                     ticket.resolved ? "yes" : "no";
                 document.getElementById("ticket-resolve-button").textContent =
                     `${ticket.resolved ? "Unresolve" : "Resolve"} ticket`;
+
+                if (response.status !== 200) {
+                    const messageContainer = document.getElementById("message");
+                    messageContainer.innerHTML = `\
+        <span class="update-status">Error: user unauthorized to access ticket: ${ticket.reason || 'no reason specified'}</span>`;
+                }
 
                 return ticket;
             }
@@ -53,8 +58,9 @@
           ${(state = ticket.resolved ? "unresolved → resolved" : "resolved → unresolved")}
         </span>`;
                 } else {
+                    const ticket = await response.json();
                     messageContainer.innerHTML = `\
-        <span class="update-status">Error: user unauthorized to perform operation</span>`;
+        <span class="update-status">Error: user unauthorized to perform operation: ${ticket.reason || 'no reason specified'}</span>`;
                 }
             }
 
