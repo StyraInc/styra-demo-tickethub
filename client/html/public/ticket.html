@@ -26,7 +26,7 @@
                 if (response.status !== 200) {
                     const messageContainer = document.getElementById("message");
                     messageContainer.innerHTML = `\
-        <span class="update-status">Error: user unauthorized access ticket: ${ticket.reason || 'no reason specified'}</span>`;
+        <span class="update-status">Error: user unauthorized to access ticket: ${ticket.reason || 'no reason specified'}</span>`;
                 }
 
                 return ticket;
