@@ -46,8 +46,7 @@ public class CustomAuthentication implements Authentication {
 
     @Override
     public boolean isAuthenticated() {
-        //return authenticated;
-        return true;
+        return authenticated;
     }
 
     @Override
