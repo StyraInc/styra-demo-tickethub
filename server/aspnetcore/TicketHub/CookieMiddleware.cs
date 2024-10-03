@@ -1,54 +1,53 @@
+using System.Security.Claims;
+using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Options;
 
-public class UseCookieAuthMiddleware
+public class CustomCookieAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
-    private readonly RequestDelegate _next;
-
-    public UseCookieAuthMiddleware(RequestDelegate next)
+    [Obsolete]
+    public CustomCookieAuthenticationHandler(
+        IOptionsMonitor<AuthenticationSchemeOptions> options,
+        ILoggerFactory logger,
+        UrlEncoder encoder,
+        ISystemClock clock) : base(options, logger, encoder, clock)
     {
-        _next = next;
     }
 
-    public async Task Invoke(HttpContext context)
+    protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        // Note(philip): Because the cookie value we're using has invalid
-        // characters (spaces), we have to hack the cookie value out of the
-        // Cookie header ourselves. ASP.NET follows the RFC for cookie parsing,
-        // so it will reject the user cookie if we try to extract it with
-        // context.Request.Cookies["user"].
-        string? rawCookieHeader = context.Request.Headers["Cookie"];
+        string? rawCookieHeader = Request.Headers["Cookie"];
 
         // Cookie not found? Error out.
         if (string.IsNullOrEmpty(rawCookieHeader))
         {
-            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            await context.Response.WriteAsync("{\"error\": \"authentication error: user credentials not provided\"}");
-            return;
+            return AuthenticateResult.NoResult();
         }
 
         // Parse the cookie value.
         string pattern = @"user=(?<tenant>[^/]+) / (?<subject>[^;]+)";
         Match match = Regex.Match(rawCookieHeader, pattern);
-        if (match.Success)
+        if (!match.Success)
         {
-            // Extract the values using named capture groups
-            string tenant = match.Groups["tenant"].Value.Trim();
-            string subject = match.Groups["subject"].Value.Trim();
-            context.Items["Tenant"] = tenant;
-            context.Items["Subject"] = subject;
+            return AuthenticateResult.Fail("Invalid cookie format");
         }
+        // Extract the values using named capture groups
+        string tenant = match.Groups["tenant"].Value.Trim();
+        string subject = match.Groups["subject"].Value.Trim();
 
-        await _next(context);
-    }
-}
 
-public static class UseCookieAuthMiddlewareExtensions
-{
-    public static IApplicationBuilder UseCookieAuthMiddleware(this IApplicationBuilder builder)
-    {
-        return builder.UseMiddleware<UseCookieAuthMiddleware>();
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, subject),
+            new Claim(ClaimTypes.Name, subject),
+            new Claim("Tenant", tenant),
+        };
+
+        var identity = new ClaimsIdentity(claims, Scheme.Name);
+        var principal = new ClaimsPrincipal(identity);
+        var ticket = new AuthenticationTicket(principal, Scheme.Name);
+
+        return AuthenticateResult.Success(ticket);
     }
 }

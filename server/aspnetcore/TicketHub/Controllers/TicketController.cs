@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mime;
+using System.Security.Claims;
 using TicketHub.Database;
 
 namespace TicketHub.Controllers;
@@ -37,7 +38,7 @@ public class TicketController : ControllerBase
     [Route("tickets")]
     public async Task<ActionResult<IAsyncEnumerable<Ticket>>> ListTickets()
     {
-        var tName = HttpContext.Items["Tenant"]?.ToString();
+        var tName = User.FindFirstValue("Tenant");
         if (tName is string)
         {
             Tenant tenant = await getTenantByName(tName);
@@ -68,8 +69,7 @@ public class TicketController : ControllerBase
     [Route("tickets")]
     public async Task<ActionResult<Ticket>> CreateTicket([FromBody] TicketFields tf)
     {
-
-        string tenant = HttpContext.Items["Tenant"]?.ToString() ?? "";
+        var tenant = User.FindFirstValue("Tenant");
         Ticket ticket = new();
         // Fetch tenant, then create customer if needed.
         Tenant foundTenant = await _dbContext.Tenants.Where(t => t.Name == tenant).FirstAsync();

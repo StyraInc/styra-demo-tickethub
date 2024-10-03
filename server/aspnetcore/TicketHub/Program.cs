@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using TicketHub.Database;
 using Styra.Opa;
 using Styra.Opa.AspNetCore;
+using Microsoft.AspNetCore.Authentication;
 
 
 string opaURL = System.Environment.GetEnvironmentVariable("OPA_URL") ?? "http://localhost:8181";
@@ -19,12 +20,18 @@ builder.Services.AddControllers().AddNewtonsoftJson(opts =>
     opts.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
 });
 builder.Services.AddExceptionHandler<CustomExceptionHandler>();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = "CustomCookieAuth";
+    options.DefaultChallengeScheme = "CustomCookieAuth";
+}).AddScheme<AuthenticationSchemeOptions, CustomCookieAuthenticationHandler>(
+    "CustomCookieAuth", options => { });
 
 // Create the top-level application.
 var app = builder.Build();
 
 // Wire in middleware.
-app.UseCookieAuthMiddleware();
+app.UseAuthentication();
 app.UseMiddleware<OpaAuthorizationMiddleware>(opa, "tickets/aspnetcore/main");
 app.MapControllers();
 
