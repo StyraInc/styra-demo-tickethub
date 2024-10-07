@@ -20,9 +20,11 @@ public class TicketController : ControllerBase
 
     private async Task<Customer> addCustomer(Tenant tenant, string name)
     {
-        Customer c = new Customer();
-        c.Name = name;
-        c.Tenant = tenant.Id;
+        Customer c = new()
+        {
+            Name = name,
+            Tenant = tenant.Id,
+        };
         await _dbContext.Customers.AddAsync(c);
         return c;
     }
