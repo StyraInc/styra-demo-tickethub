@@ -28,6 +28,20 @@ services:
     expose:
       - 4000
 
+  server-aspnetcore:
+    build: server/aspnetcore/
+    profiles:
+      - aspnetcore
+    environment:
+      OPA_URL: "http://localhost:8181"
+      DATABASE_CONN_STR: "Host=localhost;Database=postgres;Username=postgres;Password=schmickethub"
+    depends_on:
+      - database
+      - opa
+    network_mode: host
+    expose:
+      - 4000
+
   database:
     image: postgres
     restart: always

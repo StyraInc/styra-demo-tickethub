@@ -50,6 +50,14 @@ run-csharp-react: SERVER = csharp
 run-csharp-react: CLIENT = react
 run-csharp-react: run
 
+run-aspnetcore-html: SERVER = aspnetcore
+run-aspnetcore-html: CLIENT = html
+run-aspnetcore-html: run
+
+run-aspnetcore-react: SERVER = aspnetcore
+run-aspnetcore-react: CLIENT = react
+run-aspnetcore-react: run
+
 .PHONY: clean
 clean:
 	rm -rf dist
@@ -106,4 +114,12 @@ package-csharp-react: SERVER = csharp
 package-csharp-react: CLIENT = react
 package-csharp-react: tar-csharp-react
 
-package-all: package-node-html package-node-react package-java-html package-java-react package-csharp-html package-csharp-react package-go-html package-go-react
+package-aspnetcore-html: SERVER = aspnetcore
+package-aspnetcore-html: CLIENT = html
+package-aspnetcore-html: tar-aspnetcore-html
+
+package-aspnetcore-react: SERVER = aspnetcore
+package-aspnetcore-react: CLIENT = react
+package-aspnetcore-react: tar-aspnetcore-react
+
+package-all: package-node-html package-node-react package-java-html package-java-react package-csharp-html package-csharp-react package-aspnetcore-html package-aspnetcore-react  package-go-html package-go-react
