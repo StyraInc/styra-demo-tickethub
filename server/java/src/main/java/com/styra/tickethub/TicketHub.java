@@ -61,9 +61,7 @@ public class TicketHub {
     @Path("/tickets")
     @Produces({MediaType.APPLICATION_JSON})
     public Tickets getTickets() {
-        if (!authz()) {
-            throw new ForbiddenException("Not authorized");
-        }
+        authz();
         return new Tickets(storage.getTickets(getTenant()));
     }
 
@@ -71,9 +69,7 @@ public class TicketHub {
     @Path("/tickets/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Ticket getTicket(@PathParam("id") int id) {
-        if (!authz()) {
-            throw new ForbiddenException("Not authorized");
-        }
+        authz();
 
         // This will perform poorly with a large number of tickets, but since
         // this is just a demo it should never have more than a few dozen.
@@ -97,9 +93,7 @@ public class TicketHub {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Ticket addTicket(Ticket ticket) {
-        if (!authz()) {
-            throw new ForbiddenException("Not authorized");
-        }
+        authz();
         return storage.addTicket(getTenant(), ticket);
     }
 
@@ -107,9 +101,7 @@ public class TicketHub {
     @Path("/tickets/{id}/resolve")
     @Produces(MediaType.APPLICATION_JSON)
     public Ticket resolveTicket(@PathParam("id") int id, TicketStatus status) {
-        if (!authz()) {
-            throw new ForbiddenException("Not authorized");
-        }
+        authz();
         var tickets = storage.getTickets(getTenant());
         Ticket ticket = null;
         for (Ticket t : tickets) {
@@ -171,7 +163,7 @@ public class TicketHub {
         return request.getMethod();
     }
 
-    private boolean authz() {
+    private void authz() throws ForbiddenExceptionWithReason {
         String path = getSessionPath();
         String action = getSessionMethod().toLowerCase();
 
@@ -200,16 +192,28 @@ public class TicketHub {
             entry("action", action)
         );
 
-        boolean allow;
+        boolean allow = false;
+        String reason = null;
 
         try {
             allow = opa.check("tickets/allow", iMap);
         } catch (Exception e) {
-            System.out.printf("ERROR: request threw exception: %s\n", e);
-            return false;
+            throw new ForbiddenExceptionWithReason(String.format("OPA request failed due to exception: %s", e), null);
         }
 
-        return allow;
+        if (allow) {
+            // don't bother getting a reason if the request was allowed
+            return;
+        }
+
+        try {
+            reason = opa.evaluate("tickets/reason", iMap);
+        } catch (Exception e) {
+            throw new ForbiddenExceptionWithReason(String.format("OPA request failed due to exception: %s", e), null);
+        }
+
+        throw new ForbiddenExceptionWithReason("access denied by policy", reason);
+
     }
 
     public static void main(String... args) throws Exception {
