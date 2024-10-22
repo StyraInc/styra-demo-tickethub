@@ -1,7 +1,6 @@
 import "express-async-errors"; // makes sure uncaught errors in async handlers doesn't cause crash
 import "module-alias/register.js";
 
-import cookieParser from "cookie-parser";
 import express from "express";
 import StatusCodes from "http-status-codes";
 
@@ -18,7 +17,6 @@ const prisma = new PrismaClient();
 // common middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
 function readToken(val) {
   if (!val) return [];
