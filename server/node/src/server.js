@@ -26,9 +26,6 @@ function readToken(val) {
 // authentication
 app.use(async (req, res, next) => {
   let [tenantName, subject] = readToken(req.headers.authorization);
-  if ((!tenantName || !subject) && "user" in req.cookies) {
-    [tenantName, subject] = req.cookies.user.split(" / "); // fallback to cookie
-  }
   if (!tenantName || !subject) {
     return res.status(UNAUTHORIZED).json({
       error: "authentication error: user credentials not provided",
