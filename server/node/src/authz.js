@@ -22,7 +22,6 @@ export class Authorizer {
       },
     },
   ) {
-    if (!(await this.opa.evaluate(path, { user, tenant, ...input })))
-      throw new UnauthorizedError();
+    return this.opa.evaluate(path, { user, tenant, ...input });
   }
 }

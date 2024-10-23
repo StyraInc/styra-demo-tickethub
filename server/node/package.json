@@ -45,7 +45,8 @@
     "jsonfile": "^6.1.0",
     "module-alias": "^2.2.2",
     "morgan": "^1.10.0",
-    "@styra/opa": "^1.6.0"
+    "@styra/opa": "^1.6.0",
+    "@ucast/core": "^1.10.2"
   },
   "devDependencies": {
     "eslint": "^9.13.0",
