@@ -27,12 +27,12 @@ user_is_resolver(user, tenant) if "resolver" in roles[tenant][user]
 
 ## CONDITIONS ##
 
-#conditions["tickets.resolved"] := false if user_is_resolver(input.user, input.tenant)
+conditions["tickets.resolved"] := false if user_is_resolver(input.user, input.tenant)
 #conditions["tickets.id"].ne := 2
 
-conditions.or contains {"tickets.resolved": false} if user_is_resolver(input.user, input.tenant)
-conditions.or contains {"tickets.id": {"ne": 2}}
-conditions["customers.name"] := "Globex"
+#conditions.or contains {"tickets.resolved": false} if user_is_resolver(input.user, input.tenant)
+#conditions.or contains {"tickets.id": {"ne": 2}}
+#conditions["customers.name"] := "Globex"
 
 ## DENY REASONS ##
 
