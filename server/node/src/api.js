@@ -3,12 +3,7 @@ import { Router } from "express";
 import { param } from "express-validator";
 import { Authorizer } from "./authz.js";
 import { PrismaClient } from "@prisma/client";
-import {
-  ObjectQueryParser,
-  createInterpreter,
-  Condition,
-  //InterpretationContext, // NB(sr): that's an interface
-} from "@ucast/core";
+import { ucastToPrisma } from "@styra/ucast-prisma";
 
 // all routes in this router is prefixed with /api, see ./server.js:42
 export const router = Router();
@@ -31,7 +26,7 @@ router.post(
     const {
       params: { id },
     } = req;
-    const { allow, reason, conditions } = await authz.authorized(path, { action: "resolve" }, req);
+    const { allow, reason } = await authz.authorized(path, { action: "resolve" }, req);
     if (!allow)
       return res.status(FORBIDDEN).json({reason});
 
@@ -49,7 +44,10 @@ router.post(
 
 // create ticket
 router.post("/tickets", async (req, res) => {
-  await authz.authorized(path, { action: "create" }, req);
+  const { allow, reason } = await authz.authorized(path, { action: "create" }, req);
+  if (!allow)
+    return res.status(FORBIDDEN).json({reason});
+
 
   const {
     auth: {
@@ -92,25 +90,21 @@ router.get("/tickets", async (req, res) => {
   const { allow, reason, conditions } = await authz.authorized(path, { action: "list" }, req);
   if (!allow)
     return res.status(FORBIDDEN).json({reason});
-  console.log({allow, conditions});
+  console.dir({allow, conditions}, {depth: null});
 
-  // find the relevant conditions: tickets.*
-  const parser = new ObjectQueryParser({ eq: {type: "field" }});
-  const parsed = parser.parse(conditions);
-  // console.log({parsed});
-  const eq = (node, value, _ctx) => {
-    //console.log({node, value});
-    const [tbl, field] = node.field.split(".");
-    return {[tbl]: {[field]: node.value}};
-    };
-  const interpret = createInterpreter({ eq });
-  const interpreted = interpret(parsed, 'test');
-  console.log(interpreted);
+  const interpreted = ucastToPrisma(conditions);
+  console.dir(interpreted, {depth: null});
+
+  const { tickets: primary, ...extras } = interpreted;
 
   const tickets = (
     await prisma.tickets.findMany({
-      where: { tenant: req.auth.tenant.id, ...interpreted.tickets },
-      include: { customers: true },
+      where: {
+        tenant: req.auth.tenant.id,
+        ...primary,
+        ...extras, // most likely empty
+      },
+      ...includeCustomers,
     })
   ).map((ticket) => toTicket(ticket));
   return res.status(OK).json({ tickets });
@@ -121,7 +115,9 @@ router.get("/tickets/:id", [param("id").isInt().toInt()], async (req, res) => {
   const {
     params: { id },
   } = req;
-  await authz.authorized(path, { action: "get", id }, req);
+  const { allow, reason } = await authz.authorized(path, { action: "get", id }, req);
+  if (!allow)
+    return res.status(FORBIDDEN).json({reason});
 
   const ticket = await prisma.tickets.findUniqueOrThrow({
     where: { id },
