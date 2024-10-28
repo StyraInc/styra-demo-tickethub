@@ -36,7 +36,7 @@
   "dependencies": {
     "@prisma/client": "^5.21.1",
     "@styra/opa": "^1.6.0",
-    "@styra/ucast-prisma": "https://gitpkg.vercel.app/StyraInc/opa-typescript/packages/ucast-prisma?push-rslyroouwwxx&scripts.postinstall=npm%20install%20--ignore-scripts%20%26%26%20npm%20run%20build",
+    "@styra/ucast-prisma": "https://gitpkg.vercel.app/StyraInc/opa-typescript/packages/ucast-prisma?main&scripts.postinstall=npm%20install%20--ignore-scripts%20%26%26%20npm%20run%20build",
     "@ucast/core": "^1.10.2",
     "command-line-args": "^6.0.0",
     "dotenv": "^16.0.0",
