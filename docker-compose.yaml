@@ -155,9 +155,10 @@ services:
       - --retry=10
       - --verbose
       - --report-junit=tests/api/report.xml
-      - tests/api/basic.hurl
+      - tests/api/
     environment:
       - HURL_host=localhost
+      - HURL_skip_conditions=${HURL_SKIP_CONDITIONS:-false}
     profiles:
       - tools
     network_mode: host

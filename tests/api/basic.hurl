@@ -139,6 +139,8 @@ jsonpath "$.last_updated" == {{test_ticket_last_update_timestamp}}
 POST http://{{host}}:4000/api/tickets/{{ticket_id}}/resolve
 Content-Type: application/json
 Authorization: Bearer acmecorp / alice
+[Options]
+delay: 1s
 [Cookies]
 user: acmecorp / alice
 { "resolved": true }
@@ -146,4 +148,4 @@ HTTP 200
 [Asserts]
 jsonpath "$.id" == {{ticket_id}}
 jsonpath "$.resolved" == true
-jsonpath "$.last_updated" != {{test_ticket_last_update_timestamp}}
+jsonpath "$.last_updated" > {{test_ticket_last_update_timestamp}}

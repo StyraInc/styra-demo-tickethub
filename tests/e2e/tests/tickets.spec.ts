@@ -24,6 +24,13 @@ test("bob can not create new tickets", async ({ page }) => {
   ).toBeDisabled();
 });
 
+test("ceasar can only see unresolved tickets", async ({ page }) => {
+  test.skip(process.env.CONDITIONS != "true", "skipping conditions test");
+  await page.goto(baseURL);
+  await page.getByLabel("User").selectOption("ceasar");
+  await expect(page.locator("#ticket-list > tbody > tr ")).toHaveCount(4);
+});
+
 test("select another tenant's user switches title and ticket list", async ({
   page,
 }) => {
