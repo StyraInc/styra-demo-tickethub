@@ -146,11 +146,8 @@ router.get("/tickets", async (req, res) => {
     req,
   );
   if (!allow) return res.status(FORBIDDEN).json({ reason });
-  console.dir({ allow, conditions }, { depth: null });
 
   const filters = ucastToPrisma(conditions, "tickets");
-  console.dir(filters, { depth: null });
-
   const tickets = (
     await prisma.tickets.findMany({
       where: {
