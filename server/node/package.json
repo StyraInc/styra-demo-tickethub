@@ -36,7 +36,7 @@
   "dependencies": {
     "@prisma/client": "^5.21.1",
     "@styra/opa": "^1.6.0",
-    "@styra/ucast-prisma": "^0.0.2",
+    "@styra/ucast-prisma": "^0.0.3",
     "@ucast/core": "^1.10.2",
     "command-line-args": "^6.0.1",
     "dotenv": "^16.0.0",

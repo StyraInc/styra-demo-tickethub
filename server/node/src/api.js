@@ -100,17 +100,14 @@ router.get("/tickets", async (req, res) => {
   if (!allow) return res.status(FORBIDDEN).json({ reason });
   console.dir({ allow, conditions }, { depth: null });
 
-  const interpreted = ucastToPrisma(conditions);
-  console.dir(interpreted, { depth: null });
-
-  const { tickets: primary, ...extras } = interpreted;
+  const filters = ucastToPrisma(conditions, "tickets");
+  console.dir(filters, { depth: null });
 
   const tickets = (
     await prisma.tickets.findMany({
       where: {
         tenant: req.auth.tenant.id,
-        ...primary,
-        ...extras, // most likely empty
+        ...filters,
       },
       include: {
         customers: true,
