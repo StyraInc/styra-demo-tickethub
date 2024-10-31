@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
+import { useUsers } from "../UsersContext";
 import { Authz, useAuthz } from "@styra/opa-react";
 
 export default function Tickets() {
   const { user, tenant } = useAuthn();
+  const { users } = useUsers();
   const navigate = useNavigate();
   const [tickets, setTickets] = useState();
 
@@ -20,13 +22,11 @@ export default function Tickets() {
       .then((data) => setTickets(data.tickets));
   }, [tenant, user]);
 
-  // TODO(sr): take these from somewhere else
-  const users = [
-    { value: "none", label: "unassigned" },
-    { value: "alice", label: "Alice" },
-    { value: "bob", label: "Bob" },
-    { value: "ceasar", label: "Ceasar" },
-  ];
+  const usersSelect = users.map(({ name: value }) => ({
+    value,
+    label: capitalizeFirstLetter(value),
+  }));
+  usersSelect.unshift({ value: "none", label: "unassigned" });
 
   const { result: authorizedAssigner } = useAuthz("tickets/allow", {
     action: "assign",
@@ -79,7 +79,7 @@ export default function Tickets() {
                   onChange={(e) => handleAssigneeChange(ticket, e.target.value)}
                   disabled={!authorizedAssigner}
                 >
-                  {users.map(({ value, label }) => (
+                  {usersSelect.map(({ value, label }) => (
                     <option key={value} value={value}>
                       {label}
                     </option>
@@ -123,4 +123,9 @@ export default function Tickets() {
       </Authz>
     </main>
   );
+}
+
+// Thanks SO: https://stackoverflow.com/a/1026087/993018
+function capitalizeFirstLetter(val) {
+  return String(val).charAt(0).toUpperCase() + String(val).slice(1);
 }
