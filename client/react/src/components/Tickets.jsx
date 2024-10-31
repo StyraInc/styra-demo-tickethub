@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
-import { useUsers } from "../UsersContext";
-import { Authz, useAuthz } from "@styra/opa-react";
+import { Authz } from "@styra/opa-react";
+import Assignee from "./Assignee";
 
 export default function Tickets() {
   const { user, tenant } = useAuthn();
-  const { users } = useUsers();
   const navigate = useNavigate();
   const [tickets, setTickets] = useState();
 
@@ -21,29 +20,6 @@ export default function Tickets() {
       .then((res) => res.json())
       .then((data) => setTickets(data.tickets));
   }, [tenant, user]);
-
-  const usersSelect = users.map(({ name: value }) => ({
-    value,
-    label: capitalizeFirstLetter(value),
-  }));
-  usersSelect.unshift({ value: "none", label: "unassigned" });
-
-  const { result: authorizedAssigner } = useAuthz("tickets/allow", {
-    action: "assign",
-    resource: "ticket",
-  });
-
-  const handleAssigneeChange = (ticket, assignee) => {
-    ticket.assignee = assignee;
-    fetch(`/api/tickets/${ticket.id}/assign`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${tenant} / ${user}`,
-      },
-      body: JSON.stringify({ assignee }),
-    });
-  };
 
   return (
     <main>
@@ -74,17 +50,7 @@ export default function Tickets() {
                 {ticket.description}
               </td>
               <td>
-                <select
-                  defaultValue={ticket.assignee}
-                  onChange={(e) => handleAssigneeChange(ticket, e.target.value)}
-                  disabled={!authorizedAssigner}
-                >
-                  {usersSelect.map(({ value, label }) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
+                <Assignee ticket={ticket} />
               </td>
               <td>{ticket.resolved ? "yes" : "no"}</td>
               <td>
@@ -123,9 +89,4 @@ export default function Tickets() {
       </Authz>
     </main>
   );
-}
-
-// Thanks SO: https://stackoverflow.com/a/1026087/993018
-function capitalizeFirstLetter(val) {
-  return String(val).charAt(0).toUpperCase() + String(val).slice(1);
 }
