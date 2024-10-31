@@ -33,6 +33,18 @@ export default function Tickets() {
     resource: "ticket",
   });
 
+  const handleAssigneeChange = (ticket, assignee) => {
+    ticket.assignee = assignee;
+    fetch(`/api/tickets/${ticket.id}/assign`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${tenant} / ${user}`,
+      },
+      body: JSON.stringify({ assignee }),
+    });
+  };
+
   return (
     <main>
       <table id="ticket-list">
@@ -64,12 +76,7 @@ export default function Tickets() {
               <td>
                 <select
                   defaultValue={ticket.assignee}
-                  onChange={(e) => {
-                    ticket.assignee = e.target.value;
-                    alert(
-                      `Assigning ticket #${ticket.id} to ${ticket.assignee} (not supported yet)`,
-                    );
-                  }}
+                  onChange={(e) => handleAssigneeChange(ticket, e.target.value)}
                   disabled={!authorizedAssigner}
                 >
                   {users.map(({ value, label }) => (
@@ -90,6 +97,8 @@ export default function Tickets() {
                     </button>
                   }
                 >
+                  {/* NOTE(sr): This button does not work? It's just to show off disabled/enabled based on authz
+                   and batch queries. */}
                   <button type="submit">
                     {ticket.resolved ? "Unresolve" : "Resolve"}
                   </button>
