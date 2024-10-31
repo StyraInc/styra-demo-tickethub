@@ -12,7 +12,7 @@ const { OK, FORBIDDEN } = StatusCodes;
 const prisma = new PrismaClient({
   log: ["query"],
 });
-const includeCustomers = { include: { customers: true } };
+const includeRelations = { include: { customers: true, users: true } };
 
 // setup authz
 const authz = new Authorizer(process.env.OPA_URL || "http://127.0.0.1:8181/");
@@ -39,7 +39,7 @@ router.post(
         resolved: req.body.resolved ? true : false,
         last_updated: now(),
       },
-      ...includeCustomers,
+      ...includeRelations,
     });
     return res.status(OK).json(toTicket(ticket));
   },
@@ -87,7 +87,7 @@ router.post(
         },
         last_updated: now(),
       },
-      include: { users: true, customers: true },
+      ...includeRelations,
     });
     return res.status(OK).json(toTicket(ticket));
   },
@@ -132,7 +132,7 @@ router.post("/tickets", async (req, res) => {
         connect: { id: tenantId },
       },
     },
-    ...includeCustomers,
+    ...includeRelations,
   });
 
   return res.status(OK).json(toTicket(ticket));
@@ -157,10 +157,7 @@ router.get("/tickets", async (req, res) => {
         tenant: req.auth.tenant.id,
         ...filters,
       },
-      include: {
-        customers: true,
-        users: true,
-      },
+      ...includeRelations,
     })
   ).map((ticket) => toTicket(ticket));
   return res.status(OK).json({ tickets });
@@ -180,7 +177,7 @@ router.get("/tickets/:id", [param("id").isInt().toInt()], async (req, res) => {
 
   const ticket = await prisma.tickets.findUniqueOrThrow({
     where: { id },
-    ...includeCustomers,
+    ...includeRelations,
   });
   return res.status(OK).json(toTicket(ticket));
 });
