@@ -29,6 +29,7 @@ export default function Tickets() {
             <th>Last Updated</th>
             <th>Customer</th>
             <th>Description</th>
+            <th>Assignee</th>
             <th colSpan="2">Resolved</th>
           </tr>
         </thead>
@@ -42,6 +43,7 @@ export default function Tickets() {
               <td>{ticket.last_updated}</td>
               <td>{ticket.customer}</td>
               <td>{ticket.description}</td>
+              <td>{ticket.assignee}</td>
               <td>{ticket.resolved ? "yes" : "no"}</td>
               <td>
                 <Authz
