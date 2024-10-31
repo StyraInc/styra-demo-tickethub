@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
-import { Authz } from "@styra/opa-react";
+import { Authz, useAuthz } from "@styra/opa-react";
 
 export default function Tickets() {
   const { user, tenant } = useAuthn();
@@ -20,6 +20,19 @@ export default function Tickets() {
       .then((data) => setTickets(data.tickets));
   }, [tenant, user]);
 
+  // TODO(sr): take these from somewhere else
+  const users = [
+    { value: "none", label: "unassigned" },
+    { value: "alice", label: "Alice" },
+    { value: "bob", label: "Bob" },
+    { value: "ceasar", label: "Ceasar" },
+  ];
+
+  const { result: authorizedAssigner } = useAuthz("tickets/allow", {
+    action: "assign",
+    resource: "ticket",
+  });
+
   return (
     <main>
       <table id="ticket-list">
@@ -35,15 +48,37 @@ export default function Tickets() {
         </thead>
         <tbody>
           {tickets?.map((ticket) => (
-            <tr
-              key={ticket.id}
-              onClick={() => navigate(`/tickets/${ticket.id}`)}
-            >
-              <td>{ticket.id}</td>
-              <td>{ticket.last_updated}</td>
-              <td>{ticket.customer}</td>
-              <td>{ticket.description}</td>
-              <td>{ticket.assignee}</td>
+            <tr key={ticket.id}>
+              <td onClick={() => navigate(`/tickets/${ticket.id}`)}>
+                {ticket.id}
+              </td>
+              <td onClick={() => navigate(`/tickets/${ticket.id}`)}>
+                {ticket.last_updated}
+              </td>
+              <td onClick={() => navigate(`/tickets/${ticket.id}`)}>
+                {ticket.customer}
+              </td>
+              <td onClick={() => navigate(`/tickets/${ticket.id}`)}>
+                {ticket.description}
+              </td>
+              <td>
+                <select
+                  defaultValue={ticket.assignee}
+                  onChange={(e) => {
+                    ticket.assignee = e.target.value;
+                    alert(
+                      `Assigning ticket #${ticket.id} to ${ticket.assignee} (not supported yet)`,
+                    );
+                  }}
+                  disabled={!authorizedAssigner}
+                >
+                  {users.map(({ value, label }) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </td>
               <td>{ticket.resolved ? "yes" : "no"}</td>
               <td>
                 <Authz
