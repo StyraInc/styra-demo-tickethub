@@ -34,7 +34,7 @@ CREATE TABLE "public"."Tickets" (
 
 INSERT INTO "Tenants" (id, name) VALUES (1, 'hooli'), (2, 'acmecorp');
 
-INSERT INTO "Users" (tenant, name) VALUES (2, 'alice'), (2, 'bob'), (2, 'ceasar'), (1, 'dylan');
+INSERT INTO "Users" (tenant, name) VALUES (2, 'alice'), (2, 'bob'), (2, 'ceasar'), (1, 'dylan'), (1, 'eva'), (1, 'frank');
 
 INSERT INTO "Customers" (tenant, name) VALUES
   (2, 'Globex'),
