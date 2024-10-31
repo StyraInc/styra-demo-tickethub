@@ -185,6 +185,9 @@ router.get("/tickets", async (req, res) => {
         ...filters,
       },
       ...includeRelations,
+      orderBy: {
+        last_updated: "desc",
+      },
     })
   ).map((ticket) => toTicket(ticket));
   return res.status(OK).json({ tickets });
