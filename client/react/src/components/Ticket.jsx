@@ -68,6 +68,9 @@ export default function Ticket() {
         <label htmlFor="description">Description</label>
         <div id="description">{ticket.description}</div>
 
+        <label htmlFor="assignee">Assignee</label>
+        <div id="assignee">{ticket.assignee || "unassigned"}</div>
+
         <label htmlFor="resolved">Resolved</label>
         <div id="resolved">{ticket.resolved ? "yes" : "no"}</div>
 
