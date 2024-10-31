@@ -18,6 +18,16 @@ export default function Assignee({ ticket }) {
 
   const handleAssigneeChange = (ticket, assignee) => {
     ticket.assignee = assignee;
+    if (assignee === "none") {
+      fetch(`/api/tickets/${ticket.id}/assign`, {
+        method: "DELETE",
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${tenant} / ${user}`,
+        },
+      });
+      return;
+    }
     fetch(`/api/tickets/${ticket.id}/assign`, {
       method: "POST",
       headers: {

@@ -93,6 +93,36 @@ router.post(
   },
 );
 
+// unassign ticket
+router.delete(
+  "/tickets/:id/assign",
+  [param("id").isInt().toInt()],
+  async (req, res) => {
+    const {
+      params: { id },
+    } = req;
+    const { allow, reason } = await authz.authorized(
+      path,
+      { action: "unassign" },
+      req,
+    );
+    if (!allow) return res.status(FORBIDDEN).json({ reason });
+
+    const ticket = await prisma.tickets.update({
+      where: {
+        id,
+      },
+      data: {
+        users: {
+          disconnect: true,
+        },
+      },
+      ...includeRelations,
+    });
+    return res.status(OK).json(toTicket(ticket));
+  },
+);
+
 // create ticket
 router.post("/tickets", async (req, res) => {
   const { allow, reason } = await authz.authorized(
