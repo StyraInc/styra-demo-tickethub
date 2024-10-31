@@ -52,8 +52,10 @@ export default function Tickets() {
               <td>
                 <Assignee ticket={ticket} />
               </td>
-              <td>{ticket.resolved ? "yes" : "no"}</td>
-              <td>
+              <td onClick={() => navigate(`/tickets/${ticket.id}`)}>
+                {ticket.resolved ? "yes" : "no"}
+              </td>
+              <td onClick={() => navigate(`/tickets/${ticket.id}`)}>
                 <Authz
                   path={"tickets/allow"}
                   input={{ action: "resolve", resource: "ticket", ticket }}
