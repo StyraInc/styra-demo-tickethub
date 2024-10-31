@@ -45,6 +45,54 @@ router.post(
   },
 );
 
+// assign ticket
+router.post(
+  "/tickets/:id/assign",
+  [param("id").isInt().toInt()],
+  async (req, res) => {
+    const {
+      params: { id },
+    } = req;
+    const { allow, reason } = await authz.authorized(
+      path,
+      { action: "assign" },
+      req,
+    );
+    if (!allow) return res.status(FORBIDDEN).json({ reason });
+
+    const {
+      auth: {
+        tenant: { id: tenantId },
+      },
+      body: { assignee },
+    } = req;
+    const ticket = await prisma.tickets.update({
+      where: { id },
+      data: {
+        users: {
+          connectOrCreate: {
+            where: {
+              tenant_name: {
+                tenant: tenantId,
+                name: assignee,
+              },
+            },
+            create: {
+              name: assignee,
+              tenants: {
+                connect: { id: tenantId },
+              },
+            },
+          },
+        },
+        last_updated: now(),
+      },
+      include: { users: true, customers: true },
+    });
+    return res.status(OK).json(toTicket(ticket));
+  },
+);
+
 // create ticket
 router.post("/tickets", async (req, res) => {
   const { allow, reason } = await authz.authorized(
