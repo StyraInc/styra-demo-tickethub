@@ -180,10 +180,7 @@ router.get("/tickets", async (req, res) => {
   const filters = ucastToPrisma(conditions, "tickets");
   const tickets = (
     await prisma.tickets.findMany({
-      where: {
-        tenant: req.auth.tenant.id,
-        ...filters,
-      },
+      where: filters,
       ...includeRelations,
       orderBy: {
         last_updated: "desc",

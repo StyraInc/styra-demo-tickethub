@@ -17,7 +17,7 @@ export class Authorizer {
     input,
     {
       auth: {
-        tenant: { name: tenant }, // only feed tenant name to OPA
+        tenant, // feed complete tenant info into OPA
         subject: user,
       },
     },

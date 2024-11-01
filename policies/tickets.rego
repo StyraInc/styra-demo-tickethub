@@ -10,9 +10,13 @@ response.reason := reason_admin
 
 response.conditions := conditions
 
+# NOTE(sr): Support both server/node and the other backends -- node sends the tenant information
+# differently.
+tenant := object.get(input, ["tenant", "name"], input.tenant)
+
 default allow := false
 
-allow if allowed(input.user, input.tenant, input.action)
+allow if allowed(input.user, tenant, input.action)
 
 allowed(user, tenant, _) if "admin" in roles[tenant][user]
 
@@ -32,11 +36,15 @@ user_is_resolver(user, tenant) if "resolver" in roles[tenant][user]
 
 ## CONDITIONS ##
 
+# Tenancy
+conditions["tickets.tenant"] := input.tenant.id
+
+# Resolver conditions
 conditions.or contains {"tickets.resolved": false, "tickets.assignee": null} if {
-	user_is_resolver(input.user, input.tenant)
+	user_is_resolver(input.user, tenant)
 }
 
-conditions.or contains {"users.name": input.user} if user_is_resolver(input.user, input.tenant)
+conditions.or contains {"users.name": input.user} if user_is_resolver(input.user, tenant)
 
 ## DENY REASONS ##
 
