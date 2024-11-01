@@ -7,6 +7,7 @@ import { OPAClient } from "@styra/opa";
 
 import { Types } from "../types";
 import "../style.css";
+import UsersProvider from "../UsersContext";
 
 const paths = {
   "/tickets/new": Types.NEW_TICKET,
@@ -84,8 +85,10 @@ export default function App() {
       batch={batch}
       retry={3}
     >
-      <Nav type={type} accounts={accounts} />
-      <Outlet />
+      <UsersProvider users={accounts[tenant]}>
+        <Nav type={type} accounts={accounts} />
+        <Outlet />
+      </UsersProvider>
     </AuthzProvider>
   );
 }

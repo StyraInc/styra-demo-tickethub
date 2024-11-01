@@ -24,8 +24,10 @@ model Tickets {
   resolved     Boolean   @default(false)
   customer     Int
   tenant       Int
+  assignee     Int?
   customers    Customers @relation(fields: [customer], references: [id], onDelete: NoAction, onUpdate: NoAction)
   tenants      Tenants   @relation(fields: [tenant], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users        Users?    @relation(fields: [assignee], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Tenants {
@@ -33,4 +35,15 @@ model Tenants {
   name      String?     @unique @db.VarChar(255)
   customers Customers[]
   tickets   Tickets[]
+  users     Users[]
+}
+
+model Users {
+  id      Int       @id @default(autoincrement())
+  tenant  Int
+  name    String?   @db.VarChar(255)
+  tenants Tenants   @relation(fields: [tenant], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tickets Tickets[]
+
+  @@unique([tenant, name])
 }

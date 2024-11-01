@@ -8,7 +8,7 @@ Authorization: Bearer acmecorp / alice
 user: acmecorp / alice
 HTTP 200
 [Asserts]
-jsonpath "$.tickets" count >= 7 # fresh setup has 7 tickets
+jsonpath "$.tickets" count >= 6 # fresh setup has 6 tickets
 jsonpath "$.tickets[*].resolved" includes true # both resolved and unresolved tickets
 jsonpath "$.tickets[*].resolved" includes false
 [Captures]
@@ -25,5 +25,8 @@ skip: {{skip_conditions}}
 HTTP 200
 [Asserts]
 jsonpath "$.tickets" count < {{all_count}}
-jsonpath "$.tickets[*].resolved" not includes true
-
+# all those jsonpath expressions yield at most one-element arrays
+jsonpath "$.tickets[?(@.id == 4)].resolved" includes false
+jsonpath "$.tickets[?(@.id == 4)].assignee" not exists
+jsonpath "$.tickets[?(@.id == 2)].resolved" includes true
+jsonpath "$.tickets[?(@.id == 2)].assignee" includes "ceasar"

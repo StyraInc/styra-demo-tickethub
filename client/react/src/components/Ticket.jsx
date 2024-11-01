@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
 import { Authz } from "@styra/opa-react";
+import Assignee from "./Assignee";
 
 export default function Ticket() {
   const { user, tenant } = useAuthn();
@@ -67,6 +68,11 @@ export default function Ticket() {
 
         <label htmlFor="description">Description</label>
         <div id="description">{ticket.description}</div>
+
+        <label htmlFor="assignee">Assignee</label>
+        <div id="assignee">
+          <Assignee ticket={ticket} />
+        </div>
 
         <label htmlFor="resolved">Resolved</label>
         <div id="resolved">{ticket.resolved ? "yes" : "no"}</div>

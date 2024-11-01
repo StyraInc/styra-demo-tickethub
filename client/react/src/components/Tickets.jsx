@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthn } from "../AuthnContext";
 import { Authz } from "@styra/opa-react";
+import Assignee from "./Assignee";
 
 export default function Tickets() {
   const { user, tenant } = useAuthn();
@@ -29,21 +30,32 @@ export default function Tickets() {
             <th>Last Updated</th>
             <th>Customer</th>
             <th>Description</th>
+            <th>Assignee</th>
             <th colSpan="2">Resolved</th>
           </tr>
         </thead>
         <tbody>
           {tickets?.map((ticket) => (
-            <tr
-              key={ticket.id}
-              onClick={() => navigate(`/tickets/${ticket.id}`)}
-            >
-              <td>{ticket.id}</td>
-              <td>{ticket.last_updated}</td>
-              <td>{ticket.customer}</td>
-              <td>{ticket.description}</td>
-              <td>{ticket.resolved ? "yes" : "no"}</td>
+            <tr key={ticket.id}>
+              <td onClick={() => navigate(`/tickets/${ticket.id}`)}>
+                {ticket.id}
+              </td>
+              <td onClick={() => navigate(`/tickets/${ticket.id}`)}>
+                {ticket.last_updated}
+              </td>
+              <td onClick={() => navigate(`/tickets/${ticket.id}`)}>
+                {ticket.customer}
+              </td>
+              <td onClick={() => navigate(`/tickets/${ticket.id}`)}>
+                {ticket.description}
+              </td>
               <td>
+                <Assignee ticket={ticket} />
+              </td>
+              <td onClick={() => navigate(`/tickets/${ticket.id}`)}>
+                {ticket.resolved ? "yes" : "no"}
+              </td>
+              <td onClick={() => navigate(`/tickets/${ticket.id}`)}>
                 <Authz
                   path={"tickets/allow"}
                   input={{ action: "resolve", resource: "ticket", ticket }}
@@ -53,6 +65,8 @@ export default function Tickets() {
                     </button>
                   }
                 >
+                  {/* NOTE(sr): This button does not work? It's just to show off disabled/enabled based on authz
+                   and batch queries. */}
                   <button type="submit">
                     {ticket.resolved ? "Unresolve" : "Resolve"}
                   </button>
