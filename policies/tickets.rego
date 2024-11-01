@@ -32,7 +32,9 @@ user_is_resolver(user, tenant) if "resolver" in roles[tenant][user]
 
 ## CONDITIONS ##
 
-conditions.or contains {"tickets.resolved": false} if user_is_resolver(input.user, input.tenant)
+conditions.or contains {"tickets.resolved": false, "tickets.assignee": null} if {
+	user_is_resolver(input.user, input.tenant)
+}
 
 conditions.or contains {"users.name": input.user} if user_is_resolver(input.user, input.tenant)
 
