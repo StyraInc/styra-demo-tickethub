@@ -23,6 +23,8 @@ user: acmecorp / ceasar
 [Options]
 skip: {{skip_conditions}}
 HTTP 200
+[Captures]
+before_count: jsonpath "$.tickets" count
 [Asserts]
 jsonpath "$.tickets" count < {{all_count}}
 # all those jsonpath expressions yield at most one-element arrays
@@ -30,3 +32,38 @@ jsonpath "$.tickets[?(@.id == 4)].resolved" includes false
 jsonpath "$.tickets[?(@.id == 4)].assignee" not exists
 jsonpath "$.tickets[?(@.id == 2)].resolved" includes true
 jsonpath "$.tickets[?(@.id == 2)].assignee" includes "ceasar"
+
+# assign one unresolved ticket to bob
+POST http://{{host}}:4000/api/tickets/4/assign
+Content-Type: application/json
+Authorization: Bearer acmecorp / alice
+[Cookies]
+user: acmecorp / alice
+[Options]
+skip: {{skip_conditions}}
+{
+  "assignee": "bob"
+}
+HTTP 200
+
+# it'll disappear from ceasr's list
+GET http://{{host}}:4000/api/tickets
+Content-Type: application/json
+Authorization: Bearer acmecorp / ceasar
+[Cookies]
+user: acmecorp / ceasar
+[Options]
+skip: {{skip_conditions}}
+HTTP 200
+[Asserts]
+jsonpath "$.tickets" count < {{before_count}}
+jsonpath "$.tickets[?(@.id == 4)]" count == 0
+
+# reset
+DELETE http://{{host}}:4000/api/tickets/4/assign
+Content-Type: application/json
+Authorization: Bearer acmecorp / alice
+[Cookies]
+user: acmecorp / alice
+[Options]
+skip: {{skip_conditions}}
