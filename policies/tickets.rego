@@ -4,11 +4,11 @@ import rego.v1
 
 roles := data.roles
 
-response["allow"] := allow
+response.allow := allow
 
-response["reason"] := reason_admin
+response.reason := reason_admin
 
-response["conditions"] := conditions
+response.conditions := conditions
 
 default allow := false
 
@@ -32,12 +32,9 @@ user_is_resolver(user, tenant) if "resolver" in roles[tenant][user]
 
 ## CONDITIONS ##
 
-conditions["or"] := [
-	{"tickets.resolved": false},
-	{"users.name": input.user},
-] if {
-	user_is_resolver(input.user, input.tenant)
-}
+conditions.or contains {"tickets.resolved": false} if user_is_resolver(input.user, input.tenant)
+
+conditions.or contains {"users.name": input.user} if user_is_resolver(input.user, input.tenant)
 
 ## DENY REASONS ##
 
