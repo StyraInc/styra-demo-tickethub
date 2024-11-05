@@ -1,0 +1,4 @@
+capabilities:
+  from:
+    engine: eopa
+    version: v1.27.0
