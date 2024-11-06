@@ -207,7 +207,7 @@ public class TicketHub {
         }
 
         try {
-            reason = opa.evaluate("tickets/reason", iMap);
+            reason = opa.evaluate("tickets/response/reason", iMap);
         } catch (Exception e) {
             throw new ForbiddenExceptionWithReason(String.format("OPA request failed due to exception: %s", e), null);
         }

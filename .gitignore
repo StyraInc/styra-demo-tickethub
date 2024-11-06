@@ -8,3 +8,5 @@ server/java/bin
 server/java/libs
 policies/bundle.tar.gz
 .env
+
+tests/**/*.xml

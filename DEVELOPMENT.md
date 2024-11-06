@@ -1,5 +1,13 @@
 # Development Notes
 
+## Resetting the database
+
+You must have the `psql` CLI installed locally and have the docker-compose running.
+
+```sh
+SERVER=node make reset-database
+```
+
 ## Run tests manually
 
 Both of these test suites are run in CI for every PR, in a matrix setting that
@@ -8,10 +16,17 @@ uses all of the available backend implementations.
 ### API
 
 The individual backend services' APIs are tested using [hurl](https://hurl.dev).
-Tests are defined in `tests/api/basic.hurl`, and best run using docker-compose:
+Tests are defined in `tests/api/`, and best run using docker-compose:
 
 ```sh
 docker compose run integration-tests
+```
+
+The tests are split into `basic` and `conditions` tests. Only the `node` server implementation currently supports conditions.
+To run the tests without the conditions tests, run:
+
+```sh
+HURL_SKIP_CONDITIONS=true docker compose run integration-tests
 ```
 
 ### E2E
