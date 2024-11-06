@@ -123,3 +123,8 @@ package-aspnetcore-react: CLIENT = react
 package-aspnetcore-react: tar-aspnetcore-react
 
 package-all: package-node-html package-node-react package-java-html package-java-react package-csharp-html package-csharp-react package-aspnetcore-html package-aspnetcore-react  package-go-html package-go-react
+
+SERVER ?= node
+reset-database:
+	psql -h localhost -p 5432 -U postgres -d postgres -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'
+	psql -h localhost -p 5432 -U postgres -d postgres -f ./server/$(SERVER)/database/init.sql
