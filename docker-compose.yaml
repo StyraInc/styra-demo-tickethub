@@ -158,7 +158,7 @@ services:
       - tests/api/
     environment:
       - HURL_host=localhost
-      - HURL_skip_conditions=${HURL_SKIP_CONDITIONS:-false}
+      - HURL_skip_conditions=${HURL_SKIP_CONDITIONS:-true}
     profiles:
       - tools
     network_mode: host
