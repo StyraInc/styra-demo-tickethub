@@ -29,7 +29,7 @@ before_count: jsonpath "$.tickets" count
 jsonpath "$.tickets" count < {{all_count}}
 # all those jsonpath expressions yield at most one-element arrays
 jsonpath "$.tickets[?(@.id == 4)].resolved" includes false
-jsonpath "$.tickets[?(@.id == 4)].assignee" not exists
+jsonpath "$.tickets[?(@.id == 4)].assignee" includes null
 jsonpath "$.tickets[?(@.id == 2)].resolved" includes true
 jsonpath "$.tickets[?(@.id == 2)].assignee" includes "ceasar"
 

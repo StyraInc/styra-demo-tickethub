@@ -8,6 +8,7 @@ export default function Tickets() {
   const { user, tenant } = useAuthn();
   const navigate = useNavigate();
   const [tickets, setTickets] = useState();
+  const [canAssign, setCanAssign] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -21,6 +22,13 @@ export default function Tickets() {
       .then((data) => setTickets(data.tickets));
   }, [tenant, user]);
 
+  // figure out if the backend can do assignments
+  useEffect(() => {
+    if (!tickets || canAssign) return;
+    if (tickets.some(({ assignee }) => assignee == null || !!assignee))
+      setCanAssign(true);
+  }, [tickets, canAssign, setCanAssign]);
+
   return (
     <main>
       <table id="ticket-list">
@@ -30,7 +38,7 @@ export default function Tickets() {
             <th>Last Updated</th>
             <th>Customer</th>
             <th>Description</th>
-            <th>Assignee</th>
+            {canAssign && <th>Assignee</th>}
             <th colSpan="2">Resolved</th>
           </tr>
         </thead>
@@ -49,9 +57,11 @@ export default function Tickets() {
               <td onClick={() => navigate(`/tickets/${ticket.id}`)}>
                 {ticket.description}
               </td>
-              <td>
-                <Assignee ticket={ticket} />
-              </td>
+              {canAssign && (
+                <td>
+                  <Assignee ticket={ticket} />
+                </td>
+              )}
               <td onClick={() => navigate(`/tickets/${ticket.id}`)}>
                 {ticket.resolved ? "yes" : "no"}
               </td>
