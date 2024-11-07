@@ -23,10 +23,10 @@ docker compose run integration-tests
 ```
 
 The tests are split into `basic` and `conditions` tests. Only the `node` server implementation currently supports conditions.
-To run the tests without the conditions tests, run:
+To run the tests with the conditions tests, run:
 
 ```sh
-HURL_SKIP_CONDITIONS=true docker compose run integration-tests
+HURL_SKIP_CONDITIONS=false docker compose run integration-tests
 ```
 
 ### E2E
