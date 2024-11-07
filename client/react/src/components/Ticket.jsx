@@ -8,6 +8,7 @@ export default function Ticket() {
   const { user, tenant } = useAuthn();
   const { ticketId } = useParams();
   const [ticket, setTicket] = useState();
+  const [canAssign, setCanAssign] = useState(false);
   const [message, setMessage] = useState();
 
   const loadTicket = async function (ticketId, user, tenant, setTicket) {
@@ -25,6 +26,12 @@ export default function Ticket() {
     if (!user) return; // wait for user to be set
     loadTicket(ticketId, user, tenant, setTicket);
   }, [user, tenant, ticketId, setTicket]);
+
+  // figure out if the backend can do assignments
+  useEffect(() => {
+    if (!ticket || canAssign) return;
+    if ("assignee" in ticket) setCanAssign(true);
+  }, [ticket, canAssign, setCanAssign]);
 
   const handleSubmit = useCallback(
     async (event) => {
@@ -69,10 +76,14 @@ export default function Ticket() {
         <label htmlFor="description">Description</label>
         <div id="description">{ticket.description}</div>
 
-        <label htmlFor="assignee">Assignee</label>
-        <div id="assignee">
-          <Assignee ticket={ticket} />
-        </div>
+        {canAssign && (
+          <>
+            <label htmlFor="assignee">Assignee</label>
+            <div id="assignee">
+              <Assignee ticket={ticket} />
+            </div>
+          </>
+        )}
 
         <label htmlFor="resolved">Resolved</label>
         <div id="resolved">{ticket.resolved ? "yes" : "no"}</div>

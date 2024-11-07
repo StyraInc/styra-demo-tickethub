@@ -220,5 +220,5 @@ function toTicket({
   tenant: _1,
   ...rest
 }) {
-  return { ...rest, customer, assignee: users?.name };
+  return { ...rest, customer, assignee: users?.name || null };
 }

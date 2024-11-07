@@ -1,5 +1,5 @@
 compile:
-	npm install
+	npm ci
 
 run: compile
 	npm run start:dev
