@@ -24,14 +24,7 @@ test("bob can not create new tickets", async ({ page }) => {
   ).toBeDisabled();
 });
 
-test("ceasar can only see unresolved tickets and those assigned to them", async ({
-  page,
-}) => {
-  test.skip(process.env.CONDITIONS != "true", "skipping conditions test");
-  await page.goto(baseURL);
-  await page.getByLabel("User").selectOption("ceasar");
-  await expect(page.locator("#ticket-list > tbody > tr ")).toHaveCount(5);
-});
+
 
 test("select another tenant's user switches title and ticket list", async ({
   page,
@@ -40,4 +33,29 @@ test("select another tenant's user switches title and ticket list", async ({
   await page.getByLabel("User").selectOption("dylan");
   await expect(page).toHaveTitle(/Tickets - hooli/);
   await expect(page.locator("#ticket-list > tbody > tr ")).toHaveCount(4);
+});
+
+test.describe("data filtering using conditions", () => {
+  test.skip(process.env.CONDITIONS != "true", "skipping conditions test");
+
+  const unassignTicket5 = async ({ page }) => {
+    await page.goto(baseURL);
+    await page.getByLabel("User").selectOption("alice");
+    await page.locator("#ticket-5 select").selectOption("unassigned");
+  };
+
+  test.beforeEach(unassignTicket5);
+  test.afterEach(unassignTicket5);
+
+  test("ceasar can only see unresolved tickets and those assigned to them", async ({ page }) => {
+    await page.goto(baseURL);
+    await page.getByLabel("User").selectOption("ceasar");
+    await expect(page.locator("#ticket-list > tbody > tr ")).toHaveCount(5);
+
+    await page.getByLabel("User").selectOption("alice");
+    await page.locator("#ticket-5 select").selectOption("Bob");
+
+    await page.getByLabel("User").selectOption("ceasar");
+    await expect(page.locator("#ticket-list > tbody > tr ")).toHaveCount(4);
+  });
 });
