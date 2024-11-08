@@ -63,11 +63,11 @@ $ curl -LSs 'http://localhost:4000/api/tickets/1/resolve' -H 'Cookie: user=acmec
 
 Reason support for clients:
 * ✅ HTML
-* ❌ React
+* ✅ React (for resolving tickets)
 
 Reason support for servers:
 * ✅ Java
 * ❌ Spring Boot
 * ❌ C#
 * ❌ ASP.NET
-* ❌ Node
+* ✅ Node
