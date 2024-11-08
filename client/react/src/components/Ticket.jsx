@@ -52,7 +52,8 @@ export default function Ticket() {
           : "resolved → unresolved";
         setMessage(`Ticket updated: ${resolved}`);
       } else {
-        setMessage("Error: user unauthorized to perform operation");
+        const {reason} = await response.json();
+        setMessage(`Error: user unauthorized to perform operation.${reason != undefined ? " " + reason : "" }`);
       }
 
       await loadTicket(ticketId, user, tenant, setTicket);
