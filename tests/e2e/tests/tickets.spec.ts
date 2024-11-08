@@ -24,8 +24,6 @@ test("bob can not create new tickets", async ({ page }) => {
   ).toBeDisabled();
 });
 
-
-
 test("select another tenant's user switches title and ticket list", async ({
   page,
 }) => {
@@ -57,5 +55,35 @@ test.describe("data filtering using conditions", () => {
 
     await page.getByLabel("User").selectOption("ceasar");
     await expect(page.locator("#ticket-list > tbody > tr ")).toHaveCount(4);
+  });
+});
+
+
+test.describe("showing reasons for denials", () => {
+  test.skip(process.env.REASONS != "true", "skipping reasons test");
+
+  const unresolveTicket1 = async ({ page }) => {
+    await page.goto(baseURL);
+    await page.locator("#ticket-5 td:nth-child(1)").click();
+    await page.getByLabel("User").selectOption("alice");
+
+    const resolved = await page.locator("#resolved").textContent();
+    if (resolved == "yes") {
+      await page.getByRole("button", { name: "Resolve" }).click();
+    }
+  };
+
+  test.beforeEach(unresolveTicket1);
+  test.afterEach(unresolveTicket1);
+
+  test("bob gets an error message when trying to resolve the ticket", async ({ page }) => {
+    await page.goto(baseURL);
+    await page.locator("#ticket-5 td:nth-child(1)").click();
+    await page.getByLabel("User").selectOption("bob");
+    const resolveButton = page.getByRole("button", { name: "Resolve" });
+    await resolveButton.evaluate(element => element.removeAttribute("disabled"));
+
+    await resolveButton.click();
+    await expect(page.locator(".update-status")).toContainText("resolver role is required to resolve");
   });
 });
