@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Authentication;
+﻿using System.Linq.Expressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -18,7 +15,7 @@ public partial class Ticket
     [JsonConverter(typeof(UtcDateTimeConverter))]
     public DateTime LastUpdated { get; set; }
 
-    public bool Resolved { get; set; }
+    public bool Resolved { get; set; } = false;
 
     [JsonIgnore]
     public int Customer { get; set; }
@@ -27,16 +24,25 @@ public partial class Ticket
     public int Tenant { get; set; }
 
     [JsonIgnore]
+    public int? Assignee { get; set; } // The "User" field.
+
+    [JsonIgnore]
     public virtual Customer CustomerNavigation { get; set; } = null!;
 
     [JsonIgnore]
     public virtual Tenant TenantNavigation { get; set; } = null!;
+
+    [JsonIgnore]
+    public virtual User UserNavigation { get; set; } = null!;
 
     [JsonProperty("customer")]
     public string CustomerName => CustomerNavigation?.Name ?? "";
 
     [JsonProperty("tenant")]
     public string TenantName => TenantNavigation?.Name ?? "";
+
+    [JsonProperty("assignee")]
+    public string? UserName => UserNavigation?.Name;
 }
 
 public class TicketConverter : JsonConverter
@@ -59,6 +65,7 @@ public class TicketConverter : JsonConverter
             // Replace CustomerId and TenantId with respective names
             jsonObject["Customer"] = ticket.CustomerName;
             jsonObject["Tenant"] = ticket.TenantName;
+            jsonObject["Assignee"] = ticket.UserName;
 
             jsonObject.WriteTo(writer);
         }
@@ -80,5 +87,22 @@ public class UtcDateTimeConverter : IsoDateTimeConverter
     {
         DateTimeFormat = "yyyy-MM-ddTHH:mm:ssZ";
         DateTimeStyles = System.Globalization.DateTimeStyles.AssumeUniversal;
+    }
+}
+
+public class TicketExpressionMapper
+{
+    public static Dictionary<string, Expression<Func<Ticket, object>>> CreateMapping()
+    {
+        return new Dictionary<string, Expression<Func<Ticket, object>>>
+        {
+            ["tickets.id"] = t => t.Id,
+            ["tickets.description"] = t => t.Description,
+            ["tickets.last_updated"] = t => t.LastUpdated,
+            ["tickets.resolved"] = t => t.Resolved,
+            ["tickets.customer"] = t => t.CustomerName,
+            ["tickets.tenant"] = t => t.TenantName,
+            ["tickets.assignee"] = t => t.UserName,
+        };
     }
 }

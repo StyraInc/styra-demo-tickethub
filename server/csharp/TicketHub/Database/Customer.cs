@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace TicketHub.Database;
+﻿namespace TicketHub.Database;
 
 public partial class Customer
 {
