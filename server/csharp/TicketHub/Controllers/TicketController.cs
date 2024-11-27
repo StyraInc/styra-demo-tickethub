@@ -64,7 +64,7 @@ public class TicketController : ControllerBase
     // List all tickets.
     [HttpGet]
     [Route("tickets")]
-    [OpaRuleAuthorization("tickets/allow", "list")]
+    [OpaRuleAuthorization("tickets_expanded/allow", "list")]
     public async Task<ActionResult<IAsyncEnumerable<Ticket>>> ListTickets()
     {
         var tName = HttpContext.Items["Tenant"]?.ToString();
@@ -102,7 +102,7 @@ public class TicketController : ControllerBase
             }
 
             // Log the condition expression for debugging, with a dummy target parameter.
-            _logger.LogDebug(QueryableExtensions.BuildExpression<Ticket>(conditions, Expression.Parameter(typeof(Ticket), "x"), mapper).ToString());
+            _logger.LogInformation(QueryableExtensions.BuildExpression<Ticket>(conditions, Expression.Parameter(typeof(Ticket), "x"), mapper).ToString());
 
             List<Ticket> tickets = await _dbContext.Tickets
                 .Include(t => t.CustomerNavigation)
@@ -199,8 +199,8 @@ public class TicketController : ControllerBase
 
     public struct PolicyResult
     {
-        [JsonProperty("authorized")]
-        public bool Authorized;
+        [JsonProperty("allow")]
+        public bool Allow;
 
         [JsonProperty("reason")]
         public string Reason;
