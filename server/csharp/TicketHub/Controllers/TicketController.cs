@@ -23,6 +23,7 @@ public class TicketController : ControllerBase
 
     public record TicketFields(string customer, string description);
     public record ResolveFields(bool resolved);
+    public record AssignFields(string assignee);
 
     private async Task<Customer> addCustomer(Tenant tenant, string name)
     {
@@ -174,6 +175,28 @@ public class TicketController : ControllerBase
             return NotFound();
         }
         ticket.Resolved = rf.resolved;
+        ticket.LastUpdated = DateTime.UtcNow.ToLocalTime();
+        await _dbContext.SaveChangesAsync();
+        return Ok(ticket);
+    }
+
+    // Assign a ticket.
+    [HttpPost]
+    [Route("tickets/{id:int}/assign")]
+    [OpaRuleAuthorization("tickets/allow", "assign")]
+    public async Task<ActionResult<Ticket>> AssignTicket(int id, [FromBody] AssignFields af)
+    {
+        Ticket? ticket = await _dbContext.Tickets.FindAsync(id);
+        if (ticket is null)
+        {
+            return NotFound();
+        }
+        User? user = await _dbContext.Users.Where(u => u.Name == af.assignee && u.Tenant == ticket.Tenant).FirstAsync();
+        if (user is null)
+        {
+            return NotFound();
+        }
+        ticket.Assignee = user.Id;
         ticket.LastUpdated = DateTime.UtcNow.ToLocalTime();
         await _dbContext.SaveChangesAsync();
         return Ok(ticket);

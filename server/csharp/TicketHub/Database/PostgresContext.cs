@@ -33,7 +33,7 @@ public partial class PostgresContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("Users_pkey");
 
-            entity.HasIndex(e => new { e.Tenant, e.Name }, "Users_tenant_name_key").IsUnique();
+            entity.HasIndex(e => new { e.Tenant, e.Name }, "Users_tenant_and_name_key").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name)
@@ -83,6 +83,8 @@ public partial class PostgresContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Customer).HasColumnName("customer");
+            entity.Property(e => e.Tenant).HasColumnName("tenant");
+            entity.Property(e => e.Assignee).HasColumnName("assignee");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.LastUpdated)
                 .HasDefaultValueSql("now()")
@@ -91,8 +93,6 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.Resolved)
                 .HasDefaultValue(false)
                 .HasColumnName("resolved");
-            entity.Property(e => e.Tenant).HasColumnName("tenant");
-            entity.Property(e => e.Assignee).HasColumnName("assignee");
 
             entity.HasOne(d => d.CustomerNavigation).WithMany(p => p.Tickets)
                 .HasForeignKey(d => d.Customer)
@@ -107,7 +107,7 @@ public partial class PostgresContext : DbContext
             entity.HasOne(d => d.UserNavigation).WithMany(p => p.Tickets)
                 .HasForeignKey(d => d.Assignee)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("Tickets_user_fkey");
+                .HasConstraintName("Tickets_assignee_fkey");
 
             // Try manually designating the Navigation properties.
             entity.Navigation(e => e.CustomerNavigation);

@@ -41,7 +41,7 @@ public partial class Ticket
     [JsonProperty("tenant")]
     public string TenantName => TenantNavigation?.Name ?? "";
 
-    [JsonProperty("assignee")]
+    [JsonProperty("assignee", NullValueHandling = NullValueHandling.Include)]
     public string? UserName => UserNavigation?.Name;
 }
 
