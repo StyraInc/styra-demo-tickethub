@@ -5,13 +5,6 @@ namespace TicketHub.Authorization;
 
 public static class QueryableExtensions
 {
-    public static Expression UCASTToLINQ<T>(UCASTNode root, Dictionary<string, Func<ParameterExpression, Expression>> mapper)
-    {
-        var parameter = Expression.Parameter(typeof(T), "x");
-        var expression = BuildExpression<T>(root, parameter, mapper);
-        return Expression.Lambda<Func<T, bool>>(expression, parameter);
-    }
-
     // Builds a LINQ Lambda Expression from the UCAST tree, and then invokes it under a LINQ Where expression on some queryable source collection.
     // In our case, this *should* usually be an EF Core ORM model.
     public static IQueryable<T> ApplyUCASTFilter<T>(this IQueryable<T> source, UCASTNode root, Dictionary<string, Func<ParameterExpression, Expression>> mapper)
@@ -21,7 +14,7 @@ public static class QueryableExtensions
         return source.Where(Expression.Lambda<Func<T, bool>>(expression, parameter));
     }
 
-    private static Expression BuildExpression<T>(UCASTNode node, ParameterExpression parameter, Dictionary<string, Func<ParameterExpression, Expression>> mapper)
+    public static Expression BuildExpression<T>(UCASTNode node, ParameterExpression parameter, Dictionary<string, Func<ParameterExpression, Expression>> mapper)
     {
         // Switch expression:
         return node.Type.ToLower() switch

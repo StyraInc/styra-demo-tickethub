@@ -67,18 +67,11 @@ public class TicketController : ControllerBase
     [OpaRuleAuthorization("tickets/allow", "list")]
     public async Task<ActionResult<IAsyncEnumerable<Ticket>>> ListTickets()
     {
-        //_logger.LogInformation("{0}", JsonConvert.SerializeObject(result));
         var tName = HttpContext.Items["Tenant"]?.ToString();
         string subject = HttpContext.Items["Subject"]?.ToString() ?? "";
-        //var mapper = TicketExpressionMapper.CreateMapping();
-        var userExpr = Expression.Parameter(typeof(User), "user");
-        var ticketExpr = Expression.Parameter(typeof(Ticket), "ticket");
-
-        // TODO: Refactor the QueryableExtension stuff to allow mapping from a source parameter expression?
-        // Ex: Something like Func<ParameterExpression, string> -> PropertyExpression
-        // These mappings will need to exist for each possible model that queries would be based off of.
-        // It's inconvenient, but that's the price we pay for building on top of LINQ, as best I can tell.
-
+        // The mapping here is laborious, but this is the price we're currently
+        // paying for having to work in LINQ's constraints. All queries have to
+        // be built out *relative* to some base `IQueryable<T>` object.
         var mapper = new Dictionary<string, Func<ParameterExpression, Expression>>()
         {
             { "tickets.id", t => Expression.Property(t, "Id") },
@@ -105,14 +98,11 @@ public class TicketController : ControllerBase
             });
             if (conditions is null)
             {
-                return StatusCode(500, "No tickets found");
-            }
-            else
-            {
-                _logger.LogCritical("conditions is: {0}", conditions);
+                return StatusCode(404, "No tickets found");
             }
 
-            _logger.LogCritical(QueryableExtensions.UCASTToLINQ<Ticket>(conditions, mapper).ToString());
+            // Log the condition expression for debugging, with a dummy target parameter.
+            _logger.LogDebug(QueryableExtensions.BuildExpression<Ticket>(conditions, Expression.Parameter(typeof(Ticket), "x"), mapper).ToString());
 
             List<Ticket> tickets = await _dbContext.Tickets
                 .Include(t => t.CustomerNavigation)
@@ -123,7 +113,7 @@ public class TicketController : ControllerBase
             return Ok(new { Tickets = tickets });
         }
 
-        return StatusCode(500, "No tickets found");
+        return StatusCode(404, "No tickets found");
     }
 
     // Get a specific ticket.
