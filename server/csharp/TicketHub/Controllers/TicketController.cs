@@ -1,6 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Styra.Opa;
+using System.Linq.Expressions;
 using System.Net.Mime;
+using System.Reflection;
+using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
 using TicketHub.Authorization;
 using TicketHub.Database;
 
@@ -17,6 +23,7 @@ public class TicketController : ControllerBase
 
     public record TicketFields(string customer, string description);
     public record ResolveFields(bool resolved);
+    public record AssignFields(string assignee);
 
     private async Task<Customer> addCustomer(Tenant tenant, string name)
     {
@@ -33,24 +40,80 @@ public class TicketController : ControllerBase
         _dbContext = dbContext;
     }
 
+    public static Dictionary<string, Dictionary<string, FieldInfo>> CreateFieldInfoMapping(params Type[] dbSetTypes)
+    {
+        var mapping = new Dictionary<string, Dictionary<string, FieldInfo>>();
+
+        foreach (var dbSetType in dbSetTypes)
+        {
+            var entityType = dbSetType.GetGenericArguments()[0];
+            var fieldInfos = entityType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            var fieldMapping = new Dictionary<string, FieldInfo>();
+            foreach (var fieldInfo in fieldInfos)
+            {
+                fieldMapping[fieldInfo.Name] = fieldInfo;
+            }
+
+            mapping[entityType.Name] = fieldMapping;
+        }
+
+        return mapping;
+    }
+
     // List all tickets.
     [HttpGet]
     [Route("tickets")]
-    [OpaRuleAuthorization("tickets/allow", "list")]
+    [OpaRuleAuthorization("tickets_expanded/allow", "list")]
     public async Task<ActionResult<IAsyncEnumerable<Ticket>>> ListTickets()
     {
         var tName = HttpContext.Items["Tenant"]?.ToString();
+        string subject = HttpContext.Items["Subject"]?.ToString() ?? "";
+        // The mapping here is laborious, but this is the price we're currently
+        // paying for having to work in LINQ's constraints. All queries have to
+        // be built out *relative* to some base `IQueryable<T>` object.
+        var mapper = new Dictionary<string, Func<ParameterExpression, Expression>>()
+        {
+            { "tickets.id", t => Expression.Property(t, "Id") },
+            { "tickets.customer", t => Expression.Property(t, "Customer") },
+            { "tickets.customer.name", t => Expression.Property(t, "CustomerName") },
+            { "tickets.tenant", t => Expression.Property(t, "Tenant") },
+            { "tickets.tenant.name", t => Expression.Property(t, "TenantName") },
+            { "tickets.assignee", t => Expression.Property(t, "Assignee") },
+            { "tickets.assignee.name", t => Expression.Property(t, "UserName") },
+            { "tickets.description", t => Expression.Property(t, "Description") },
+            { "tickets.resolved", t => Expression.Property(t, "Resolved") },
+            { "tickets.last_updated", t => Expression.Property(t, "LastUpdated") },
+            { "users.id", t => Expression.Property(Expression.Property(t, "UserNavigation"), "Id") },
+            { "users.name", t => Expression.Property(Expression.Property(t, "UserNavigation"), "Name") },
+            { "users.tenant", t => Expression.Property(Expression.Property(t, "UserNavigation"), "Tenant") },
+        };
         if (tName is string)
         {
             Tenant tenant = await getTenantByName(tName);
+            var conditions = await getConditions(HttpContext, "tickets_expanded/response", new Dictionary<string, object>(){
+                { "tenant", tenant },
+                { "user", subject },
+                { "action", "list" },
+            });
+            if (conditions is null)
+            {
+                return StatusCode(404, "No tickets found");
+            }
+
+            // Log the condition expression for debugging, with a dummy target parameter.
+            _logger.LogInformation(QueryableExtensions.BuildExpression<Ticket>(conditions, Expression.Parameter(typeof(Ticket), "x"), mapper).ToString());
+
             List<Ticket> tickets = await _dbContext.Tickets
                 .Include(t => t.CustomerNavigation)
                 .Include(t => t.TenantNavigation)
-                .Where(t => t.Tenant == tenant.Id)
+                .Include(t => t.UserNavigation)
+                .ApplyUCASTFilter(conditions, mapper)
                 .ToListAsync();
             return Ok(new { Tickets = tickets });
         }
-        return StatusCode(500, "No tickets found");
+
+        return StatusCode(404, "No tickets found");
     }
 
     // Get a specific ticket.
@@ -72,7 +135,6 @@ public class TicketController : ControllerBase
     [OpaRuleAuthorization("tickets/allow", "create")]
     public async Task<ActionResult<Ticket>> CreateTicket([FromBody] TicketFields tf)
     {
-
         string tenant = HttpContext.Items["Tenant"]?.ToString() ?? "";
         Ticket ticket = new();
         // Fetch tenant, then create customer if needed.
@@ -108,8 +170,52 @@ public class TicketController : ControllerBase
         return Ok(ticket);
     }
 
+    // Assign a ticket.
+    [HttpPost]
+    [Route("tickets/{id:int}/assign")]
+    [OpaRuleAuthorization("tickets/allow", "assign")]
+    public async Task<ActionResult<Ticket>> AssignTicket(int id, [FromBody] AssignFields af)
+    {
+        Ticket? ticket = await _dbContext.Tickets.FindAsync(id);
+        if (ticket is null)
+        {
+            return NotFound();
+        }
+        User? user = await _dbContext.Users.Where(u => u.Name == af.assignee && u.Tenant == ticket.Tenant).FirstAsync();
+        if (user is null)
+        {
+            return NotFound();
+        }
+        ticket.Assignee = user.Id;
+        ticket.LastUpdated = DateTime.UtcNow.ToLocalTime();
+        await _dbContext.SaveChangesAsync();
+        return Ok(ticket);
+    }
+
     private async Task<Tenant> getTenantByName(string name)
     {
         return await _dbContext.Tenants.Where(tenant => tenant.Name == name).FirstAsync();
+    }
+
+    public struct PolicyResult
+    {
+        [JsonProperty("allow")]
+        public bool Allow;
+
+        [JsonProperty("reason")]
+        public string Reason;
+
+        [JsonProperty("conditions", NullValueHandling = NullValueHandling.Ignore)]
+        public UCASTNode? Conditions;
+    }
+
+    private async Task<UCASTNode?> getConditions(HttpContext context, string path, object input)
+    {
+        var authzService = context.RequestServices.GetRequiredService<OpaAuthzService>();
+        OpaClient opa = authzService.GetClient();
+
+        PolicyResult result = await opa.evaluate<PolicyResult>(path, input);
+        _logger.LogInformation(JsonConvert.SerializeObject(result));
+        return result.Conditions;
     }
 }
