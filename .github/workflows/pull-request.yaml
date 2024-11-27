@@ -96,7 +96,7 @@ jobs:
       - name: Run hurl API tests
         run: docker compose run --quiet-pull integration-tests
         env:
-          HURL_SKIP_CONDITIONS: ${{ matrix.server != 'node' }}
+          HURL_SKIP_CONDITIONS: ${{ matrix.server != 'node' && matrix.server != 'csharp' }}
       - name: dump logs
         run: docker compose --profile ${{ matrix.server }} logs
         if: failure()
