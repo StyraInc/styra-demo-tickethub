@@ -23,6 +23,24 @@ updates:
       slf4j:
         patterns:
           - "org.slf4j:*"
+  - package-ecosystem: "gradle"
+    directory: "/server/springboot"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    groups:
+      jetty:
+        patterns:
+          - "org.eclipse.jetty:*"
+      jersey:
+        patterns:
+          - "org.glassfish.jersey.*"
+      jackson:
+        patterns:
+          - "com.fasterxml.jackson*"
+      slf4j:
+        patterns:
+          - "org.slf4j:*"
   - package-ecosystem: "nuget"
     directory: "/server/csharp"
     schedule:
