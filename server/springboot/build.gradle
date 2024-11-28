@@ -33,7 +33,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
+	implementation 'jakarta.validation:jakarta.validation-api:3.1.0'
 	implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
 
 	implementation group: 'com.styra', name: 'opa', version: '+'
