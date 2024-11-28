@@ -36,8 +36,8 @@ dependencies {
 	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 	implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.2'
 
-	implementation group: 'com.styra', name: 'opa', version: '+'
-	implementation group: 'com.styra.opa', name: 'springboot', version: '+'
+	implementation group: 'com.styra', name: 'opa', version: '1.8.0'
+	implementation group: 'com.styra.opa', name: 'springboot', version: '0.0.8'
 
 	runtimeOnly 'org.postgresql:postgresql'
 	implementation 'org.hibernate:hibernate-core:6.5.2.Final'
