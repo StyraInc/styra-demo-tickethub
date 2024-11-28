@@ -39,7 +39,7 @@ dependencies {
     implementation 'com.jayway.jsonpath:json-path:2.9.0'
     implementation 'commons-io:commons-io:2.18.0'
 
-    implementation group: 'com.styra', name: 'opa', version: '+'
+    implementation group: 'com.styra', name: 'opa', version: '1.8.0'
 }
 
 application {
