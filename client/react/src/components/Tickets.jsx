@@ -19,7 +19,14 @@ export default function Tickets() {
       },
     })
       .then((res) => res.json())
-      .then((data) => setTickets(data.tickets));
+      .then(({ tickets }) => {
+        tickets.sort(
+          (a, b) =>
+            new Date(b.last_updated).getTime() -
+            new Date(a.last_updated).getTime(),
+        );
+        setTickets(tickets);
+      });
   }, [tenant, user]);
 
   // figure out if the backend can do assignments
@@ -27,7 +34,7 @@ export default function Tickets() {
     if (!tickets || canAssign) return;
     if (tickets.some(({ assignee }) => assignee == null || !!assignee))
       setCanAssign(true);
-  }, [tickets, canAssign, setCanAssign]);
+  }, [tickets, canAssign]);
 
   return (
     <main>
@@ -44,7 +51,7 @@ export default function Tickets() {
         </thead>
         <tbody>
           {tickets?.map((ticket) => (
-            <tr key={ticket.id} id={`ticket-${ticket.id}`} >
+            <tr key={ticket.id} id={`ticket-${ticket.id}`}>
               <td onClick={() => navigate(`/tickets/${ticket.id}`)}>
                 {ticket.id}
               </td>
