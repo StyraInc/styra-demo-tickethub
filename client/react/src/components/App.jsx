@@ -22,7 +22,7 @@ const titles = {
 };
 
 export default function App() {
-  let [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [batch] = useState(
     () => searchParams.get("batch") === "true",
     [searchParams],
@@ -73,7 +73,7 @@ export default function App() {
           document.cookie = `user=${tenant0} / ${user0}; Path=/; SameSite=Lax`;
         }
       });
-  }, [user]);
+  }, [user, setUser, setTenant]);
 
   if (!user || !tenant) return <div>Loading</div>;
 
