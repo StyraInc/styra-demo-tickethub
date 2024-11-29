@@ -85,7 +85,7 @@ jobs:
         run: npx playwright test
         working-directory: tests/e2e
         env:
-          CONDITIONS: ${{ matrix.server == 'node' }}
+          CONDITIONS: ${{ matrix.server == 'node' || matrix.server == 'csharp' }}
           REASONS: ${{ matrix.server == 'node' || matrix.server == 'java' }}
       - uses: actions/upload-artifact@v4
         if: always()
