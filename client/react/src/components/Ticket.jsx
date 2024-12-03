@@ -4,6 +4,17 @@ import { useAuthn } from "../AuthnContext";
 import { Authz } from "@styra/opa-react";
 import Assignee from "./Assignee";
 
+const loadTicket = async (ticketId, user, tenant, setTicket) => {
+  fetch(`/api/tickets/${ticketId}`, {
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${tenant} / ${user}`,
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => setTicket(data));
+};
+
 export default function Ticket() {
   const { user, tenant } = useAuthn();
   const { ticketId } = useParams();
@@ -11,27 +22,16 @@ export default function Ticket() {
   const [canAssign, setCanAssign] = useState(false);
   const [message, setMessage] = useState();
 
-  const loadTicket = async function (ticketId, user, tenant, setTicket) {
-    fetch(`/api/tickets/${ticketId}`, {
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${tenant} / ${user}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => setTicket(data));
-  };
-
   useEffect(() => {
     if (!user) return; // wait for user to be set
     loadTicket(ticketId, user, tenant, setTicket);
-  }, [user, tenant, ticketId, setTicket]);
+  }, [user, tenant, ticketId]);
 
   // figure out if the backend can do assignments
   useEffect(() => {
     if (!ticket || canAssign) return;
     if ("assignee" in ticket) setCanAssign(true);
-  }, [ticket, canAssign, setCanAssign]);
+  }, [ticket, canAssign]);
 
   const handleSubmit = useCallback(
     async (event) => {
@@ -52,13 +52,15 @@ export default function Ticket() {
           : "resolved → unresolved";
         setMessage(`Ticket updated: ${resolved}`);
       } else {
-        const {reason} = await response.json();
-        setMessage(`Error: user unauthorized to perform operation.${reason != undefined ? " " + reason : "" }`);
+        const { reason } = await response.json();
+        setMessage(
+          `Error: user unauthorized to perform operation.${reason !== undefined ? ` ${reason}` : ""}`,
+        );
       }
 
       await loadTicket(ticketId, user, tenant, setTicket);
     },
-    [ticketId, ticket, user, tenant, setTicket],
+    [ticketId, ticket, user, tenant],
   );
 
   if (!ticket) {
