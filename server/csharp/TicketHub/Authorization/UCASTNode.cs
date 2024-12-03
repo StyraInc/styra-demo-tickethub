@@ -42,9 +42,4 @@ public class UCASTNodeValueConverter : JsonConverter
     {
         serializer.Serialize(writer, value);
     }
-
-    // public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-    // {
-    //     throw new NotImplementedException();
-    // }
 }
