@@ -36,15 +36,28 @@ user_is_resolver(user, tenant) if "resolver" in roles[tenant][user]
 
 ## CONDITIONS ##
 
-# Tenancy
-conditions["tickets.tenant"] := input.tenant.id
+conditions := and_(constraints)
 
 # Resolver conditions
-conditions.or contains {"tickets.resolved": false, "tickets.assignee": null} if {
-	user_is_resolver(input.user, tenant)
-}
+constraints contains or_([
+	and_([
+		eq_("tickets.resolved", false),
+		eq_("tickets.assignee", null),
+	]),
+	eq_("users.name", input.user),
+]) if user_is_resolver(input.user, tenant)
 
-conditions.or contains {"users.name": input.user} if user_is_resolver(input.user, tenant)
+# Tenancy
+constraints contains eq_("tickets.tenant", input.tenant.id)
+
+# helper functions
+eq_(field, value) := {"type": "field", "operator": "eq", "field": field, "value": value}
+
+and_(values) := compound("and", values)
+
+or_(values) := compound("or", values)
+
+compound(op, values) := {"type": "compound", "operator": op, "value": values}
 
 ## DENY REASONS ##
 
