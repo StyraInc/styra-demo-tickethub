@@ -36,23 +36,25 @@ user_is_resolver(user, tenant) if "resolver" in roles[tenant][user]
 
 ## CONDITIONS ##
 
-conditions["type"] := "compound"
-conditions["operation"] := "and"
+conditions.type := "compound"
+
+conditions.operator := "and"
 
 # Resolver conditions
-conditions["value"] contains {"type": "compound", "operation": "or", "value": v} if {
+conditions.value contains {"type": "compound", "operator": "or", "value": v} if {
 	user_is_resolver(input.user, tenant)
 
-	v := [{"type": "compound", "operation": "and", "value": [
-			{"type": "field", "operation": "eq", "field": "tickets.resolved", "value": false},
-			{"type": "field", "operation": "eq", "field": "tickets.assignee", "value": null},
+	v := [
+		{"type": "compound", "operator": "and", "value": [
+			{"type": "field", "operator": "eq", "field": "tickets.resolved", "value": false},
+			{"type": "field", "operator": "eq", "field": "tickets.assignee", "value": null},
 		]},
-		{"type": "field", "operation": "eq", "field": "users.name", "value": input.user},
+		{"type": "field", "operator": "eq", "field": "users.name", "value": input.user},
 	]
 }
 
 # Tenancy
-conditions["value"] contains {"type": "field", "operation": "eq", "field": "tickets.tenant", "value": input.tenant.id}
+conditions.value contains {"type": "field", "operator": "eq", "field": "tickets.tenant", "value": input.tenant.id}
 
 # Tenancy
 # conditions["tickets.tenant"] := input.tenant.id

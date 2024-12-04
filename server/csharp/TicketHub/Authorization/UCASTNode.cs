@@ -9,7 +9,7 @@ public class UCASTNode
     [JsonProperty("type")]
     public required string Type;
 
-    [JsonProperty("operation")]
+    [JsonProperty("operator")]
     public required string Op;
 
     [JsonProperty("field")]

@@ -62,7 +62,7 @@ public static class QueryableExtensions
             "le" => Expression.LessThanOrEqual(property, value),
             "lte" => Expression.LessThanOrEqual(property, value),
             "contains" => Expression.Call(property, typeof(string).GetMethod("Contains", new[] { typeof(string) }), value),
-            _ => throw new ArgumentException($"Unknown operation: {node.Op}"),
+            _ => throw new ArgumentException($"Unknown operator: {node.Op}"),
         };
     }
 
@@ -76,7 +76,7 @@ public static class QueryableExtensions
         {
             "and" => childExpressions.Aggregate(Expression.AndAlso),
             "or" => childExpressions.Aggregate(Expression.OrElse),
-            _ => throw new ArgumentException($"Unknown group operation: {node.Op}"),
+            _ => throw new ArgumentException($"Unknown compound operator: {node.Op}"),
         };
     }
 }
