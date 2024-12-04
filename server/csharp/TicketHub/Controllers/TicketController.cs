@@ -64,7 +64,7 @@ public class TicketController : ControllerBase
     // List all tickets.
     [HttpGet]
     [Route("tickets")]
-    [OpaRuleAuthorization("tickets_expanded/allow", "list")]
+    [OpaRuleAuthorization("tickets/allow", "list")]
     public async Task<ActionResult<IAsyncEnumerable<Ticket>>> ListTickets()
     {
         var tName = HttpContext.Items["Tenant"]?.ToString();
@@ -91,7 +91,7 @@ public class TicketController : ControllerBase
         if (tName is string)
         {
             Tenant tenant = await getTenantByName(tName);
-            var conditions = await getConditions(HttpContext, "tickets_expanded/response", new Dictionary<string, object>(){
+            var conditions = await getConditions(HttpContext, "tickets/response", new Dictionary<string, object>(){
                 { "tenant", tenant },
                 { "user", subject },
                 { "action", "list" },
