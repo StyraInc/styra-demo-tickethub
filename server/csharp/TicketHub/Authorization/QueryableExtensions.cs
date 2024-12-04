@@ -79,4 +79,58 @@ public static class QueryableExtensions
             _ => throw new ArgumentException($"Unknown compound operator: {node.Op}"),
         };
     }
+
+    // Default construction rules:
+    //   Example.Id -> "example.id"
+    //   Example.LastUpdated -> "example.last_updated"
+    //   Example.UserNavigation.Id -> "example.user.id"
+    // 
+    public static Dictionary<string, Func<ParameterExpression, Expression>> BuildDefaultMapperDictionary<T>(string prefix = "")
+    {
+        var result = new Dictionary<string, Func<ParameterExpression, Expression>>();
+        var properties = typeof(T).GetProperties();
+        foreach (var property in properties)
+        {
+            // If the property ends with "Navigation", then we want to enumerate
+            // the top-level properties of that member that can be looked up in
+            // a LINQ Join. Otherwise, it's a normal property of the current
+            // object.
+            var propertyName = property.Name;
+            if (propertyName.EndsWith("Navigation") && propertyName != "Navigation")
+            {
+                propertyName = property.Name[..^"Navigation".Length];
+                propertyName = string.IsNullOrEmpty(prefix) ? propertyName.ToSnakeCase() : $"{prefix}.{propertyName.ToSnakeCase()}";
+
+                Type memberType = property.PropertyType;
+                var memberProperties = memberType.GetProperties();
+                foreach (var memberProp in memberProperties)
+                {
+                    // Skip cases like "Ticket.CustomerNavigation.TenantNavigation".
+                    if (memberProp.Name.EndsWith("Navigation"))
+                    {
+                        continue;
+                    }
+                    var memberPropertyName = memberProp.Name.ToSnakeCase();
+                    result[$"{propertyName}.{memberPropertyName}"] = param => Expression.Property(Expression.Property(param, property.Name), memberPropertyName);
+                }
+            }
+            else
+            {
+                propertyName = string.IsNullOrEmpty(prefix) ? propertyName.ToSnakeCase() : $"{prefix}.{propertyName.ToSnakeCase()}";
+                result[propertyName] = param => Expression.Property(param, property.Name);
+            }
+        }
+
+        return result;
+    }
+
+    private static string ToSnakeCase(this string input)
+    {
+        if (string.IsNullOrEmpty(input))
+        {
+            return input;
+        }
+
+        return string.Concat(input.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x.ToString() : x.ToString())).ToLower();
+    }
 }
