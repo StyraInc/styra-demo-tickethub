@@ -58,6 +58,7 @@ public static class QueryableExtensions
         var property = mapper[node.Field!](parameter); // Note: This will throw a KeyNotFoundException if the field name does not exist.
         Expression value = Expression.Constant(node.Value);
 
+        // TODO: Add more robust type mismatch handling and possibly exceptions.
         Type lhsType = property.Type;
         Type rhsType = value.Type;
         if (lhsType != rhsType)
@@ -100,6 +101,7 @@ public static class QueryableExtensions
     /// <returns>Result, an aggregate LINQ Expression.</returns>
     private static Expression BuildCompoundExpression<T>(UCASTNode node, ParameterExpression parameter, Dictionary<string, Func<ParameterExpression, Expression>> mapper)
     {
+        // TODO: Detect wrong types, and/or empty child condition lists.
         var childNodes = (List<UCASTNode>)node.Value;
         var childExpressions = childNodes.Select(child => BuildExpression<T>(child, parameter, mapper));
 
