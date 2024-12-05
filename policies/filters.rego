@@ -22,4 +22,9 @@ allow if {
 	input.user == input.users.user
 }
 
+allow if {
+	not data.tickets.user_is_resolver(input.user, tenant)
+	input.tenant.id == input.ticket.tenant
+}
+
 conditions := data.convert.to_conditions(input, ["input.ticket", "input.users"], "data.filters.allow")
