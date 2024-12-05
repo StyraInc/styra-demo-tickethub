@@ -35,7 +35,7 @@ public static class QueryableExtensions
         return node.Type.ToLower() switch
         {
             "field" => BuildFieldExpression<T>(node, parameter, mapper),
-            "document" => BuildFieldExpression<T>(node, parameter, mapper), // TODO: Fix this to provide actual document-level operations.
+            "document" => BuildFieldExpression<T>(node, parameter, mapper), // TODO: Fix this to provide actual document-level operations once we have any.
             "compound" => BuildCompoundExpression<T>(node, parameter, mapper),
             _ => throw new ArgumentException($"Unknown node type: {node.Type}"),
         };
@@ -55,12 +55,8 @@ public static class QueryableExtensions
     /// <returns>Result, a LINQ Expression (Usually a BinaryExpression).</returns>
     private static Expression BuildFieldExpression<T>(UCASTNode node, ParameterExpression parameter, Dictionary<string, Func<ParameterExpression, Expression>> mapper)
     {
-        // TODO: Look up the FieldInfo that matches the string, slam it into the spot where it belongs.
-        //var property = mapper[node.Field!];
-        var property = mapper[node.Field!](parameter); // TODO: Replace with TryGet
-        // Introspect the PropertyExpression, and extract the type of the thing the property is coming from.
-
-        Expression value = Expression.Constant(node.Value); // TODO: Check that this reflects correctly.
+        var property = mapper[node.Field!](parameter); // Note: This will throw a KeyNotFoundException if the field name does not exist.
+        Expression value = Expression.Constant(node.Value);
 
         Type lhsType = property.Type;
         Type rhsType = value.Type;
