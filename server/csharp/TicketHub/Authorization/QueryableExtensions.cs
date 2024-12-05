@@ -5,8 +5,15 @@ namespace TicketHub.Authorization;
 
 public static class QueryableExtensions
 {
-    // Builds a LINQ Lambda Expression from the UCAST tree, and then invokes it under a LINQ Where expression on some queryable source collection.
-    // In our case, this *should* usually be an EF Core ORM model.
+    /// <summary>
+    /// Builds a LINQ Lambda Expression from the UCAST tree, and then invokes
+    /// it under a LINQ Where expression on some queryable data source.
+    /// In our case, this *should* usually be an EF Core ORM model.
+    /// </summary>
+    /// <param name="source">LINQ data source (same type as <typeparamref name="T"/>).</param>
+    /// <param name="root">The top-level UCAST node to build a LINQ Expression tree from.</param>
+    /// <param name="mapper">Dictionary mapping UCAST property names to lambdas that generate LINQ Expressions.</param>
+    /// <returns>Result, an IQueryable<<typeparamref name="T"/>>.</returns>
     public static IQueryable<T> ApplyUCASTFilter<T>(this IQueryable<T> source, UCASTNode root, Dictionary<string, Func<ParameterExpression, Expression>> mapper)
     {
         var parameter = Expression.Parameter(typeof(T), "x");
@@ -14,6 +21,14 @@ public static class QueryableExtensions
         return source.Where(Expression.Lambda<Func<T, bool>>(expression, parameter));
     }
 
+    /// <summary>
+    /// The entry point for recursively constructing a LINQ Expression tree
+    /// from a given UCASTNode.
+    /// </summary>
+    /// <param name="node">Current UCAST node in the conditions tree.</param>
+    /// <param name="parameter">LINQ data source (same type as <typeparamref name="T"/>).</param>
+    /// <param name="mapper">Dictionary mapping UCAST property names to lambdas that generate LINQ Expressions.</param>
+    /// <returns>Result, a LINQ Expression.</returns>
     public static Expression BuildExpression<T>(UCASTNode node, ParameterExpression parameter, Dictionary<string, Func<ParameterExpression, Expression>> mapper)
     {
         // Switch expression:
@@ -26,6 +41,18 @@ public static class QueryableExtensions
         };
     }
 
+    /// <summary>
+    /// Constructs a field-level UCAST condition using LINQ Expressions. Most
+    /// operators of interest in UCAST field-level conditionsare represented
+    /// as BinaryExpression types. Some typecasts (such as Int32 upcasting to
+    /// Int64) are detected and included in the LINQ Expression tree
+    /// automatically, to ensure that the binary expressions won't fail at
+    /// runtime due to type mismatches between operands.
+    /// </summary>
+    /// <param name="node">Current UCAST node in the conditions tree.</param>
+    /// <param name="parameter">LINQ data source (same type as <typeparamref name="T"/>).</param>
+    /// <param name="mapper">Dictionary mapping UCAST property names to lambdas that generate LINQ Expressions.</param>
+    /// <returns>Result, a LINQ Expression (Usually a BinaryExpression).</returns>
     private static Expression BuildFieldExpression<T>(UCASTNode node, ParameterExpression parameter, Dictionary<string, Func<ParameterExpression, Expression>> mapper)
     {
         // TODO: Look up the FieldInfo that matches the string, slam it into the spot where it belongs.
@@ -66,6 +93,15 @@ public static class QueryableExtensions
         };
     }
 
+    /// <summary>
+    /// Constructs a compound UCAST condition. Recursively constructs its child
+    /// conditions, then binds the child nodes together with a LINQ aggregate
+    /// operation.
+    /// </summary>
+    /// <param name="node">Current UCAST node in the conditions tree.</param>
+    /// <param name="parameter">LINQ data source (same type as <typeparamref name="T"/>).</param>
+    /// <param name="mapper">Dictionary mapping UCAST property names to lambdas that generate LINQ Expressions.</param>
+    /// <returns>Result, an aggregate LINQ Expression.</returns>
     private static Expression BuildCompoundExpression<T>(UCASTNode node, ParameterExpression parameter, Dictionary<string, Func<ParameterExpression, Expression>> mapper)
     {
         var childNodes = (List<UCASTNode>)node.Value;
@@ -80,11 +116,20 @@ public static class QueryableExtensions
         };
     }
 
-    // Default construction rules:
-    //   Example.Id -> "example.id"
-    //   Example.LastUpdated -> "example.last_updated"
-    //   Example.UserNavigation.Id -> "example.user.id"
-    // 
+    /// <summary>
+    /// BuildDefaultMapperDictionary constructs a Dictionary mapping UCAST
+    /// property names to lambda functions. The lambda functions allow
+    /// late-binding a LINQ data source into LINQ Property expression lookups,
+    /// which are used extensively when building conditions over EF Core models.
+    ///
+    /// When deciding on names for data source properties, we follow a small set
+    /// of default construction rules:
+    ///  - Example.Id -> "example.id"
+    ///  - Example.LastUpdated -> "example.last_updated"
+    ///  - Example.UserNavigation.Id -> "example.user.id"
+    /// </summary>
+    /// <param name="prefix">Name of the LINQ data source, as it will appear in UCAST field references. Used as a prefix for the generated property mappings.</param>
+    /// <returns>Result, a Dictionary.</returns>
     public static Dictionary<string, Func<ParameterExpression, Expression>> BuildDefaultMapperDictionary<T>(string prefix = "")
     {
         var result = new Dictionary<string, Func<ParameterExpression, Expression>>();
