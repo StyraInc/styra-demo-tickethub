@@ -89,20 +89,3 @@ public class UtcDateTimeConverter : IsoDateTimeConverter
         DateTimeStyles = System.Globalization.DateTimeStyles.AssumeUniversal;
     }
 }
-
-public class TicketExpressionMapper
-{
-    public static Dictionary<string, Expression<Func<Ticket, object>>> CreateMapping()
-    {
-        return new Dictionary<string, Expression<Func<Ticket, object>>>
-        {
-            ["tickets.id"] = t => t.Id,
-            ["tickets.description"] = t => t.Description,
-            ["tickets.last_updated"] = t => t.LastUpdated,
-            ["tickets.resolved"] = t => t.Resolved,
-            ["tickets.customer"] = t => t.CustomerName,
-            ["tickets.tenant"] = t => t.TenantName,
-            ["tickets.assignee"] = t => t.UserName,
-        };
-    }
-}

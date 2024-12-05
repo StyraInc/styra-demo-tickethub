@@ -20,6 +20,7 @@ public class TicketController : ControllerBase
 {
     private readonly ILogger<TicketController> _logger;
     private readonly PostgresContext _dbContext;
+    private Dictionary<string, Func<ParameterExpression, Expression>> _ticketMapper;
 
     public record TicketFields(string customer, string description);
     public record ResolveFields(bool resolved);
@@ -38,6 +39,20 @@ public class TicketController : ControllerBase
     {
         _logger = logger;
         _dbContext = dbContext;
+
+        // The mapping here can be laborious, but this is the price we're currently
+        // paying for having to work in LINQ's constraints. All queries have to
+        // be built out *relative* to some base `IQueryable<T>` object.
+        _ticketMapper = QueryableExtensions.BuildDefaultMapperDictionary<Ticket>("tickets");
+        // Remove keys that won't be found in the policy.
+        _ticketMapper.Remove("tickets.user.id");
+        _ticketMapper.Remove("tickets.user.name");
+        _ticketMapper.Remove("tickets.user.tenant");
+        // Manually add the LINQ expression lambdas under the keys that *will*
+        // be found in the policy.
+        _ticketMapper["users.id"] = t => Expression.Property(Expression.Property(t, "UserNavigation"), "Id");
+        _ticketMapper["users.name"] = t => Expression.Property(Expression.Property(t, "UserNavigation"), "Name");
+        _ticketMapper["users.tenant"] = t => Expression.Property(Expression.Property(t, "UserNavigation"), "Tenant");
     }
 
     public static Dictionary<string, Dictionary<string, FieldInfo>> CreateFieldInfoMapping(params Type[] dbSetTypes)
@@ -69,25 +84,6 @@ public class TicketController : ControllerBase
     {
         var tName = HttpContext.Items["Tenant"]?.ToString();
         string subject = HttpContext.Items["Subject"]?.ToString() ?? "";
-        // The mapping here is laborious, but this is the price we're currently
-        // paying for having to work in LINQ's constraints. All queries have to
-        // be built out *relative* to some base `IQueryable<T>` object.
-        var mapper = new Dictionary<string, Func<ParameterExpression, Expression>>()
-        {
-            { "tickets.id", t => Expression.Property(t, "Id") },
-            { "tickets.customer", t => Expression.Property(t, "Customer") },
-            { "tickets.customer.name", t => Expression.Property(t, "CustomerName") },
-            { "tickets.tenant", t => Expression.Property(t, "Tenant") },
-            { "tickets.tenant.name", t => Expression.Property(t, "TenantName") },
-            { "tickets.assignee", t => Expression.Property(t, "Assignee") },
-            { "tickets.assignee.name", t => Expression.Property(t, "UserName") },
-            { "tickets.description", t => Expression.Property(t, "Description") },
-            { "tickets.resolved", t => Expression.Property(t, "Resolved") },
-            { "tickets.last_updated", t => Expression.Property(t, "LastUpdated") },
-            { "users.id", t => Expression.Property(Expression.Property(t, "UserNavigation"), "Id") },
-            { "users.name", t => Expression.Property(Expression.Property(t, "UserNavigation"), "Name") },
-            { "users.tenant", t => Expression.Property(Expression.Property(t, "UserNavigation"), "Tenant") },
-        };
         if (tName is string)
         {
             Tenant tenant = await getTenantByName(tName);
@@ -102,13 +98,13 @@ public class TicketController : ControllerBase
             }
 
             // Log the condition expression for debugging, with a dummy target parameter.
-            _logger.LogInformation(QueryableExtensions.BuildExpression<Ticket>(conditions, Expression.Parameter(typeof(Ticket), "x"), mapper).ToString());
+            _logger.LogInformation(QueryableExtensions.BuildExpression<Ticket>(conditions, Expression.Parameter(typeof(Ticket), "x"), _ticketMapper).ToString());
 
             List<Ticket> tickets = await _dbContext.Tickets
                 .Include(t => t.CustomerNavigation)
                 .Include(t => t.TenantNavigation)
                 .Include(t => t.UserNavigation)
-                .ApplyUCASTFilter(conditions, mapper)
+                .ApplyUCASTFilter(conditions, _ticketMapper)
                 .ToListAsync();
             return Ok(new { Tickets = tickets });
         }
