@@ -136,33 +136,32 @@ public static class QueryableExtensions
         var properties = typeof(T).GetProperties();
         foreach (var property in properties)
         {
-            // If the property ends with "Navigation", then we want to enumerate
-            // the top-level properties of that member that can be looked up in
-            // a LINQ Join. Otherwise, it's a normal property of the current
-            // object.
             var propertyName = property.Name;
-            if (propertyName.EndsWith("Navigation") && propertyName != "Navigation")
-            {
-                propertyName = property.Name[..^"Navigation".Length];
-                propertyName = string.IsNullOrEmpty(prefix) ? propertyName.ToSnakeCase() : $"{prefix}.{propertyName.ToSnakeCase()}";
-
-                Type memberType = property.PropertyType;
-                var memberProperties = memberType.GetProperties();
-                foreach (var memberProp in memberProperties)
-                {
-                    // Skip cases like "Ticket.CustomerNavigation.TenantNavigation".
-                    if (memberProp.Name.EndsWith("Navigation"))
-                    {
-                        continue;
-                    }
-                    var memberPropertyName = memberProp.Name.ToSnakeCase();
-                    result[$"{propertyName}.{memberPropertyName}"] = param => Expression.Property(Expression.Property(param, property.Name), memberPropertyName);
-                }
-            }
-            else
+            // Normal properties, or a property just named "navigation" (case invariant) should be processed normally.
+            if (!propertyName.EndsWith("Navigation") || propertyName.ToLower() == "Navigation")
             {
                 propertyName = string.IsNullOrEmpty(prefix) ? propertyName.ToSnakeCase() : $"{prefix}.{propertyName.ToSnakeCase()}";
                 result[propertyName] = param => Expression.Property(param, property.Name);
+                continue;
+            }
+            // Implicit else: Properties with the "Navigation" suffix are
+            // usually ORM tooling for foreign key/entity lookups in EF Core. We
+            // indirect one level, and enumerate the non-Navigation properties
+            // of that type.
+            propertyName = property.Name[..^"Navigation".Length];
+            propertyName = string.IsNullOrEmpty(prefix) ? propertyName.ToSnakeCase() : $"{prefix}.{propertyName.ToSnakeCase()}";
+
+            Type memberType = property.PropertyType;
+            var memberProperties = memberType.GetProperties();
+            foreach (var memberProp in memberProperties)
+            {
+                // Skip cases like "Ticket.CustomerNavigation.TenantNavigation".
+                if (memberProp.Name.EndsWith("Navigation") && memberProp.Name.ToLower() != "Navigation")
+                {
+                    continue;
+                }
+                var memberPropertyName = memberProp.Name.ToSnakeCase();
+                result[$"{propertyName}.{memberPropertyName}"] = param => Expression.Property(Expression.Property(param, property.Name), memberPropertyName);
             }
         }
 
