@@ -11,11 +11,9 @@ updates:
       interval: "daily"
     open-pull-requests-limit: 10
     groups:
-      jetty:
+      jetty-jersey:
         patterns:
           - "org.eclipse.jetty:*"
-      jersey:
-        patterns:
           - "org.glassfish.jersey.*"
       jackson:
         patterns:
@@ -29,12 +27,6 @@ updates:
       interval: "daily"
     open-pull-requests-limit: 10
     groups:
-      jetty:
-        patterns:
-          - "org.eclipse.jetty:*"
-      jersey:
-        patterns:
-          - "org.glassfish.jersey.*"
       jackson:
         patterns:
           - "com.fasterxml.jackson*"
