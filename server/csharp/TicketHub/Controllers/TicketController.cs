@@ -2,11 +2,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Styra.Opa;
+using Styra.Ucast.Linq;
 using System.Linq.Expressions;
 using System.Net.Mime;
 using System.Reflection;
-using System.Reflection.Metadata;
-using System.Runtime.CompilerServices;
 using TicketHub.Authorization;
 using TicketHub.Database;
 
