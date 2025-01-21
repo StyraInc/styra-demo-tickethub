@@ -170,14 +170,19 @@ router.post("/tickets", async (req, res) => {
 
 // list all tickets
 router.get("/tickets", async (req, res) => {
-  const { allow, reason, conditions } = await authz.authorized(
+  const { allow, reason } = await authz.authorized(
     path,
     { action: "list" },
     req,
   );
   if (!allow) return res.status(FORBIDDEN).json({ reason });
 
-  const filters = ucastToPrisma(conditions, "tickets");
+  const query = "data.tickets.filters.include";
+  const { result } = await authz
+    .conditions(query, { action: "list" }, req)
+    .then((res) => res.json());
+
+  const filters = ucastToPrisma(result, "tickets");
   const tickets = (
     await prisma.tickets.findMany({
       where: filters,
