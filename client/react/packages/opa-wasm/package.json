@@ -14,7 +14,7 @@
     "tsx": "^4.11.2",
     "typescript": "^5.4.5",
     "typescript-eslint": "^7.7.0",
-    "undici": "^6.19.2",
+    "undici": "^6.21.1",
     "zx": "^8.1.2"
   },
   "dependencies": {
