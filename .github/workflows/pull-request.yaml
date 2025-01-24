@@ -75,6 +75,13 @@ jobs:
           fetch-depth: 0
       - name: setup
         run: docker compose --profile ${{ matrix.server }} --profile react up --quiet-pull --wait --wait-timeout 300
+        env:
+          OPA_DOCKERFILE: enterprise-opa.Dockerfile
+          EOPA_LICENSE_KEY: ${{ secrets.EOPA_LICENSE_KEY }}
+        if: matrix.server == 'node'
+      - name: setup
+        run: docker compose --profile ${{ matrix.server }} --profile react up --quiet-pull --wait --wait-timeout 300
+        if: matrix.server != 'node'
       - name: Install dependencies
         run: npm ci
         working-directory: tests/e2e
