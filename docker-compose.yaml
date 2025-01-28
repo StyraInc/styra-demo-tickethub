@@ -130,7 +130,7 @@ services:
     init: true
     build:
       context: .
-      dockerfile: ${OPA_DOCKERFILE-opa.Dockerfile}
+      dockerfile: ${OPA_DOCKERFILE-enterprise-opa.Dockerfile}
     ports:
       - "8181:8181"
     command:
@@ -138,6 +138,7 @@ services:
       - --server
       - --addr=:8181
       - --log-level=debug
+      - --set=plugins.exp_compile_api={}
       - --bundle
       - bundle.tar.gz
     working_dir: /

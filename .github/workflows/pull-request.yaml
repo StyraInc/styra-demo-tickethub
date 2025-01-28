@@ -6,8 +6,6 @@ on:
   push:
     branches:
       - main
-  schedule:
-    - cron: 0 0 * * *
 
 # When a new revision is pushed to a PR, cancel all in-progress CI runs for that
 # PR. See https://docs.github.com/en/actions/using-jobs/using-concurrency
@@ -58,6 +56,9 @@ jobs:
         if: ${{ matrix.client == 'react' }}
       - name: setup
         run: docker compose --profile ${{ matrix.client }} up --quiet-pull --wait --wait-timeout 300 --build
+        env:
+          OPA_DOCKERFILE: enterprise-opa.Dockerfile
+          EOPA_LICENSE_KEY: ${{ secrets.EOPA_LICENSE_KEY }}
       - name: smoke test
         run: curl --retry 5 --retry-connrefused --retry-max-time 120 http://127.0.0.1:3000 -v
 
@@ -78,10 +79,6 @@ jobs:
         env:
           OPA_DOCKERFILE: enterprise-opa.Dockerfile
           EOPA_LICENSE_KEY: ${{ secrets.EOPA_LICENSE_KEY }}
-        if: matrix.server == 'node'
-      - name: setup
-        run: docker compose --profile ${{ matrix.server }} --profile react up --quiet-pull --wait --wait-timeout 300
-        if: matrix.server != 'node'
       - name: Install dependencies
         run: npm ci
         working-directory: tests/e2e
