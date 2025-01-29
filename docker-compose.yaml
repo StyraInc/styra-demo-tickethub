@@ -138,6 +138,7 @@ services:
       - --server
       - --addr=:8181
       - --log-level=debug
+      - --no-license-fallback
       - --set=plugins.exp_compile_api={}
       - --bundle
       - bundle.tar.gz
