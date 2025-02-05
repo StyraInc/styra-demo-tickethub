@@ -182,7 +182,7 @@ router.get("/tickets", async (req, res) => {
     .conditions(query, { action: "list" }, req)
     .then((res) => res.json());
 
-  const filters = ucastToPrisma(result, "tickets");
+  const filters = ucastToPrisma(result.query, "tickets");
   const tickets = (
     await prisma.tickets.findMany({
       where: filters,
