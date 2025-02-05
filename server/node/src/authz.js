@@ -42,15 +42,12 @@ export class Authorizer {
       query,
       input,
       unknowns: ["input.tickets", "input.users"],
-      options: {
-        dialect: "prisma",
-      },
     });
-    const req = new Request(`${this.endpoint}/exp/compile`, {
+    const req = new Request(`${this.endpoint}/v1/compile`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Accept: "application/vnd.styra.ucast+json",
+        Accept: "application/vnd.styra.ucast.prisma+json",
       },
       body,
     });
