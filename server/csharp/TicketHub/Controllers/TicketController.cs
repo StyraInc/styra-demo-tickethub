@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Styra.Opa;
 using Styra.Ucast.Linq;
 using System.Linq.Expressions;
+using System.Net.Http.Headers;
 using System.Net.Mime;
 using System.Reflection;
 using TicketHub.Authorization;
@@ -19,7 +20,8 @@ public class TicketController : ControllerBase
 {
     private readonly ILogger<TicketController> _logger;
     private readonly PostgresContext _dbContext;
-    private Dictionary<string, Func<ParameterExpression, Expression>> _ticketMapper;
+    private readonly Dictionary<string, Func<ParameterExpression, Expression>> _ticketMapper;
+    private readonly string opaURL = Environment.GetEnvironmentVariable("OPA_URL") ?? "http://localhost:8181";
 
     public record TicketFields(string customer, string description);
     public record ResolveFields(bool resolved);
@@ -86,7 +88,7 @@ public class TicketController : ControllerBase
         if (tName is string)
         {
             Tenant tenant = await getTenantByName(tName);
-            var conditions = await getConditions(HttpContext, "tickets/response", new Dictionary<string, object>(){
+            var conditions = await getConditions(HttpContext, "data.tickets.filters.include", new Dictionary<string, object>(){
                 { "tenant", tenant },
                 { "user", subject },
                 { "action", "list" },
@@ -204,13 +206,48 @@ public class TicketController : ControllerBase
         public UCASTNode? Conditions;
     }
 
-    private async Task<UCASTNode?> getConditions(HttpContext context, string path, object input)
+    public struct CompileUCASTResult
     {
-        var authzService = context.RequestServices.GetRequiredService<OpaAuthzService>();
-        OpaClient opa = authzService.GetClient();
+        [JsonProperty("result")]
+        public CompileResult Result;
 
-        PolicyResult result = await opa.evaluate<PolicyResult>(path, input);
-        _logger.LogInformation(JsonConvert.SerializeObject(result));
-        return result.Conditions;
+        public struct CompileResult
+        {
+            [JsonProperty("query", NullValueHandling = NullValueHandling.Ignore)]
+            public UCASTNode? Conditions;
+        }
+    }
+
+    private async Task<UCASTNode?> getConditions(HttpContext context, string query, object input)
+    {
+        var url = opaURL + "/v1/compile";
+        using var client = new HttpClient();
+        var jsonififed = JsonConvert.SerializeObject(new Dictionary<string, object>(){
+                { "query", query },
+                { "input", input },
+                { "unknowns", new List<object>() {"input.tickets", "input.users"} },
+            });
+        var content = new StringContent(jsonififed, System.Text.Encoding.UTF8, "application/json");
+
+        var request = new HttpRequestMessage(HttpMethod.Post, url);
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.styra.ucast.linq+json"));
+        request.Content = content;
+
+        HttpResponseMessage response = await client.SendAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            string responseBody = await response.Content.ReadAsStringAsync();
+            _logger.LogInformation(responseBody);
+            CompileUCASTResult result = JsonConvert.DeserializeObject<CompileUCASTResult>(responseBody);
+            return result.Result.Conditions;
+        }
+        else
+        {
+            string responseBody = await response.Content.ReadAsStringAsync();
+            _logger.LogError(responseBody);
+            // Handle the error
+            return null;
+        }
     }
 }
