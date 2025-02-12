@@ -1,12 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Styra.Opa;
-using Styra.Ucast.Linq;
 using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using System.Net.Mime;
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Styra.Ucast.Linq;
 using TicketHub.Authorization;
 using TicketHub.Database;
 
@@ -106,7 +105,9 @@ public class TicketController : ControllerBase
                 .Include(t => t.TenantNavigation)
                 .Include(t => t.UserNavigation)
                 .ApplyUCASTFilter(conditions, _ticketMapper)
+                .AsNoTracking()
                 .ToListAsync();
+            // TODO: Masking logic goes here...
             return Ok(new { Tickets = tickets });
         }
 
@@ -215,6 +216,21 @@ public class TicketController : ControllerBase
         {
             [JsonProperty("query", NullValueHandling = NullValueHandling.Ignore)]
             public UCASTNode? Conditions;
+        }
+    }
+
+    public struct MaskResult
+    {
+        [JsonProperty("masks")]
+        public Dictionary<string, MaskingFunc>? Masks;
+
+        public struct MaskingFunc
+        {
+            [JsonProperty("replace", NullValueHandling = NullValueHandling.Ignore)]
+            public object? Replace;
+
+            [JsonProperty("hash-sha256", NullValueHandling = NullValueHandling.Ignore)]
+            public object? HashSha256;
         }
     }
 
