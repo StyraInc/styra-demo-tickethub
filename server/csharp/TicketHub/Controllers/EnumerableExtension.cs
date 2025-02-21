@@ -1,7 +1,3 @@
-
-
-using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Reflection;
 using Newtonsoft.Json;
 
@@ -55,27 +51,32 @@ public static class EnumerableExtension
             // var currentValue = config.GetPropertyByName(name, result);
             if (maskingFunc.Replace is not null)
             {
-                config.SetPropertyByName(name, ref result, maskingFunc.Replace.Value);
+                config.SetPropertyByName(name, ref result, maskingFunc.Replace?.Value);
             }
         }
         return result;
     }
-    // public static IEnumerable<T> MaskElements<T>(this IEnumerable<T> source, Dictionary<string, MaskingFunc> maskingRules, MappingConfiguration<T> config)
-    // {
-    //     IEnumerable<T> result = source.Select(x =>
-    // }
 
-    // public static IEnumerable<T> MaskElements<T>(this IEnumerable<T> source, Dictionary<string, MaskingFunc> maskingRules, Dictionary<string, string> nameRemappings)
-    // {
-
-    // }
+    public static IEnumerable<T> MaskElements<T>(this IEnumerable<T> source, Dictionary<string, MaskingFunc>? maskingRules, MappingConfiguration<T> config)
+    {
+        if (maskingRules is null)
+        {
+            return source;
+        }
+        IEnumerable<T> result = source.Select(x => x.ApplyMask(maskingRules, config));
+        return result;
+    }
 }
-
 
 public struct MaskResult
 {
     [JsonProperty("masks")]
     public Dictionary<string, MaskingFunc>? Masks;
+
+    public override string ToString()
+    {
+        return JsonConvert.SerializeObject(this);
+    }
 }
 
 public struct MaskingFunc
@@ -85,7 +86,13 @@ public struct MaskingFunc
 
     public struct ReplaceFunc
     {
-        readonly object? Value;
+        [JsonProperty("value", NullValueHandling = NullValueHandling.Ignore)]
+        public object? Value;
+    }
+
+    public override string ToString()
+    {
+        return JsonConvert.SerializeObject(this);
     }
 }
 
