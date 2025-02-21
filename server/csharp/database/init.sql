@@ -36,15 +36,15 @@ CREATE TABLE "public"."Tickets" (
   FOREIGN KEY ("assignee") REFERENCES "public"."Users"(id)
 );
 
-INSERT INTO "Tenants" (id, name) VALUES (1, 'hooli', 'EU'), (2, 'acmecorp', 'NA');
+INSERT INTO "Tenants" (id, name, region) VALUES (1, 'hooli', 'EU'), (2, 'acmecorp', 'NA');
 
-INSERT INTO "Users" (tenant, name) VALUES
-  (2, 'alice', null, 'alice@acmecorp.com'),
-  (2, 'bob', null, 'bob@acmecorp.com'),
-  (2, 'ceasar', null, 'ceasar@acmecorp.com'),
-  (1, 'dylan', null, 'dylan@acmecorp.com'),
-  (1, 'eva', null, null),
-  (1, 'frank', null, 'frank@acmecorp.com');
+INSERT INTO "Users" (tenant, name, email) VALUES
+  (2, 'alice', 'alice@acmecorp.com'),
+  (2, 'bob', 'bob@acmecorp.com'),
+  (2, 'ceasar', 'ceasar@acmecorp.com'),
+  (1, 'dylan', 'dylan@acmecorp.com'),
+  (1, 'eva', null),
+  (1, 'frank', 'frank@acmecorp.com');
 
 INSERT INTO "Customers" (tenant, name, email, phone) VALUES
   (2, 'Globex', 'hank.scorpio@globex.com', '+1-555-0123'),  -- USA
