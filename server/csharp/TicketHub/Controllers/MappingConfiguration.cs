@@ -1,13 +1,6 @@
-
-
 using System.Linq.Expressions;
-using Newtonsoft.Json;
 
 namespace TicketHub.Controllers;
-
-// Name mappings should start with $[a-zA-Z0-9_]*
-// Examples: $this.Customer.Id, $.Customer.Id
-
 
 public class NameToLINQExpressionConfiguration : Dictionary<string, Func<ParameterExpression, Expression>>;
 
@@ -18,11 +11,11 @@ public class NameToLINQExpressionConfiguration : Dictionary<string, Func<Paramet
 public class MappingConfiguration<T>
 {
     // Cache of generated mappings, so we don't have to reconstruct them every time.
-    private Dictionary<string, string> nameMappings = new(typeof(T).GetProperties().Length);
-    private Dictionary<string, Func<ParameterExpression, Expression>> linqMappingsCache = new(typeof(T).GetProperties().Length);
-    private string namePrefix = typeof(T).Name.ToLower();
+    protected Dictionary<string, string> nameMappings = new(typeof(T).GetProperties().Length);
+    protected Dictionary<string, Func<ParameterExpression, Expression>> linqMappingsCache = new(typeof(T).GetProperties().Length);
+    protected string namePrefix = typeof(T).Name.ToLower();
 
-    public MappingConfiguration(Dictionary<string, string> namesToProperties, string? prefix = null, bool forcePrecompile = false)
+    public MappingConfiguration(Dictionary<string, string>? namesToProperties = null, string? prefix = null, bool forcePrecompile = false)
     {
         namePrefix = prefix ?? namePrefix;
         foreach (var property in typeof(T).GetProperties())
@@ -32,15 +25,31 @@ public class MappingConfiguration<T>
             nameMappings[snakeCasedProperty] = property.Name;
             linqMappingsCache[snakeCasedProperty] = param => Expression.Property(param, property.Name);
         }
+        if (namesToProperties is not null)
+        {
+            foreach (var mapping in namesToProperties)
+            {
+                // Split string on '.' characters, and build out the Expression.Property() chain accordingly.
+                var parts = mapping.Value.Split('.');
+                var startIdx = parts[0] == prefix ? 0 : 1;
+                linqMappingsCache[mapping.Key] = param => Expression.Property(param, parts[startIdx]);
+                for (var i = startIdx + 1; i < parts.Length; i++)
+                {
+                    var part = parts[i];
+                    linqMappingsCache[mapping.Key] = param => Expression.Property(linqMappingsCache[mapping.Key](param), part);
+                }
+            }
+        }
     }
 
-    // public MappingConfiguration(Dictionary<string, Func<ParameterExpression, Expression>> namesToExpressions)
-    // {
-
-    // }
+    // Future(philip): This can be excised once the UCAST LINQ library is updated to use the config mapping types.
+    public Dictionary<string, Func<ParameterExpression, Expression>> getLINQMappings()
+    {
+        return new(linqMappingsCache);
+    }
 
     // Note: Uses reflection, so it may be very slow.
-    public object? GetPropertyByName(string name, T source)
+    public object? GetPropertyByName(string name, ref T source)
     {
         if (source is not null && nameMappings.TryGetValue(name, out var accessor))
         {
@@ -55,7 +64,11 @@ public class MappingConfiguration<T>
     {
         if (source is not null && nameMappings.TryGetValue(name, out var accessor))
         {
-            source.GetType().GetProperty(accessor)?.SetValue(source, value);
+            var prop = source.GetType().GetProperty(accessor);
+            if (prop != null)
+            {
+                prop.SetValue(source, value);
+            }
         }
     }
 }
@@ -65,7 +78,6 @@ public class EFCoreMappingConfiguration<T> : MappingConfiguration<T>
 {
     public EFCoreMappingConfiguration(Dictionary<string, string> namesToProperties, string? prefix = null, bool forcePrecompile = false) : base(namesToProperties)
     {
-        var result = new Dictionary<string, Func<ParameterExpression, Expression>>();
         var properties = typeof(T).GetProperties();
         foreach (var property in properties)
         {
@@ -74,7 +86,8 @@ public class EFCoreMappingConfiguration<T> : MappingConfiguration<T>
             if (!propertyName.EndsWith("Navigation") || propertyName.ToLower() == "Navigation")
             {
                 propertyName = string.IsNullOrEmpty(prefix) ? propertyName.ToSnakeCase() : $"{prefix}.{propertyName.ToSnakeCase()}";
-                result[propertyName] = param => Expression.Property(param, property.Name);
+                nameMappings[propertyName] = property.Name;
+                linqMappingsCache[propertyName] = param => Expression.Property(param, property.Name);
                 continue;
             }
             // Implicit else: Properties with the "Navigation" suffix are
@@ -94,7 +107,22 @@ public class EFCoreMappingConfiguration<T> : MappingConfiguration<T>
                     continue;
                 }
                 var memberPropertyName = memberProp.Name.ToSnakeCase();
-                result[$"{propertyName}.{memberPropertyName}"] = param => Expression.Property(Expression.Property(param, property.Name), memberPropertyName);
+                linqMappingsCache[$"{propertyName}.{memberPropertyName}"] = param => Expression.Property(Expression.Property(param, property.Name), memberPropertyName);
+            }
+        }
+        if (namesToProperties is not null)
+        {
+            foreach (var mapping in namesToProperties)
+            {
+                // Split string on '.' characters, and build out the Expression.Property() chain accordingly.
+                var parts = mapping.Value.Split('.');
+                var startIdx = parts[0] == prefix ? 0 : 1;
+                linqMappingsCache[mapping.Key] = param => Expression.Property(param, parts[startIdx]);
+                for (var i = startIdx + 1; i < parts.Length; i++)
+                {
+                    var part = parts[i];
+                    linqMappingsCache[mapping.Key] = param => Expression.Property(linqMappingsCache[mapping.Key](param), part);
+                }
             }
         }
     }
