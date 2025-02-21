@@ -43,6 +43,11 @@ public partial class Ticket
 
     [JsonProperty("assignee", NullValueHandling = NullValueHandling.Include)]
     public string? UserName => UserNavigation?.Name;
+
+    public override string ToString()
+    {
+        return JsonConvert.SerializeObject(this);
+    }
 }
 
 public class TicketConverter : JsonConverter
