@@ -10,6 +10,9 @@ public partial class Tenant
     [JsonProperty("name")]
     public string? Name { get; set; }
 
+    [JsonProperty("region")]
+    public string? Region { get; set; }
+
     [JsonProperty("customers")]
     public virtual ICollection<Customer> Customers { get; set; } = new List<Customer>();
 

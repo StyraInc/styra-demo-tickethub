@@ -1,12 +1,15 @@
 CREATE TABLE "public"."Tenants" (
   id SERIAL PRIMARY KEY NOT NULL,
-  name VARCHAR(255) UNIQUE
+  name VARCHAR(255) UNIQUE,
+  region VARCHAR(255)
 );
 
 CREATE TABLE "public"."Customers" (
   id SERIAL PRIMARY KEY NOT NULL,
   tenant INTEGER NOT NULL,
   name VARCHAR(255),
+  email VARCHAR(255),
+  phone VARCHAR(20),
   FOREIGN KEY ("tenant") REFERENCES "public"."Tenants"(id),
   UNIQUE (tenant, name)
 );
@@ -15,6 +18,7 @@ CREATE TABLE "public"."Users" (
   id SERIAL PRIMARY KEY NOT NULL,
   tenant INTEGER NOT NULL,
   name VARCHAR(255),
+  email VARCHAR(255) UNIQUE,
   FOREIGN KEY ("tenant") REFERENCES "public"."Tenants"(id),
   UNIQUE (tenant, name)
 );
@@ -32,16 +36,22 @@ CREATE TABLE "public"."Tickets" (
   FOREIGN KEY ("assignee") REFERENCES "public"."Users"(id)
 );
 
-INSERT INTO "Tenants" (id, name) VALUES (1, 'hooli'), (2, 'acmecorp');
+INSERT INTO "Tenants" (id, name) VALUES (1, 'hooli', 'EU'), (2, 'acmecorp', 'NA');
 
-INSERT INTO "Users" (tenant, name) VALUES (2, 'alice'), (2, 'bob'), (2, 'ceasar'), (1, 'dylan'), (1, 'eva'), (1, 'frank');
+INSERT INTO "Users" (tenant, name) VALUES
+  (2, 'alice', null, 'alice@acmecorp.com'),
+  (2, 'bob', null, 'bob@acmecorp.com'),
+  (2, 'ceasar', null, 'ceasar@acmecorp.com'),
+  (1, 'dylan', null, 'dylan@acmecorp.com'),
+  (1, 'eva', null, null),
+  (1, 'frank', null, 'frank@acmecorp.com');
 
-INSERT INTO "Customers" (tenant, name) VALUES
-  (2, 'Globex'),
-  (2, 'Sirius Cybernetics Corp.'),
-  (2, 'Cyberdyne Systems Corp.'),
-  (1, 'Soylent Corp.'),
-  (1, 'Tyrell Corp.');
+INSERT INTO "Customers" (tenant, name, email, phone) VALUES
+  (2, 'Globex', 'hank.scorpio@globex.com', '+1-555-0123'),  -- USA
+  (2, 'Sirius Cybernetics Corp.', 'complaints@siriuscyber.net', '+44-555-4608'),  -- UK
+  (2, 'Cyberdyne Systems Corp.', 'miles.dyson@cyberdyne.com', '+1-555-2144'),  -- USA
+  (1, 'Soylent Corp.', 'info@soylentgreen.com', '+49-555-6789'),  -- Germany
+  (1, 'Tyrell Corp.', 'eldon.tyrell@tyrellcorp.com', '+81-555-3247');  -- Japan
 
 INSERT INTO "Tickets" (tenant, customer, description, resolved, assignee) VALUES
   (2, 1, 'Dooms day device needs to be refactored', FALSE, 3),

@@ -39,6 +39,9 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .HasColumnName("name");
+            entity.Property(e => e.Email)
+                .HasMaxLength(255)
+                .HasColumnName("email");
             entity.Property(e => e.Tenant).HasColumnName("tenant");
 
             entity.HasOne(d => d.TenantNavigation).WithMany(p => p.Users)
@@ -57,6 +60,12 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .HasColumnName("name");
+            entity.Property(e => e.Email)
+                .HasMaxLength(255)
+                .HasColumnName("email");
+            entity.Property(e => e.Phone)
+                .HasMaxLength(20)
+                .HasColumnName("phone");
             entity.Property(e => e.Tenant).HasColumnName("tenant");
 
             entity.HasOne(d => d.TenantNavigation).WithMany(p => p.Customers)
@@ -75,6 +84,9 @@ public partial class PostgresContext : DbContext
             entity.Property(e => e.Name)
                 .HasMaxLength(255)
                 .HasColumnName("name");
+            entity.Property(e => e.Region)
+                .HasMaxLength(255)
+                .HasColumnName("region");
         });
 
         modelBuilder.Entity<Ticket>(entity =>
