@@ -26,3 +26,5 @@ resolver_include if {
 	input.tickets.assignee == null
 	input.tickets.resolved == false
 }
+
+masks["tickets.description"] := {"replace": {"value": "***"}}

@@ -1,12 +1,12 @@
+using System.Linq.Expressions;
+using System.Net.Http.Headers;
+using System.Net.Mime;
+using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Styra.Opa;
 using Styra.Ucast.Linq;
-using System.Linq.Expressions;
-using System.Net.Http.Headers;
-using System.Net.Mime;
-using System.Reflection;
 using TicketHub.Authorization;
 using TicketHub.Database;
 
@@ -20,7 +20,7 @@ public class TicketController : ControllerBase
 {
     private readonly ILogger<TicketController> _logger;
     private readonly PostgresContext _dbContext;
-    private readonly Dictionary<string, Func<ParameterExpression, Expression>> _ticketMapper;
+    private readonly MappingConfiguration<Ticket> _ticketMapping;
     private readonly string opaURL = Environment.GetEnvironmentVariable("OPA_URL") ?? "http://localhost:8181";
 
     public record TicketFields(string customer, string description);
@@ -29,9 +29,11 @@ public class TicketController : ControllerBase
 
     private async Task<Customer> addCustomer(Tenant tenant, string name)
     {
-        Customer c = new Customer();
-        c.Name = name;
-        c.Tenant = tenant.Id;
+        Customer c = new()
+        {
+            Name = name,
+            Tenant = tenant.Id
+        };
         await _dbContext.Customers.AddAsync(c);
         return c;
     }
@@ -41,19 +43,16 @@ public class TicketController : ControllerBase
         _logger = logger;
         _dbContext = dbContext;
 
-        // The mapping here can be laborious, but this is the price we're currently
-        // paying for having to work in LINQ's constraints. All queries have to
-        // be built out *relative* to some base `IQueryable<T>` object.
-        _ticketMapper = QueryableExtensions.BuildDefaultMapperDictionary<Ticket>("tickets");
         // Remove keys that won't be found in the policy.
-        _ticketMapper.Remove("tickets.user.id");
-        _ticketMapper.Remove("tickets.user.name");
-        _ticketMapper.Remove("tickets.user.tenant");
-        // Manually add the LINQ expression lambdas under the keys that *will*
-        // be found in the policy.
-        _ticketMapper["users.id"] = t => Expression.Property(Expression.Property(t, "UserNavigation"), "Id");
-        _ticketMapper["users.name"] = t => Expression.Property(Expression.Property(t, "UserNavigation"), "Name");
-        _ticketMapper["users.tenant"] = t => Expression.Property(Expression.Property(t, "UserNavigation"), "Tenant");
+        // _ticketMapper.Remove("tickets.user.id");
+        // _ticketMapper.Remove("tickets.user.name");
+        // _ticketMapper.Remove("tickets.user.tenant");
+
+        _ticketMapping = new EFCoreMappingConfiguration<Ticket>(new Dictionary<string, string> {
+            {"users.id", "tickets.UserNavigation.Id"},
+            {"users.name", "tickets.UserNavigation.Name"},
+            {"users.tenant", "tickets.UserNavigation.Tenant"},
+        }, prefix: "tickets");
     }
 
     public static Dictionary<string, Dictionary<string, FieldInfo>> CreateFieldInfoMapping(params Type[] dbSetTypes)
@@ -98,15 +97,27 @@ public class TicketController : ControllerBase
                 return StatusCode(404, "No tickets found");
             }
 
-            // Log the condition expression for debugging, with a dummy target parameter.
-            _logger.LogInformation(QueryableExtensions.BuildExpression<Ticket>(conditions, Expression.Parameter(typeof(Ticket), "x"), _ticketMapper).ToString());
+            var maskingRules = await getMaskingRules(HttpContext, "tickets/filters/masks", new Dictionary<string, object>(){
+                { "tenant", tenant },
+                { "user", subject },
+                { "action", "list" },
+            });
 
-            List<Ticket> tickets = await _dbContext.Tickets
+            // Log the condition expression for debugging, with a dummy target parameter.
+            _logger.LogInformation(QueryableExtensions.BuildExpression<Ticket>(conditions, Expression.Parameter(typeof(Ticket), "x"), _ticketMapping).ToString());
+
+            List<Ticket> filteredTickets = await _dbContext.Tickets
                 .Include(t => t.CustomerNavigation)
                 .Include(t => t.TenantNavigation)
                 .Include(t => t.UserNavigation)
-                .ApplyUCASTFilter(conditions, _ticketMapper)
+                .ApplyUCASTFilter(conditions, _ticketMapping)
+                .AsNoTracking()
                 .ToListAsync();
+
+            _logger.LogInformation("masks: {masks}", maskingRules);
+            var tickets = filteredTickets.MaskElements(maskingRules, _ticketMapping);
+            _logger.LogInformation("Tickets after masking: {tickets}", tickets);
+
             return Ok(new { Tickets = tickets });
         }
 
@@ -189,6 +200,22 @@ public class TicketController : ControllerBase
         return Ok(ticket);
     }
 
+    [HttpDelete]
+    [Route("tickets/{id:int}/assign")]
+    [OpaRuleAuthorization("tickets/allow", "assign")]
+    public async Task<ActionResult<Ticket>> UnassignTicket(int id)
+    {
+        Ticket? ticket = await _dbContext.Tickets.FindAsync(id);
+        if (ticket is null)
+        {
+            return NotFound();
+        }
+        ticket.Assignee = null;
+        ticket.LastUpdated = DateTime.UtcNow.ToLocalTime();
+        await _dbContext.SaveChangesAsync();
+        return Ok(ticket);
+    }
+
     private async Task<Tenant> getTenantByName(string name)
     {
         return await _dbContext.Tenants.Where(tenant => tenant.Name == name).FirstAsync();
@@ -249,5 +276,20 @@ public class TicketController : ControllerBase
             // Handle the error
             return null;
         }
+    }
+
+    private async Task<Dictionary<string, MaskingFunc>> getMaskingRules(HttpContext context, string path, object input)
+    {
+        string tenant = context.Items["Tenant"]?.ToString() ?? "";
+        string subject = context.Items["Subject"]?.ToString() ?? "";
+        var authzService = context.RequestServices.GetRequiredService<OpaAuthzService>();
+        OpaClient opa = authzService.GetClient();
+
+        var result = await opa.evaluate<Dictionary<string, MaskingFunc>>(path, new Dictionary<string, object>(){
+            { "tenant", tenant },
+            { "user", subject },
+            { "action", "list" },
+        });
+        return result;
     }
 }
