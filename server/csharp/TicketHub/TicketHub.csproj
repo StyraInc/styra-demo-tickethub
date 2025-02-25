@@ -13,10 +13,10 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="NodaTime" Version="3.2.1" />
-    <PackageReference Include="Npgsql" Version="9.0.2" />
+    <PackageReference Include="Npgsql" Version="9.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="9.0.3" />
-    <PackageReference Include="Npgsql.Json.NET" Version="9.0.2" />
+    <PackageReference Include="Npgsql.Json.NET" Version="9.0.3" />
     <PackageReference Include="Styra.Opa" Version="1.4.1" />
     <PackageReference Include="Styra.Ucast.Linq" Version="0.1.0" />
   </ItemGroup>
