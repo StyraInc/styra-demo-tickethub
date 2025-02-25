@@ -27,7 +27,7 @@ public class TicketController : ControllerBase
     public record ResolveFields(bool resolved);
     public record AssignFields(string assignee);
 
-    private async Task<Customer> addCustomer(Tenant tenant, string name)
+    private async Task<Customer> AddCustomer(Tenant tenant, string name)
     {
         Customer c = new()
         {
@@ -53,27 +53,6 @@ public class TicketController : ControllerBase
             {"users.name", "tickets.UserNavigation.Name"},
             {"users.tenant", "tickets.UserNavigation.Tenant"},
         }, prefix: "tickets");
-    }
-
-    public static Dictionary<string, Dictionary<string, FieldInfo>> CreateFieldInfoMapping(params Type[] dbSetTypes)
-    {
-        var mapping = new Dictionary<string, Dictionary<string, FieldInfo>>();
-
-        foreach (var dbSetType in dbSetTypes)
-        {
-            var entityType = dbSetType.GetGenericArguments()[0];
-            var fieldInfos = entityType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
-            var fieldMapping = new Dictionary<string, FieldInfo>();
-            foreach (var fieldInfo in fieldInfos)
-            {
-                fieldMapping[fieldInfo.Name] = fieldInfo;
-            }
-
-            mapping[entityType.Name] = fieldMapping;
-        }
-
-        return mapping;
     }
 
     // List all tickets.
@@ -144,16 +123,18 @@ public class TicketController : ControllerBase
     public async Task<ActionResult<Ticket>> CreateTicket([FromBody] TicketFields tf)
     {
         string tenant = HttpContext.Items["Tenant"]?.ToString() ?? "";
-        Ticket ticket = new();
         // Fetch tenant, then create customer if needed.
         Tenant foundTenant = await _dbContext.Tenants.Where(t => t.Name == tenant).FirstAsync();
-        Customer foundCustomer = await _dbContext.Customers.Where(c => c.Name == tf.customer).FirstOrDefaultAsync() ?? await addCustomer(foundTenant, tf.customer);
+        Customer foundCustomer = await _dbContext.Customers.Where(c => c.Name == tf.customer).FirstOrDefaultAsync() ?? await AddCustomer(foundTenant, tf.customer);
 
         // Update ticket fields.
-        ticket.Description = tf.description;
-        ticket.LastUpdated = DateTime.UtcNow.ToLocalTime();
-        ticket.Tenant = foundTenant.Id;
-        ticket.Customer = foundCustomer.Id;
+        Ticket ticket = new()
+        {
+            Description = tf.description,
+            LastUpdated = DateTime.UtcNow.ToLocalTime(),
+            Tenant = foundTenant.Id,
+            Customer = foundCustomer.Id
+        };
 
         // Add ticket to context, then propagate changes back to DB.
         await _dbContext.Tickets.AddAsync(ticket);
