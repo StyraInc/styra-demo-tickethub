@@ -28,3 +28,17 @@ resolver_include if {
 }
 
 masks["tickets.description"] := {"replace": {"value": "***"}}
+
+# masks["tickets.description"] := {"replace": {"value": "***"}} if {
+# 	# ticket not assigned to user
+# 	input.users.name != input.user
+# 	# user is not an admin
+# 	not "admin" in data.tickets.roles[input.tenant.name][input.user]
+# }
+
+# masks["tickets.description"] := {"replace": {"value": "***"}} if {
+# 	# ticket not assigned to user
+# 	input.users.name != input.user
+# 	# user is not a resolver
+# 	not "resolver" in data.tickets.roles[input.tenant.name][input.user]
+# }
