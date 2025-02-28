@@ -27,18 +27,14 @@ resolver_include if {
 	input.tickets.resolved == false
 }
 
-masks["tickets.description"] := {"replace": {"value": "***"}}
+# Default-deny mask.
+default masks["tickets.description"] := {"replace": {"value": "***"}}
 
-# masks["tickets.description"] := {"replace": {"value": "***"}} if {
-# 	# ticket not assigned to user
-# 	input.users.name != input.user
-# 	# user is not an admin
-# 	not "admin" in data.tickets.roles[input.tenant.name][input.user]
-# }
+# Allow viewing the field if user is an admin or a resolver.
+masks["tickets.description"] := {} if {
+	"admin" in data.roles[input.tenant][input.user]
+}
 
-# masks["tickets.description"] := {"replace": {"value": "***"}} if {
-# 	# ticket not assigned to user
-# 	input.users.name != input.user
-# 	# user is not a resolver
-# 	not "resolver" in data.tickets.roles[input.tenant.name][input.user]
-# }
+masks["tickets.description"] := {} if {
+	"resolver" in data.roles[input.tenant][input.user]
+}

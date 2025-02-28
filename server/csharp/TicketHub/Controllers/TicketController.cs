@@ -1,7 +1,6 @@
 using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using System.Net.Mime;
-using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -48,10 +47,10 @@ public class TicketController : ControllerBase
         // _ticketMapper.Remove("tickets.user.name");
         // _ticketMapper.Remove("tickets.user.tenant");
 
-        _ticketMapping = new EFCoreMappingConfiguration<Ticket>(new Dictionary<string, string> {
-            {"users.id", "tickets.UserNavigation.Id"},
-            {"users.name", "tickets.UserNavigation.Name"},
-            {"users.tenant", "tickets.UserNavigation.Tenant"},
+        _ticketMapping = new MappingConfiguration<Ticket>(new Dictionary<string, string> {
+            {"users.id", "tickets.user_navigation.id"},
+            {"users.name", "tickets.user_navigation.name"},
+            {"users.tenant", "tickets.user_navigation.tenant"},
         }, prefix: "tickets");
     }
 
