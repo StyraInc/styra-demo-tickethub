@@ -101,6 +101,7 @@ jobs:
         run: docker compose run --quiet-pull integration-tests
         env:
           HURL_SKIP_CONDITIONS: ${{ matrix.server != 'node' && matrix.server != 'csharp' }}
+          HURL_SKIP_MASKING: ${{ matrix.server != 'csharp' }}
       - name: dump logs
         run: docker compose --profile ${{ matrix.server }} logs
         if: failure()
