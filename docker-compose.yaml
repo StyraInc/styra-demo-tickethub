@@ -160,6 +160,7 @@ services:
     environment:
       - HURL_host=localhost
       - HURL_skip_conditions=${HURL_SKIP_CONDITIONS:-true}
+      - HURL_skip_masking=${HURL_SKIP_MASKING:-true}
     profiles:
       - tools
     network_mode: host
