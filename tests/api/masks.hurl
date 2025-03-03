@@ -10,8 +10,13 @@ user: acmecorp / alice
 skip: {{skip_masking}}
 HTTP 200
 [Asserts]
-jsonpath "$.tickets" count >= 1 # fresh setup has 6 tickets
-jsonpath "$.tickets[*].description" != "***" # description not masked for admins
+jsonpath "$.tickets[*].description" count >= 6
+jsonpath "$.tickets[0].description" != "***" # description not masked for admins
+jsonpath "$.tickets[1].description" != "***"
+jsonpath "$.tickets[2].description" != "***"
+jsonpath "$.tickets[3].description" != "***"
+jsonpath "$.tickets[4].description" != "***"
+jsonpath "$.tickets[5].description" != "***"
 [Captures]
 all_count: jsonpath "$.tickets" count
 
@@ -25,8 +30,13 @@ user: acmecorp / ceasar
 skip: {{skip_masking}}
 HTTP 200
 [Asserts]
-jsonpath "$.tickets" count >= 1
-jsonpath "$.tickets[*].description" != "***" # description not masked for resolvers
+jsonpath "$.tickets[*].description" count >= 6
+jsonpath "$.tickets[0].description" != "***" # description not masked for resolvers
+jsonpath "$.tickets[1].description" != "***"
+jsonpath "$.tickets[2].description" != "***"
+jsonpath "$.tickets[3].description" != "***"
+jsonpath "$.tickets[4].description" != "***"
+jsonpath "$.tickets[5].description" != "***"
 [Captures]
 all_count: jsonpath "$.tickets" count
 
@@ -40,7 +50,12 @@ user: acmecorp / bob
 skip: {{skip_masking}}
 HTTP 200
 [Asserts]
-jsonpath "$.tickets" count >= 1
-jsonpath "$.tickets[*].description" == "***" # description masked for readers
+jsonpath "$.tickets[*].description" count >= 6
+jsonpath "$.tickets[0].description" == "***" # description masked for readers
+jsonpath "$.tickets[1].description" == "***"
+jsonpath "$.tickets[2].description" == "***"
+jsonpath "$.tickets[3].description" == "***"
+jsonpath "$.tickets[4].description" == "***"
+jsonpath "$.tickets[5].description" == "***"
 [Captures]
 all_count: jsonpath "$.tickets" count
