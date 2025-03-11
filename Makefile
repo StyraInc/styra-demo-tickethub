@@ -1,6 +1,6 @@
 PROJECTS = $(wildcard ./client/* ./server/*)
-OPA_IMAGE ?= docker.io/openpolicyagent/opa:latest
-OPA ?= docker run -v ${PWD}/policies:/w/policies -w /w ${OPA_IMAGE}
+OPA_IMAGE ?= ghcr.io/styrainc/enterprise-opa:latest
+OPA ?= docker run -v ${PWD}/policies:/w/policies:rw -w /w ${OPA_IMAGE}
 
 entrypoint := "tickets/allow"
 files := $(wildcard ./policies/*.rego ./policies/*.json)
@@ -128,3 +128,6 @@ SERVER ?= node
 reset-database:
 	psql -h localhost -p 5432 -U postgres -d postgres -c 'DROP SCHEMA public CASCADE; CREATE SCHEMA public;'
 	psql -h localhost -p 5432 -U postgres -d postgres -f ./server/$(SERVER)/database/init.sql
+
+test-policies:
+	$(OPA) test -v policies
