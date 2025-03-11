@@ -2,6 +2,15 @@ package tickets.filters
 
 tenancy if input.tickets.tenant == input.tenant.id # tenancy check
 
+# METADATA
+# scope: document
+# custom:
+#   unknowns:
+#     - input.tickets
+#     - input.users
+#     - input.customers
+#     - input.tenants
+
 include if {
 	tenancy
 	resolver_include
