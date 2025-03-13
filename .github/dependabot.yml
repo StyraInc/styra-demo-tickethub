@@ -15,16 +15,15 @@ updates:
       interval: "daily"
     open-pull-requests-limit: 10
     groups:
-      jetty-jersey:
-        patterns:
-          - "org.eclipse.jetty:*"
-          - "org.glassfish.jersey.*"
       jackson:
         patterns:
           - "com.fasterxml.jackson*"
       slf4j:
         patterns:
           - "org.slf4j:*"
+    ignore: # server/java doesn't compile when bumping these
+      - dependency-name: "org.eclipse.jetty:*"
+      - dependency-name: "org.glassfish.jersey.*"
   - package-ecosystem: "gradle"
     directory: "/server/springboot"
     schedule:
