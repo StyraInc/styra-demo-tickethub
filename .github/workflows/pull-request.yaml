@@ -60,7 +60,7 @@ jobs:
           fetch-depth: 0
       - name: build wasm bundle
         run: |
-          curl -Lo eopa https://github.com/StyraInc/enterprise-opa/releases/download/v1.35.0/eopa_Linux_x86_64
+          curl -Lo eopa https://github.com/StyraInc/enterprise-opa/releases/download/v1.36.2/eopa_Linux_x86_64
           chmod +x ./eopa
           make client/react/public/opa.wasm
         env:

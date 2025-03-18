@@ -45,13 +45,11 @@ test_admin_can_see_every_ticket_of_their_tenant if {
 		"data.tickets.filters.include",
 		list_query,
 		{
-			"tables": {
-				"tickets": tickets_table,
-				"tenants": tenants_table,
-				"users": users_table,
-			},
-			"debug": true,
+			"tickets": tickets_table,
+			"tenants": tenants_table,
+			"users": users_table,
 		},
+		{"debug": true},
 	) with input.user as "jane"
 		with input.tenant.name as "acmecorp"
 		with input.tenant.id as 2
@@ -71,13 +69,11 @@ test_resolver_can_see_their_own_and_unassigned_tickets_of_their_tenant if {
 		"data.tickets.filters.include",
 		list_query,
 		{
-			"tables": {
-				"tickets": tickets_table,
-				"tenants": tenants_table,
-				"users": users_table,
-			},
-			"debug": true,
+			"tickets": tickets_table,
+			"tenants": tenants_table,
+			"users": users_table,
 		},
+		{"debug": true},
 	) with input.user as "ceasar"
 		with input.tenant.name as "acmecorp"
 		with input.tenant.id as 2
