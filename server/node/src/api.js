@@ -1,9 +1,9 @@
 import StatusCodes from "http-status-codes";
 import { Router } from "express";
 import { param } from "express-validator";
-import { Authorizer } from "./authz.js";
 import { PrismaClient } from "@prisma/client";
-import { ucastToPrisma } from "@styra/ucast-prisma";
+
+import { Adapter } from "@styra/ucast-prisma";
 
 // all routes in this router is prefixed with /api, see ./server.js:42
 export const router = Router();
@@ -15,7 +15,7 @@ const prisma = new PrismaClient({
 const includeRelations = { include: { customers: true, users: true } };
 
 // setup authz
-const authz = new Authorizer(process.env.OPA_URL || "http://127.0.0.1:8181/");
+const opa = new Adapter(process.env.OPA_URL || "http://127.0.0.1:8181/");
 const path = "tickets/response";
 
 // resolve ticket
@@ -25,11 +25,11 @@ router.post(
   async (req, res) => {
     const {
       params: { id },
+      auth: { tenant, subject: user },
     } = req;
-    const { allow, reason } = await authz.authorized(
+    const { allow, reason } = await opa.evaluate(
       path,
-      { action: "resolve" },
-      req,
+      { user, tenant, action: "resolve" },
     );
     if (!allow) return res.status(FORBIDDEN).json({ reason });
 
@@ -52,11 +52,11 @@ router.post(
   async (req, res) => {
     const {
       params: { id },
+      auth: { tenant, subject: user },
     } = req;
-    const { allow, reason } = await authz.authorized(
+    const { allow, reason } = await opa.evaluate(
       path,
-      { action: "assign" },
-      req,
+      { user, tenant, action: "assign" },
     );
     if (!allow) return res.status(FORBIDDEN).json({ reason });
 
@@ -100,11 +100,11 @@ router.delete(
   async (req, res) => {
     const {
       params: { id },
+      auth: { tenant, subject: user },
     } = req;
-    const { allow, reason } = await authz.authorized(
+    const { allow, reason } = await opa.evaluate(
       path,
-      { action: "unassign" },
-      req,
+      { user, tenant, action: "unassign" },
     );
     if (!allow) return res.status(FORBIDDEN).json({ reason });
 
@@ -125,19 +125,17 @@ router.delete(
 
 // create ticket
 router.post("/tickets", async (req, res) => {
-  const { allow, reason } = await authz.authorized(
+  const {
+    auth: { tenant, subject: user },
+    body: { customer, ...ticketData },
+  } = req;
+  const { allow, reason } = await opa.evaluate(
     path,
-    { action: "create" },
-    req,
+    { user, tenant, action: "create" },
   );
   if (!allow) return res.status(FORBIDDEN).json({ reason });
 
-  const {
-    auth: {
-      tenant: { id: tenantId },
-    },
-    body: { customer, ...ticketData },
-  } = req;
+  const { id: tenantId } = tenant;
 
   const ticket = await prisma.tickets.create({
     data: {
@@ -170,28 +168,26 @@ router.post("/tickets", async (req, res) => {
 
 // list all tickets
 router.get("/tickets", async (req, res) => {
-  const { allow, reason } = await authz.authorized(
-    path,
-    { action: "list" },
-    req,
+  const {
+    auth: { tenant, subject: user },
+  } = req;
+  const { query, mask } = await opa.filters(
+    "tickets/filters/include",
+    "tickets",
+    { user, tenant, action: "list" },
+    {},
   );
-  if (!allow) return res.status(FORBIDDEN).json({ reason });
+  if (!query) return res.status(FORBIDDEN).json({ reason: "not authorized" });
 
-  const query = "data.tickets.filters.include";
-  const { result } = await authz
-    .conditions(query, { action: "list" }, req)
-    .then((res) => res.json());
-
-  const filters = ucastToPrisma(result.query, "tickets");
   const tickets = (
     await prisma.tickets.findMany({
-      where: filters,
+      where: query,
       ...includeRelations,
       orderBy: {
         last_updated: "desc",
       },
     })
-  ).map((ticket) => toTicket(ticket));
+  ).map((ticket) => toTicket(mask(ticket)));
   return res.status(OK).json({ tickets });
 });
 
@@ -199,11 +195,11 @@ router.get("/tickets", async (req, res) => {
 router.get("/tickets/:id", [param("id").isInt().toInt()], async (req, res) => {
   const {
     params: { id },
+    auth: { tenant, subject: user },
   } = req;
-  const { allow, reason } = await authz.authorized(
+  const { allow, reason } = await opa.evaluate(
     path,
-    { action: "get", id },
-    req,
+    { user, tenant, action: "get", id },
   );
   if (!allow) return res.status(FORBIDDEN).json({ reason });
 
