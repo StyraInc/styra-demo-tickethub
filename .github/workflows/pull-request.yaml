@@ -34,7 +34,7 @@ jobs:
   unit-test-react:
     name: node packages
     needs: init
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -57,7 +57,7 @@ jobs:
   build-clients:
     name: build client
     needs: init
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -86,7 +86,7 @@ jobs:
   test-e2e:
     name: Test E2E
     needs: init
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -137,7 +137,7 @@ jobs:
   test-e2e-batch:
     name: Test E2E Batching
     needs: init
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       eopa_license: ${{ secrets.EOPA_LICENSE_KEY }}
     steps:
