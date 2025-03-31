@@ -3,7 +3,7 @@ import { Router } from "express";
 import { param } from "express-validator";
 import { PrismaClient } from "@prisma/client";
 
-import { Adapter } from "@styra/ucast-prisma";
+import { OPAClient } from "@styra/opa";
 
 // all routes in this router is prefixed with /api, see ./server.js:42
 export const router = Router();
@@ -15,7 +15,7 @@ const prisma = new PrismaClient({
 const includeRelations = { include: { customers: true, users: true } };
 
 // setup authz
-const opa = new Adapter(process.env.OPA_URL || "http://127.0.0.1:8181/");
+const opa = new OPAClient(process.env.OPA_URL || "http://127.0.0.1:8181/");
 const path = "tickets/response";
 
 // resolve ticket
@@ -171,11 +171,10 @@ router.get("/tickets", async (req, res) => {
   const {
     auth: { tenant, subject: user },
   } = req;
-  const { query, mask } = await opa.filters(
+  const { query, mask } = await opa.getFilters(
     "tickets/filters/include",
-    "tickets",
     { user, tenant, action: "list" },
-    {},
+    "tickets",
   );
   if (!query) return res.status(FORBIDDEN).json({ reason: "not authorized" });
 
