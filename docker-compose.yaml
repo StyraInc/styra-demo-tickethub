@@ -82,6 +82,7 @@ services:
       # TODO: figure out how to get Spring to accept db URL from env
       #- OPA_URL=http://opa:8181
       - OPA_URL=http://localhost:8181
+      - _JAVA_OPTIONS=-Djava.net.preferIPv4Stack=true
     network_mode: host
     #ports:
     #  - "4000:8080"
