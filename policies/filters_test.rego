@@ -98,7 +98,7 @@ test_only_tenancy_requirement_for_admin if {
 		with input.tenant.name as "acmecorp"
 		with input.tenant.id as 2
 		with data.roles.acmecorp.jane as {"admin"}
-	res.sql == "WHERE tickets.tenant = E'2'"
+	res.query == "WHERE tickets.tenant = E'2'"
 }
 
 test_tenancy_requirement_and_assignee_for_resolvers if {
@@ -109,5 +109,5 @@ test_tenancy_requirement_and_assignee_for_resolvers if {
 		with input.tenant.name as "acmecorp"
 		with input.tenant.id as 2
 		with data.roles.acmecorp.jane as {"resolver"}
-	res.sql == "WHERE ((tickets.tenant = E'2' AND users.name = E'jane') OR (tickets.tenant = E'2' AND tickets.assignee IS NULL AND tickets.resolved = FALSE))"
+	res.query == "WHERE ((tickets.tenant = E'2' AND users.name = E'jane') OR (tickets.tenant = E'2' AND tickets.assignee IS NULL AND tickets.resolved = FALSE))"
 }
