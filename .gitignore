@@ -6,6 +6,9 @@ dist/
 node_modules/
 server/java/bin
 server/java/libs
+server/springboot/bin
+server/springboot/libs
+.gradle
 policies/bundle.tar.gz
 .env
 
