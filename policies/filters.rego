@@ -10,6 +10,7 @@ tenancy if input.tickets.tenant == input.tenant.id # tenancy check
 #     - input.users
 #     - input.customers
 #     - input.tenants
+#   mask_rule: masks
 
 include if {
 	tenancy
