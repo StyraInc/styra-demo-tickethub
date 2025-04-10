@@ -1,5 +1,5 @@
 PROJECTS = $(wildcard ./client/* ./server/*)
-OPA_IMAGE ?= ghcr.io/styrainc/enterprise-opa:edge
+OPA_IMAGE ?= ghcr.io/styrainc/enterprise-opa:latest
 OPA ?= docker run -v ${PWD}/policies:/w/policies:rw -w /w ${OPA_IMAGE}
 
 entrypoint := "tickets/allow"
