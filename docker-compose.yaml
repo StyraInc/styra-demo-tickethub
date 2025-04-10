@@ -140,6 +140,7 @@ services:
       - --addr=:8181
       - --log-level=debug
       - --no-license-fallback
+      - --set=decision_logs.console=true
       - --bundle
       - bundle.tar.gz
     working_dir: /
@@ -155,7 +156,7 @@ services:
     command:
       - --test
       - --retry=10
-      - --verbose
+      - --very-verbose
       - --report-junit=tests/api/report.xml
       - tests/api/
     environment:
