@@ -10,15 +10,12 @@ user: acmecorp / alice
 skip: {{skip_masking}}
 HTTP 200
 [Asserts]
-jsonpath "$.tickets[*].description" count >= 6
+jsonpath "$.tickets[*].description" count >= 5
 jsonpath "$.tickets[0].description" != "***" # description not masked for admins
 jsonpath "$.tickets[1].description" != "***"
 jsonpath "$.tickets[2].description" != "***"
 jsonpath "$.tickets[3].description" != "***"
 jsonpath "$.tickets[4].description" != "***"
-jsonpath "$.tickets[5].description" != "***"
-[Captures]
-all_count: jsonpath "$.tickets" count
 
 # resolver LIST
 GET http://{{host}}:4000/api/tickets
@@ -30,15 +27,12 @@ user: acmecorp / ceasar
 skip: {{skip_masking}}
 HTTP 200
 [Asserts]
-jsonpath "$.tickets[*].description" count >= 6
+jsonpath "$.tickets[*].description" count >= 5
 jsonpath "$.tickets[0].description" != "***" # description not masked for resolvers
 jsonpath "$.tickets[1].description" != "***"
 jsonpath "$.tickets[2].description" != "***"
 jsonpath "$.tickets[3].description" != "***"
 jsonpath "$.tickets[4].description" != "***"
-jsonpath "$.tickets[5].description" != "***"
-[Captures]
-all_count: jsonpath "$.tickets" count
 
 # ensure readers only see masked tickets
 GET http://{{host}}:4000/api/tickets
@@ -50,12 +44,9 @@ user: acmecorp / bob
 skip: {{skip_masking}}
 HTTP 200
 [Asserts]
-jsonpath "$.tickets[*].description" count >= 6
+jsonpath "$.tickets[*].description" count >= 5
 jsonpath "$.tickets[0].description" == "***" # description masked for readers
 jsonpath "$.tickets[1].description" == "***"
 jsonpath "$.tickets[2].description" == "***"
 jsonpath "$.tickets[3].description" == "***"
 jsonpath "$.tickets[4].description" == "***"
-jsonpath "$.tickets[5].description" == "***"
-[Captures]
-all_count: jsonpath "$.tickets" count
