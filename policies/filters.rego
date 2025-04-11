@@ -41,9 +41,9 @@ default masks.tickets.description := {"replace": {"value": "***"}}
 
 # Allow viewing the field if user is an admin or a resolver.
 masks.tickets.description := {} if {
-	"admin" in data.roles[input.tenant][input.user]
+	"admin" in data.roles[input.tenant.name][input.user]
 }
 
 masks.tickets.description := {} if {
-	"resolver" in data.roles[input.tenant][input.user]
+	"resolver" in data.roles[input.tenant.name][input.user]
 }
