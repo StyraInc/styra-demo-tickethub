@@ -10,7 +10,7 @@ tenancy if input.tickets.tenant == input.tenant.id # tenancy check
 #     - input.users
 #     - input.customers
 #     - input.tenants
-
+#   mask_rule: masks
 include if {
 	tenancy
 	resolver_include
@@ -37,13 +37,13 @@ resolver_include if {
 }
 
 # Default-deny mask.
-default masks["tickets.description"] := {"replace": {"value": "***"}}
+default masks.tickets.description := {"replace": {"value": "***"}}
 
 # Allow viewing the field if user is an admin or a resolver.
-masks["tickets.description"] := {} if {
-	"admin" in data.roles[input.tenant][input.user]
+masks.tickets.description := {} if {
+	"admin" in data.roles[input.tenant.name][input.user]
 }
 
-masks["tickets.description"] := {} if {
-	"resolver" in data.roles[input.tenant][input.user]
+masks.tickets.description := {} if {
+	"resolver" in data.roles[input.tenant.name][input.user]
 }

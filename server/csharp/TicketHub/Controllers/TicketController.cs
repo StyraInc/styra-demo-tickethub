@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Styra.Opa;
+using Styra.Opa.OpenApi.Models.Components;
 using Styra.Ucast.Linq;
 using TicketHub.Authorization;
 using TicketHub.Database;
@@ -62,10 +63,10 @@ public class TicketController : ControllerBase
     {
         var tName = HttpContext.Items["Tenant"]?.ToString();
         string subject = HttpContext.Items["Subject"]?.ToString() ?? "";
-        if (tName is string)
+        if (tName is not null)
         {
             Tenant tenant = await getTenantByName(tName);
-            var conditions = await getConditions(HttpContext, "data.tickets.filters.include", new Dictionary<string, object>(){
+            var (conditions, masks) = await GetConditions(HttpContext, "tickets/filters/include", new Dictionary<string, object>(){
                 { "tenant", tenant },
                 { "user", subject },
                 { "action", "list" },
@@ -75,14 +76,8 @@ public class TicketController : ControllerBase
                 return StatusCode(404, "No tickets found");
             }
 
-            var maskingRules = await getMaskingRules(HttpContext, "tickets/filters/masks", new Dictionary<string, object>(){
-                { "tenant", tenant },
-                { "user", subject },
-                { "action", "list" },
-            });
-
             // Log the condition expression for debugging, with a dummy target parameter.
-            _logger.LogInformation(QueryableExtensions.BuildExpression<Ticket>(conditions, Expression.Parameter(typeof(Ticket), "x"), _ticketMapping).ToString());
+            _logger.LogInformation("LINQ AST: {expr}", QueryableExtensions.BuildExpression<Ticket>(conditions, Expression.Parameter(typeof(Ticket), "x"), _ticketMapping).ToString());
 
             List<Ticket> filteredTickets = await _dbContext.Tickets
                 .Include(t => t.CustomerNavigation)
@@ -92,8 +87,8 @@ public class TicketController : ControllerBase
                 .AsNoTracking()
                 .ToListAsync();
 
-            _logger.LogInformation("masks: {masks}", maskingRules);
-            var tickets = filteredTickets.MaskElements(maskingRules, _ticketMapping);
+            _logger.LogInformation("masks: {masks}", masks);
+            var tickets = filteredTickets.MaskElements(masks, _ticketMapping);
             _logger.LogInformation("Tickets after masking: {tickets}", tickets);
 
             return Ok(new { Tickets = tickets });
@@ -222,15 +217,18 @@ public class TicketController : ControllerBase
         {
             [JsonProperty("query", NullValueHandling = NullValueHandling.Ignore)]
             public UCASTNode? Conditions;
+
+            [JsonProperty("masks", NullValueHandling = NullValueHandling.Ignore)]
+            public Dictionary<string, Dictionary<string, MaskingFunc>>? Masks;
         }
     }
 
-    private async Task<UCASTNode?> getConditions(HttpContext context, string query, object input)
+    private async Task<(UCASTNode?, Dictionary<string, Dictionary<string, MaskingFunc>>?)> GetConditions(HttpContext context, string path, object input)
     {
-        var url = opaURL + "/v1/compile";
+        var url = opaURL + "/v1/compile/" + path;
         using var client = new HttpClient();
         var jsonififed = JsonConvert.SerializeObject(new Dictionary<string, object>(){
-                { "query", query },
+                //{ "query", query },
                 { "input", input },
                 { "unknowns", new List<object>() {"input.tickets", "input.users"} },
             });
@@ -245,31 +243,31 @@ public class TicketController : ControllerBase
         if (response.IsSuccessStatusCode)
         {
             string responseBody = await response.Content.ReadAsStringAsync();
-            _logger.LogInformation(responseBody);
+            _logger.LogInformation("Response Body: {responseBody}", responseBody);
             CompileUCASTResult result = JsonConvert.DeserializeObject<CompileUCASTResult>(responseBody);
-            return result.Result.Conditions;
+            return (result.Result.Conditions, result.Result.Masks);
         }
         else
         {
             string responseBody = await response.Content.ReadAsStringAsync();
-            _logger.LogError(responseBody);
+            _logger.LogError("Response Body: {responseBody}", responseBody);
             // Handle the error
-            return null;
+            return (null, null);
         }
     }
 
-    private async Task<Dictionary<string, MaskingFunc>> getMaskingRules(HttpContext context, string path, object input)
-    {
-        string tenant = context.Items["Tenant"]?.ToString() ?? "";
-        string subject = context.Items["Subject"]?.ToString() ?? "";
-        var authzService = context.RequestServices.GetRequiredService<OpaAuthzService>();
-        OpaClient opa = authzService.GetClient();
+    // private static async Task<D> getMaskingRules(HttpContext context, string path, object input)
+    // {
+    //     string tenant = context.Items["Tenant"]?.ToString() ?? "";
+    //     string subject = context.Items["Subject"]?.ToString() ?? "";
+    //     var authzService = context.RequestServices.GetRequiredService<OpaAuthzService>();
+    //     OpaClient opa = authzService.GetClient();
 
-        var result = await opa.evaluate<Dictionary<string, MaskingFunc>>(path, new Dictionary<string, object>(){
-            { "tenant", tenant },
-            { "user", subject },
-            { "action", "list" },
-        });
-        return result;
-    }
+    //     var result = await opa.evaluate<Dictionary<string, Dictionary<string, MaskingFunc>>>(path, new Dictionary<string, object>(){
+    //         { "tenant", tenant },
+    //         { "user", subject },
+    //         { "action", "list" },
+    //     });
+    //     return result;
+    // }
 }
