@@ -1,4 +1,4 @@
-# conditions currently only apply to the "resolver" user, acmecorp/ceasar
+# filters currently only apply to the "resolver" user, acmecorp/ceasar
 
 # baseline: get all tickets as admin
 GET http://{{host}}:4000/api/tickets
@@ -21,7 +21,7 @@ Authorization: Bearer acmecorp / ceasar
 [Cookies]
 user: acmecorp / ceasar
 [Options]
-skip: {{skip_conditions}}
+skip: {{skip_filters}}
 HTTP 200
 [Captures]
 before_count: jsonpath "$.tickets" count
@@ -40,7 +40,7 @@ Authorization: Bearer acmecorp / alice
 [Cookies]
 user: acmecorp / alice
 [Options]
-skip: {{skip_conditions}}
+skip: {{skip_filters}}
 {
   "assignee": "bob"
 }
@@ -53,7 +53,7 @@ Authorization: Bearer acmecorp / ceasar
 [Cookies]
 user: acmecorp / ceasar
 [Options]
-skip: {{skip_conditions}}
+skip: {{skip_filters}}
 HTTP 200
 [Asserts]
 jsonpath "$.tickets" count < {{before_count}}
@@ -66,4 +66,4 @@ Authorization: Bearer acmecorp / alice
 [Cookies]
 user: acmecorp / alice
 [Options]
-skip: {{skip_conditions}}
+skip: {{skip_filters}}

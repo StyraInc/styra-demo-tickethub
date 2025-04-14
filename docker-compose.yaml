@@ -161,7 +161,7 @@ services:
       - tests/api/
     environment:
       - HURL_host=localhost
-      - HURL_skip_conditions=${HURL_SKIP_CONDITIONS:-true}
+      - HURL_skip_filters=${HURL_SKIP_FILTERING:-true}
       - HURL_skip_masking=${HURL_SKIP_MASKING:-true}
     profiles:
       - tools
