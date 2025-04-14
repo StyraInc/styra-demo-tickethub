@@ -128,10 +128,8 @@ services:
       - opa
 
   opa:
-    init: true
-    build:
-      context: .
-      dockerfile: ${OPA_DOCKERFILE-enterprise-opa.Dockerfile}
+    image: ${EOPA_IMAGE:-ghcr.io/styrainc/enterprise-opa:latest}
+    pull_policy: always
     ports:
       - "8181:8181"
     command:
@@ -142,7 +140,7 @@ services:
       - --no-license-fallback
       - --set=decision_logs.console=true
       - --bundle
-      - bundle.tar.gz
+      - /policies
     working_dir: /
     volumes:
       - ./policies:/policies
