@@ -22,11 +22,12 @@ Tests are defined in `tests/api/`, and best run using docker-compose:
 docker compose run integration-tests
 ```
 
-The tests are split into `basic` and `conditions` tests. Only the `node` server implementation currently supports conditions.
-To run the tests with the conditions tests, run:
+The tests are split into `basic`, `filters` and `masks` tests.
+Only the `node` and `csharp` server implementation currently support filtering and masking.
+To run the tests with the filtering and masking tests, run:
 
 ```sh
-HURL_SKIP_CONDITIONS=false docker compose run integration-tests
+HURL_SKIP_FILTERING=false HURL_SKIP_MASKING=false docker compose run integration-tests
 ```
 
 ### E2E

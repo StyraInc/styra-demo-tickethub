@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 const baseURL = `http://127.0.0.1:3000/?batch=${process.env.BATCHING === "true"}`;
-const conditionsDisabled = process.env.CONDITIONS !== "true";
+const filtersDisabled = process.env.FILTERS !== "true";
 const reasonsDisabled = process.env.REASONS !== "true";
 
 test("has title with tenant and list of tickets", async ({ page }) => {
@@ -35,8 +35,8 @@ test("select another tenant's user switches title and ticket list", async ({
   await expect(page.locator("#ticket-list > tbody > tr ")).toHaveCount(4);
 });
 
-test.describe("data filtering using conditions", () => {
-  test.skip(conditionsDisabled, "skipping conditions test");
+test.describe("data filtering using filters", () => {
+  test.skip(filtersDisabled, "skipping filters test");
 
   const unassignTicket5 = async ({ page }) => {
     await page.goto(baseURL);
