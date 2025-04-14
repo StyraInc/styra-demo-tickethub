@@ -78,7 +78,6 @@ jobs:
       - name: setup
         run: docker compose --profile ${{ matrix.client }} up --quiet-pull --wait --wait-timeout 300 --build
         env:
-          OPA_DOCKERFILE: enterprise-opa.Dockerfile
           EOPA_LICENSE_KEY: ${{ secrets.EOPA_LICENSE_KEY }}
       - name: smoke test
         run: curl --retry 5 --retry-connrefused --retry-max-time 120 http://127.0.0.1:3000 -v
@@ -99,7 +98,6 @@ jobs:
       - name: setup
         run: docker compose --profile ${{ matrix.server }} --profile react up --quiet-pull --wait --wait-timeout 300
         env:
-          OPA_DOCKERFILE: enterprise-opa.Dockerfile
           EOPA_LICENSE_KEY: ${{ secrets.EOPA_LICENSE_KEY }}
       - name: Install dependencies
         run: npm ci
@@ -149,7 +147,6 @@ jobs:
       - name: setup
         run: docker compose --profile node --profile react up --quiet-pull --wait --wait-timeout 300
         env:
-          OPA_DOCKERFILE: enterprise-opa.Dockerfile
           EOPA_LICENSE_KEY: ${{ secrets.EOPA_LICENSE_KEY }}
         if: env.eopa_license != ''
       - name: Install dependencies
