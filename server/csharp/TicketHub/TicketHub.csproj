@@ -18,7 +18,7 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="9.0.4" />
     <PackageReference Include="Npgsql.Json.NET" Version="9.0.3" />
     <PackageReference Include="Styra.Opa" Version="1.5.3" />
-    <PackageReference Include="Styra.Ucast.Linq" Version="0.5.0" />
+    <PackageReference Include="Styra.Ucast.Linq" Version="0.6.0" />
   </ItemGroup>
 
 </Project>
