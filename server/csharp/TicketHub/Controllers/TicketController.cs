@@ -4,8 +4,6 @@ using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using Styra.Opa;
-using Styra.Opa.OpenApi.Models.Components;
 using Styra.Ucast.Linq;
 using TicketHub.Authorization;
 using TicketHub.Database;

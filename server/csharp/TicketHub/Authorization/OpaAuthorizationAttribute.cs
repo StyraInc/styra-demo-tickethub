@@ -45,7 +45,7 @@ public class OpaRuleAuthorizationAttribute : Attribute, IAsyncAuthorizationFilte
         var authzService = context.HttpContext.RequestServices.GetRequiredService<OpaAuthzService>();
         OpaClient opa = authzService.GetClient();
 
-        bool allowed = await opa.evaluate<bool>(_path, new Dictionary<string, object>(){
+        bool allowed = await opa.Evaluate<bool>(_path, new Dictionary<string, object>(){
             { "tenant", tenant },
             { "user", subject },
             { "action", _action },
@@ -95,7 +95,7 @@ public class OpaRuleActionFilterAttribute : ActionFilterAttribute
         var authzService = context.HttpContext.RequestServices.GetRequiredService<OpaAuthzService>();
         OpaClient opa = authzService.GetClient();
 
-        bool allowed = await opa.evaluate<bool>(_path, new Dictionary<string, object>(){
+        bool allowed = await opa.Evaluate<bool>(_path, new Dictionary<string, object>(){
             { "tenant", tenant },
             { "user", subject },
             { "action", _action },
